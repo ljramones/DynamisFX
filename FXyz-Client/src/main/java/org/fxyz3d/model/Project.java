@@ -29,12 +29,15 @@
 
 package org.fxyz3d.model;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.fxyz3d.FXyzSample;
 
 /**
  * Represents a project such as ControlsFX or JFXtras
  */
 public class Project {
+    private static final Logger LOG = Logger.getLogger(Project.class.getName());
     
     private final String name;
     
@@ -60,8 +63,8 @@ public class Project {
                 packagesWithoutBase = packagePath.substring(basePackage.length() + 1);
             }
         } catch (StringIndexOutOfBoundsException e) {
-            System.out.println("packagePath: " + packagePath + ", basePackage: " + basePackage);
-            e.printStackTrace();
+            LOG.log(Level.WARNING, "Failed to derive package path from packagePath={0}, basePackage={1}",
+                    new Object[]{packagePath, basePackage});
             return;
         }
         

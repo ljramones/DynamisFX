@@ -100,7 +100,7 @@ public class HiddenSidesClient extends AnchorPane{
     }
 
     public final Node getContent() {
-        return center.getChildren().get(0);
+        return center.getChildren().isEmpty() ? null : center.getChildren().get(0);
     }
 
     public final void setContent(Node content) {

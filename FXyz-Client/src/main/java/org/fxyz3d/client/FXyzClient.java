@@ -33,14 +33,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.beans.Observable;
 import javafx.beans.value.ObservableValue;
@@ -77,6 +77,7 @@ import org.fxyz3d.model.WelcomePage;
 import org.fxyz3d.util.SampleScanner;
 
 public class FXyzClient extends Application {
+    private static final Logger LOG = Logger.getLogger(FXyzClient.class.getName());
 
     public static final String 
             BACKGROUNDS = FXyzClient.class.getResource("/org/fxyz3d/client/clientBackgrounds.css").toExternalForm(),
@@ -182,7 +183,7 @@ public class FXyzClient extends Application {
             } else if (newSample.getValue() instanceof EmptySample) {
                 FXyzSample selectedSample1 = newSample.getValue();
                 Project selectedProject = projectsMap.get(selectedSample1.getSampleName());
-                System.out.println(selectedProject);
+                LOG.log(Level.FINE, "Selected project {0}", selectedProject);
                 if (selectedProject != null) {
                     changeToWelcomePage(selectedProject.getWelcomePage());
                 }
@@ -220,7 +221,7 @@ public class FXyzClient extends Application {
         this.stage.initStyle(StageStyle.TRANSPARENT);
         this.stage.show();
 
-        System.err.println(contentTree.getRoot().getChildren());
+        LOG.log(Level.FINE, "Loaded projects: {0}", contentTree.getRoot().getChildren().size());
     }
 
     /*/SimpleSamplerClient client = new SimpleSamplerClient(stage);  
@@ -252,7 +253,7 @@ public class FXyzClient extends Application {
         for (String projectName : projectsMap.keySet()) {
             final Project project = projectsMap.get(projectName);
             if (project == null) {
-                System.err.println("null: " + project);
+                LOG.log(Level.WARNING, "Project map contained null entry for key {0}", projectName);
                 continue;
             }
 
@@ -264,14 +265,13 @@ public class FXyzClient extends Application {
         // with this newly built and full tree, we filter based on the search text
         if (searchText != null) {
             pruneSampleTree(root, searchText);
-
-            // FIXME weird bug in TreeView I think
-            contentTree.setRoot(null);
-            contentTree.setRoot(root);
         }
 
         // and finally we sort the display a little
         sort(root, (o1, o2) -> o1.getValue().getSampleName().compareTo(o2.getValue().getSampleName()));
+        if (contentTree != null) {
+            contentTree.setRoot(root);
+        }
     }
 
     private void sort(TreeItem<FXyzSample> node, Comparator<TreeItem<FXyzSample>> comparator) {
@@ -392,7 +392,11 @@ public class FXyzClient extends Application {
     }
 
     private String getResource(InputStream is) {
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
+        if (is == null) {
+            LOG.warning("Requested resource stream was null");
+            return "";
+        }
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
             String line;
             StringBuilder sb = new StringBuilder();
             while ((line = br.readLine()) != null) {
@@ -401,7 +405,7 @@ public class FXyzClient extends Application {
             }
             return sb.toString();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.log(Level.WARNING, "Failed to read resource stream", e);
             return "";
         }
     }
@@ -430,15 +434,15 @@ public class FXyzClient extends Application {
             src = "Sample Source not found";
             try {
                 src = getSourceCode(sample);
-            } catch (Throwable ex) {
-                ex.printStackTrace();
+            } catch (RuntimeException ex) {
+                LOG.log(Level.WARNING, "Failed to format source code for sample " + sample.getSampleName(), ex);
             }
         }
 
         // Escape '<' by "&lt;" to ensure correct rendering by SyntaxHighlighter
         src = src.replace("<", "&lt;");
 
-        String template = getResource("/fxsampler/util/SourceCodeTemplate.html", null);
+        String template = getResource("/org/fxyz3d/util/SourceCodeTemplate.html", null);
         return template.replace("<source/>", src);
     }
 
@@ -450,18 +454,16 @@ public class FXyzClient extends Application {
         } else {
             src = "Css not found";
             try {
-                src = new String(
-                        Files.readAllBytes(Paths.get(getClass().getResource(cssUrl).toURI()))
-                );
-            } catch (URISyntaxException | IOException ex) {
-                ex.printStackTrace();
+                src = getResource(cssUrl, getClass());
+            } catch (RuntimeException ex) {
+                LOG.log(Level.WARNING, "Failed to read stylesheet " + cssUrl, ex);
             }
         }
 
         // Escape '<' by "&lt;" to ensure correct rendering by SyntaxHighlighter
         src = src.replace("<", "&lt;");
 
-        String template = getResource("/fxsampler/util/CssTemplate.html", null);
+        String template = getResource("/org/fxyz3d/util/CssTemplate.html", null);
         return template.replace("<source/>", src);
     }
 

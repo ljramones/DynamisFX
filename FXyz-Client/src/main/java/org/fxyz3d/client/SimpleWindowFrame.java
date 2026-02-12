@@ -185,11 +185,11 @@ public class SimpleWindowFrame extends AnchorPane {
     }
 
     public final void setOnMinimizeAction(EventHandler<ActionEvent> value) {
-        exit.setOnAction(value);
+        minimize.setOnAction(value);
     }
 
     public final void setOnMaximizeAction(EventHandler<ActionEvent> value) {
-        exit.setOnAction(value);
+        maximize.setOnAction(value);
     }
 
     public final StringProperty textProperty() {

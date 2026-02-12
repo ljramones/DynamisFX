@@ -30,18 +30,20 @@
 package org.fxyz3d.util;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.lang.module.ModuleReader;
 import java.lang.module.ResolvedModule;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.fxyz3d.FXyzSample;
 import org.fxyz3d.FXyzSamplerProject;
 import org.fxyz3d.model.EmptySample;
@@ -51,18 +53,18 @@ import org.fxyz3d.model.Project;
  * All the code related to classpath scanning, etc for samples.
  */
 public class SampleScanner {
+    private static final Logger LOG = Logger.getLogger(SampleScanner.class.getName());
     
     private static final List<String> ILLEGAL_CLASS_NAMES = new ArrayList<>();
     static {
-        ILLEGAL_CLASS_NAMES.add("/com/javafx/main/Main.class");
-        ILLEGAL_CLASS_NAMES.add("/com/javafx/main/NoJavaFXFallback.class");
+        ILLEGAL_CLASS_NAMES.add("com/javafx/main/Main.class");
+        ILLEGAL_CLASS_NAMES.add("com/javafx/main/NoJavaFXFallback.class");
         ILLEGAL_CLASS_NAMES.add("module-info.class");
     }
     
     private static final Map<String, FXyzSamplerProject> packageToProjectMap = new HashMap<>();
     static {
-        System.out.println("Initialising FXyz-Sampler sample scanner...");
-        System.out.println("\tDiscovering projects...");
+        LOG.fine("Initialising FXyz-Sampler sample scanner...");
         // find all projects on the classpath that expose a FXyzSamplerProject
         // service. These guys are our friends....
         ServiceLoader<FXyzSamplerProject> loader = ServiceLoader.load(FXyzSamplerProject.class);
@@ -70,12 +72,12 @@ public class SampleScanner {
             final String projectName = project.getProjectName();
             final String basePackage = project.getSampleBasePackage();
             packageToProjectMap.put(basePackage, project);
-            System.out.println("\t\tFound project '" + projectName + 
-                    "', with sample base package '" + basePackage + "'");
+            LOG.log(Level.FINE, "Found project ''{0}'' with sample base package ''{1}''",
+                    new Object[] {projectName, basePackage});
         }
         
         if (packageToProjectMap.isEmpty()) {
-            System.out.println("\tError: Did not find any projects!");
+            LOG.warning("Did not find any FXyzSamplerProject services");
         }
     }
     
@@ -87,13 +89,10 @@ public class SampleScanner {
      * @return The classes
      */
     public Map<String, Project> discoverSamples() {
-        Class<?>[] results = new Class[] { };
-        
-        try {
-        	  results = loadFromPathScanning();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (packageToProjectMap.isEmpty()) {
+            return projectsMap;
         }
+        Class<?>[] results = loadFromPathScanning();
         
         for (Class<?> sampleClass : results) {
             if (! FXyzSample.class.isAssignableFrom(sampleClass)) continue;
@@ -106,7 +105,7 @@ public class SampleScanner {
             try {
                 sample = (FXyzSample)sampleClass.getDeclaredConstructor().newInstance();
             } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-                e.printStackTrace();
+                LOG.log(Level.FINE, "Failed to instantiate sample class " + sampleClass.getName(), e);
             }
             if (sample == null || ! sample.isVisible()) continue;
 
@@ -139,33 +138,58 @@ public class SampleScanner {
      * @return The classes
      * @throws IOException
      */
-    private Class<?>[] loadFromPathScanning() throws IOException {
+    private Class<?>[] loadFromPathScanning() {
 
         final Set<Class<?>> classes = new LinkedHashSet<>();
+        final Set<String> allowedClassPathPrefixes = toClassPathPrefixes(packageToProjectMap.keySet());
         // scan the module-path
         ModuleLayer.boot().configuration().modules().stream()
                 .map(ResolvedModule::reference)
                 .filter(rm -> !isSystemModule(rm.descriptor().name()))
                 .forEach(mref -> {
+                    final String moduleName = mref.descriptor().name();
+                    final ClassLoader moduleClassLoader = ModuleLayer.boot().findLoader(moduleName);
                     try (ModuleReader reader = mref.open()) {
                         reader.list()
-                            .filter(c -> c.endsWith(".class") && 
-                                    ! ILLEGAL_CLASS_NAMES.contains(c))
+                            .filter(c -> isScannableClass(c, allowedClassPathPrefixes))
                             .forEach(c -> {
-                                final Class<?> clazz = processClassName(c);
+                                final Class<?> clazz = processClassName(c, moduleClassLoader);
                                 if (clazz != null) {
                                     classes.add(clazz);
                                 }
                             });
                     } catch (IOException ioe) {
-                        throw new UncheckedIOException(ioe);
+                        LOG.log(Level.FINE, "Failed to scan module " + moduleName, ioe);
                     }
                 });
         
         return classes.toArray(new Class[classes.size()]);
     }
 
-    private Class<?> processClassName(final String name) {
+    private boolean isScannableClass(final String classPath, Set<String> allowedPrefixes) {
+        if (!classPath.endsWith(".class")) {
+            return false;
+        }
+        final String normalized = normalizeClassPath(classPath);
+        if (ILLEGAL_CLASS_NAMES.contains(normalized)) {
+            return false;
+        }
+        return allowedPrefixes.stream().anyMatch(normalized::startsWith);
+    }
+
+    private Set<String> toClassPathPrefixes(Collection<String> packageNames) {
+        final Set<String> prefixes = new LinkedHashSet<>();
+        for (String packageName : packageNames) {
+            prefixes.add(packageName.replace('.', '/') + "/");
+        }
+        return prefixes;
+    }
+
+    private String normalizeClassPath(final String classPath) {
+        return classPath.startsWith("/") ? classPath.substring(1) : classPath;
+    }
+
+    private Class<?> processClassName(final String name, ClassLoader classLoader) {
         String className = name.replace("\\", ".");
         className = className.replace("/", ".");
         
@@ -188,11 +212,10 @@ public class SampleScanner {
 
         Class<?> clazz = null;
         try {
-            clazz = Class.forName(className);
-        } catch (Throwable e) {
-            // Throwable, could be all sorts of bad reasons the class won't instantiate
-            System.out.println("ERROR: Class name: " + className + ", Initial filename: " + name);
-//            e.printStackTrace();
+            clazz = Class.forName(className, false, classLoader);
+        } catch (ClassNotFoundException | LinkageError e) {
+            LOG.log(Level.FINE, "Failed to load class {0} from module path entry {1}",
+                    new Object[] {className, name});
         }
         return clazz;
     }
