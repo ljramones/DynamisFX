@@ -41,6 +41,7 @@ module org.fxyz3d.core {
     exports org.fxyz3d.geometry;
     exports org.fxyz3d.io;
     exports org.fxyz3d.physics.api;
+    exports org.fxyz3d.physics.hybrid;
     exports org.fxyz3d.physics.model;
     exports org.fxyz3d.physics.step;
     exports org.fxyz3d.physics.sync;

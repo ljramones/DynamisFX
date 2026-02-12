@@ -445,6 +445,13 @@ Current Orekit module scope/shortcomings:
 - Constraint creation is intentionally unsupported in this backend.
 - Higher-fidelity multi-body and full frame/time-scale integration are still planned next in Phase 3.
 
+Phase 4 kickoff is now in progress in `FXyz-Core` with a hybrid coordinator layer:
+
+- `org.fxyz3d.physics.hybrid.HybridPhysicsCoordinator`
+- ownership model via `HybridOwnership`
+- handoff strategy via `StateHandoffMode`
+- thread-safe combined snapshots via `HybridSnapshot`
+
 ### Supported Formats
 
 | Format | Extension | Import | Export | Description |

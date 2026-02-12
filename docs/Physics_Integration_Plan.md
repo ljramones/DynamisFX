@@ -135,7 +135,7 @@ Current kickoff progress:
 
 ### Phase 4 - Hybrid Coordinator
 
-Status: `PENDING`
+Status: `IN PROGRESS`
 
 Deliverables:
 
@@ -146,6 +146,25 @@ Deliverables:
 Exit criteria:
 
 - Deterministic mixed simulation tick with clear ownership.
+
+Current kickoff progress:
+
+- New core coordinator package:
+  - `org.fxyz3d.physics.hybrid`
+  - `HybridPhysicsCoordinator`
+  - `HybridBodyLink`
+  - `HybridOwnership`
+  - `StateHandoffMode`
+  - `HybridSnapshot`
+- Deterministic tick order established:
+  - orbital world step
+  - general world step
+  - ownership-based handoff
+  - snapshot publish
+- Handoff policies now explicit:
+  - full-state handoff
+  - position/velocity-only handoff
+- Snapshot publication uses an atomic reference for safe cross-thread reads.
 
 ### Phase 5 - Hardening
 
