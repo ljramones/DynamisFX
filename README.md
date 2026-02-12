@@ -450,7 +450,16 @@ Phase 4 kickoff is now in progress in `FXyz-Core` with a hybrid coordinator laye
 - `org.fxyz3d.physics.hybrid.HybridPhysicsCoordinator`
 - ownership model via `HybridOwnership`
 - handoff strategy via `StateHandoffMode`
+- conflict handling via `ConflictPolicy`
 - thread-safe combined snapshots via `HybridSnapshot`
+- per-link divergence thresholds with reject-on-divergence policy
+- render metadata in snapshots:
+  - interpolation alpha
+  - extrapolation seconds
+
+Sample wiring:
+
+- `org.fxyz3d.samples.utilities.HybridPhysicsCoordinatorSample`
 
 ### Supported Formats
 

@@ -132,9 +132,50 @@ class HybridPhysicsCoordinatorTest {
         HybridSnapshot snapshot = coordinator.step(0.5);
         assertNotNull(snapshot);
         assertEquals(0.5, snapshot.simulationTimeSeconds(), 1e-9);
+        assertEquals(0.0, snapshot.interpolationAlpha(), 1e-9);
+        assertEquals(0.5, snapshot.extrapolationSeconds(), 1e-9);
         assertNotNull(coordinator.latestSnapshot());
         assertThrows(UnsupportedOperationException.class, () ->
                 snapshot.generalStates().put(generalBody, PhysicsBodyState.IDENTITY));
+    }
+
+    @Test
+    void rejectsDivergentHandoffWhenPolicyRequiresIt() {
+        FakeWorld general = new FakeWorld();
+        FakeWorld orbital = new FakeWorld();
+        HybridPhysicsCoordinator coordinator = new HybridPhysicsCoordinator(general, orbital);
+
+        PhysicsBodyHandle generalBody = general.createBody(new PhysicsBodyDefinition(
+                PhysicsBodyType.DYNAMIC, 1.0, new BoxShape(1, 1, 1),
+                new PhysicsBodyState(
+                        PhysicsVector3.ZERO,
+                        PhysicsQuaternion.IDENTITY,
+                        PhysicsVector3.ZERO,
+                        PhysicsVector3.ZERO,
+                        ReferenceFrame.WORLD,
+                        0.0)));
+        PhysicsBodyHandle orbitalBody = orbital.createBody(new PhysicsBodyDefinition(
+                PhysicsBodyType.DYNAMIC, 1.0, new BoxShape(1, 1, 1),
+                new PhysicsBodyState(
+                        new PhysicsVector3(1000.0, 0.0, 0.0),
+                        PhysicsQuaternion.IDENTITY,
+                        PhysicsVector3.ZERO,
+                        PhysicsVector3.ZERO,
+                        ReferenceFrame.WORLD,
+                        0.0)));
+
+        coordinator.registerLink(new HybridBodyLink(
+                generalBody,
+                orbitalBody,
+                HybridOwnership.ORBITAL,
+                StateHandoffMode.FULL_STATE,
+                ConflictPolicy.REJECT_ON_DIVERGENCE,
+                10.0));
+        coordinator.step(0.1);
+
+        PhysicsBodyState currentGeneral = general.getBodyState(generalBody);
+        assertEquals(0.0, currentGeneral.position().x(), 1e-9);
+        assertEquals(1, coordinator.lastRejectedHandoffs());
     }
 
     private static final class FakeWorld implements PhysicsWorld {

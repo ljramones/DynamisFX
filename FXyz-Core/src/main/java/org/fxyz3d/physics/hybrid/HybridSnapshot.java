@@ -9,12 +9,20 @@ import org.fxyz3d.physics.model.PhysicsBodyState;
  */
 public record HybridSnapshot(
         double simulationTimeSeconds,
+        double interpolationAlpha,
+        double extrapolationSeconds,
         Map<PhysicsBodyHandle, PhysicsBodyState> generalStates,
         Map<PhysicsBodyHandle, PhysicsBodyState> orbitalStates) {
 
     public HybridSnapshot {
         if (!Double.isFinite(simulationTimeSeconds) || simulationTimeSeconds < 0.0) {
             throw new IllegalArgumentException("simulationTimeSeconds must be finite and >= 0");
+        }
+        if (!Double.isFinite(interpolationAlpha) || interpolationAlpha < 0.0 || interpolationAlpha > 1.0) {
+            throw new IllegalArgumentException("interpolationAlpha must be finite and in [0,1]");
+        }
+        if (!Double.isFinite(extrapolationSeconds) || extrapolationSeconds < 0.0) {
+            throw new IllegalArgumentException("extrapolationSeconds must be finite and >= 0");
         }
         if (generalStates == null || orbitalStates == null) {
             throw new IllegalArgumentException("generalStates and orbitalStates must not be null");

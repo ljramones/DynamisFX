@@ -9,11 +9,33 @@ public record HybridBodyLink(
         PhysicsBodyHandle generalBody,
         PhysicsBodyHandle orbitalBody,
         HybridOwnership ownership,
-        StateHandoffMode handoffMode) {
+        StateHandoffMode handoffMode,
+        ConflictPolicy conflictPolicy,
+        double maxPositionDivergenceMeters) {
+
+    public HybridBodyLink(
+            PhysicsBodyHandle generalBody,
+            PhysicsBodyHandle orbitalBody,
+            HybridOwnership ownership,
+            StateHandoffMode handoffMode) {
+        this(
+                generalBody,
+                orbitalBody,
+                ownership,
+                handoffMode,
+                ConflictPolicy.OVERWRITE,
+                Double.POSITIVE_INFINITY);
+    }
 
     public HybridBodyLink {
-        if (generalBody == null || orbitalBody == null || ownership == null || handoffMode == null) {
-            throw new IllegalArgumentException("generalBody, orbitalBody, ownership and handoffMode must not be null");
+        if (generalBody == null || orbitalBody == null || ownership == null
+                || handoffMode == null || conflictPolicy == null) {
+            throw new IllegalArgumentException(
+                    "generalBody, orbitalBody, ownership, handoffMode and conflictPolicy must not be null");
+        }
+        if (!(maxPositionDivergenceMeters >= 0.0)
+                || (Double.isNaN(maxPositionDivergenceMeters))) {
+            throw new IllegalArgumentException("maxPositionDivergenceMeters must be >= 0 and not NaN");
         }
     }
 }

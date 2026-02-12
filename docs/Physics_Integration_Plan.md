@@ -164,7 +164,15 @@ Current kickoff progress:
 - Handoff policies now explicit:
   - full-state handoff
   - position/velocity-only handoff
+- Conflict policy controls now available per link:
+  - overwrite
+  - reject-on-divergence with configurable distance tolerance
 - Snapshot publication uses an atomic reference for safe cross-thread reads.
+- Snapshot metadata now includes render-facing fields:
+  - interpolation alpha
+  - extrapolation seconds
+- Hybrid sample wiring added in `FXyz-Samples`:
+  - `org.fxyz3d.samples.utilities.HybridPhysicsCoordinatorSample`
 
 ### Phase 5 - Hardening
 
