@@ -12,6 +12,7 @@
 
     <modules>
         <module>FXyz-Core</module>
+        <module>FXyz-Physics-ODE4j</module>
         <module>FXyz-Importers</module>
         <module>FXyz-Client</module>
         <module>FXyz-Samples</module>
@@ -31,6 +32,7 @@
         <jcsg.version>0.5.7</jcsg.version>
         <vvecmath.version>0.4.0</vvecmath.version>
         <poly2tri-core.version>0.1.2</poly2tri-core.version>
+        <ode4j.version>0.5.3</ode4j.version>
 
         <slf4j.version>2.0.7</slf4j.version>
 
@@ -116,6 +118,11 @@
                 <version>${poly2tri-core.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.ode4j</groupId>
+                <artifactId>core</artifactId>
+                <version>${ode4j.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.version}</version>
@@ -142,6 +149,11 @@
             <dependency>
                 <groupId>org.fxyz3d</groupId>
                 <artifactId>fxyz3d-importers</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.fxyz3d</groupId>
+                <artifactId>fxyz3d-physics-ode4j</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

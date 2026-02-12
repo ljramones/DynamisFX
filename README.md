@@ -296,6 +296,27 @@ FXyz-Core now includes a baseline collision package: `org.fxyz3d.collision`.
 - `ConvexSupport3D`
 - `Gjk3D`
 - `CollisionManifold3D`
+- `ContactPoint3D`
+- `ContactManifold3D`
+- `ContactGenerator3D`
+- `ManifoldCache3D<T>`
+- `WarmStartImpulse`
+- `CollisionKind`
+- `CollisionFilter`
+- `CollisionFiltering`
+- `FilteredCollisionPair<T>`
+- `NodeCollisionAdapter`
+- `CollisionEventType`
+- `CollisionEvent<T>`
+- `CollisionWorld3D<T>`
+- `CollisionDebugSnapshot3D<T>`
+- `RigidBodyAdapter3D<T>`
+- `CollisionResponder3D<T>`
+- `ContactSolver3D<T>`
+- `Constraint3D<T>`
+- `DistanceConstraint3D<T>`
+- `PointConstraint3D<T>`
+- `PhysicsStep3D`
 - `Ccd3D`
 - `CollisionPipeline`
 
@@ -310,6 +331,14 @@ FXyz-Core now includes a baseline collision package: `org.fxyz3d.collision`.
 - Convex 3D EPA manifold extraction via `Gjk3D.intersectsWithManifold(...)`
 - Segment-vs-AABB and swept-AABB time-of-impact via `Ccd3D`
 - Approximate swept convex-convex TOI via `Ccd3D.sweptConvexTimeOfImpact(...)`
+- Primitive contact-point generation via `ContactGenerator3D`
+- Layer/mask filtering and trigger-vs-solid classification via `CollisionFilter`/`CollisionFiltering`
+- JavaFX scene-node adapter hooks via `NodeCollisionAdapter`
+- Runtime world orchestration with enter/stay/exit events via `CollisionWorld3D`
+- Optional baseline response solving via `ContactSolver3D` (through `CollisionWorld3D` responder hook)
+- Configurable solver iterations via `CollisionWorld3D.setSolverIterations(...)` with warm-start support
+- Constraint + fixed-step utilities available for deterministic simulation loops
+- Debug snapshot extraction for overlays/tooling via `CollisionDebugSnapshot3D.from(...)`
 
 ### Broad-Phase
 
@@ -319,13 +348,26 @@ Both are broad-phase only and should be followed by narrow-phase validation.
 
 `CollisionPipeline` can be used to filter broad-phase candidate pairs through a narrow-phase predicate (for example, SAT).
 
+### Collision Debug Sample
+
+`FXyz-Samples` includes `org.fxyz3d.samples.utilities.CollisionDebugWorld` for collision diagnostics:
+
+- Animated moving boxes in a bounded world
+- Live wireframe AABB overlays
+- Contact point markers colored by event type (`ENTER`/`STAY`/`EXIT`)
+- Key controls:
+  - `D`: toggle debug overlay
+  - `SPACE`: pause/resume
+
 ### Current Shortcomings
 
 - No OBB (oriented bounding box) support
 - No mesh-level narrow phase
-- No rigid-body dynamics/response integration yet
+- No full rigid-body engine (sleeping/islands/friction joints)
 - SAT is currently 2D convex-polygon only (concave shapes require decomposition)
 - Convex-convex CCD currently uses sampled bracketing + bisection (not full conservative advancement yet)
+- Generic contact-point extraction for arbitrary GJK/EPA convex pairs is not implemented yet
+- Solver is baseline only; advanced constraint solving (robust stacking/joints) is still out of scope
 
 ### Broad-Phase Benchmark Harness
 
@@ -336,6 +378,56 @@ For local performance comparisons of broad-phase strategies, use:
 This compares `SpatialHash3D` and `SweepAndPrune3D` on generated AABB scenes.
 
 See `docs/Core_Collision.md` for details.
+
+## Physics Backend SPI (2026)
+
+FXyz-Core now includes an engine-agnostic physics scaffolding layer intended to make Orekit and ODE4j integration modular:
+
+- `org.fxyz3d.physics.api`
+  - `PhysicsBackendFactory`
+  - `PhysicsBackend`
+  - `PhysicsWorld`
+  - `PhysicsBodyHandle`
+  - `PhysicsConstraintHandle`
+  - `PhysicsConstraintDefinition`
+  - `PhysicsConstraintType`
+  - `PhysicsCapabilities`
+  - runtime tuning on `PhysicsWorld`:
+    - `runtimeTuning()`
+    - `setRuntimeTuning(...)`
+- `org.fxyz3d.physics.model`
+  - immutable state/config/shape records (`PhysicsBodyState`, `PhysicsBodyDefinition`, `PhysicsWorldConfiguration`, etc.)
+  - explicit reference frames via `ReferenceFrame`
+  - world configuration includes solver/contact tunables:
+    - `solverIterations`
+    - `contactFriction`
+    - `contactBounce`
+    - `contactSoftCfm`
+    - `contactBounceVelocity`
+- `org.fxyz3d.physics.sync`
+  - `PhysicsSceneSync<N>` for backend state -> scene node synchronization
+- `org.fxyz3d.physics.step`
+  - `FixedStepAccumulator` + `FixedStepResult` for deterministic stepping
+
+Roadmap and phased execution details:
+
+- `docs/Physics_Integration_Plan.md`
+
+Phase 2 kickoff is now in progress with a new module shell:
+
+- `FXyz-Physics-ODE4j`
+  - `Ode4jBackendFactory`
+  - `Ode4jBackend`
+  - `Ode4jWorld`
+
+Current status:
+
+- `Ode4jWorld` is bound to ODE4j core world/body/shape primitives for create/update/step lifecycle.
+- Contact resolution is enabled via ODE4j space-collide + contact joints.
+- Minimal cross-backend constraint API is available (`BALL`, `FIXED`) and mapped in ODE4j world.
+- Minimal cross-backend constraint API is available (`BALL`, `FIXED`, `HINGE`, `SLIDER`) and mapped in ODE4j world.
+- Sample integration is available in:
+  - `org.fxyz3d.samples.utilities.Ode4jPhysicsSyncSample`
 
 ### Supported Formats
 

@@ -40,6 +40,10 @@ module org.fxyz3d.core {
     exports org.fxyz3d.collision;
     exports org.fxyz3d.geometry;
     exports org.fxyz3d.io;
+    exports org.fxyz3d.physics.api;
+    exports org.fxyz3d.physics.model;
+    exports org.fxyz3d.physics.step;
+    exports org.fxyz3d.physics.sync;
     exports org.fxyz3d.scene;
     exports org.fxyz3d.scene.paint;
     exports org.fxyz3d.scene.selection;

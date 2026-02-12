@@ -10,12 +10,8 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>fxyz3d-samples</artifactId>
-    <name>FXyz-Samples</name>
-
-    <properties>
-        <samples.main.class>org.fxyz3d.samples.Launcher</samples.main.class>
-    </properties>
+    <artifactId>fxyz3d-physics-ode4j</artifactId>
+    <name>FXyz-Physics-ODE4j</name>
 
     <dependencies>
         <dependency>
@@ -23,56 +19,8 @@
             <artifactId>fxyz3d</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.fxyz3d</groupId>
-            <artifactId>fxyz3d-importers</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.fxyz3d</groupId>
-            <artifactId>fxyz3d-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.fxyz3d</groupId>
-            <artifactId>fxyz3d-physics-ode4j</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-controls</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-fxml</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.controlsfx</groupId>
-            <artifactId>controlsfx</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.reactfx</groupId>
-            <artifactId>reactfx</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.fxmisc.easybind</groupId>
-            <artifactId>easybind</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jfxtras</groupId>
-            <artifactId>jfxtras-controls</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.graalvm.js</groupId>
-            <artifactId>js</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.graalvm.js</groupId>
-            <artifactId>js-scriptengine</artifactId>
+            <groupId>org.ode4j</groupId>
+            <artifactId>core</artifactId>
         </dependency>
 
         <dependency>
@@ -125,37 +73,11 @@
                         <exclude>module-info.java</exclude>
                         <exclude>**/module-info.java</exclude>
                     </excludes>
-                    <compilerArgs>
-                        <arg>--add-exports=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED</arg>
-                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-                            <Main-Class>${samples.main.class}</Main-Class>
-                            <Implementation-Title>FXyz-Samples</Implementation-Title>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.openjfx</groupId>
-                <artifactId>javafx-maven-plugin</artifactId>
-                <configuration>
-                    <mainClass>${samples.main.class}</mainClass>
-                    <jvmArgs>
-                        --add-exports=javafx.base/com.sun.javafx.runtime=ALL-UNNAMED
-                        --add-exports=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED
-                    </jvmArgs>
-                </configuration>
             </plugin>
         </plugins>
     </build>
