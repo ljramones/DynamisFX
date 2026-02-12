@@ -87,9 +87,35 @@ class OrekitWorldTest {
                 1.0));
         world.setRuntimeTuning(new PhysicsRuntimeTuning(8, 0.7, 0.2, 1e-4, 0.05));
         assertEquals(8, world.runtimeTuning().solverIterations());
+        world.setTimeScale(4.0);
+        assertEquals(4.0, world.timeScale(), 1e-9);
 
         world.close();
         assertThrows(IllegalStateException.class, () -> world.bodies());
         assertThrows(IllegalStateException.class, () -> world.step(1.0));
+    }
+
+    @Test
+    void appliesTimeScaleDuringStepping() {
+        OrekitWorld world = new OrekitWorld(new PhysicsWorldConfiguration(
+                ReferenceFrame.ICRF,
+                PhysicsVector3.ZERO,
+                1.0));
+        PhysicsBodyHandle body = world.createBody(new PhysicsBodyDefinition(
+                PhysicsBodyType.KINEMATIC,
+                0.0,
+                new SphereShape(1.0),
+                new PhysicsBodyState(
+                        PhysicsVector3.ZERO,
+                        org.fxyz3d.physics.model.PhysicsQuaternion.IDENTITY,
+                        new PhysicsVector3(0.0, 1.0, 0.0),
+                        PhysicsVector3.ZERO,
+                        ReferenceFrame.ICRF,
+                        0.0)));
+        world.setTimeScale(10.0);
+        world.step(0.5);
+        PhysicsBodyState state = world.getBodyState(body);
+        assertEquals(5.0, state.position().y(), 1e-9);
+        assertEquals(5.0, state.timestampSeconds(), 1e-9);
     }
 }

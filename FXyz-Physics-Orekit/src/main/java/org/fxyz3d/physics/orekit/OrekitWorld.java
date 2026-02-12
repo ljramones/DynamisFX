@@ -29,6 +29,7 @@ public final class OrekitWorld implements PhysicsWorld {
     private final Map<PhysicsBodyHandle, BodyEntry> bodies = new LinkedHashMap<>();
     private long nextBodyHandle = 1L;
     private PhysicsRuntimeTuning runtimeTuning;
+    private double timeScale = 1.0;
     private boolean closed;
 
     OrekitWorld(PhysicsWorldConfiguration configuration) {
@@ -115,12 +116,26 @@ public final class OrekitWorld implements PhysicsWorld {
         runtimeTuning = tuning;
     }
 
+    public double timeScale() {
+        ensureOpen();
+        return timeScale;
+    }
+
+    public void setTimeScale(double value) {
+        ensureOpen();
+        if (!(value > 0.0) || !Double.isFinite(value)) {
+            throw new IllegalArgumentException("timeScale must be > 0 and finite");
+        }
+        timeScale = value;
+    }
+
     @Override
     public void step(double dtSeconds) {
         ensureOpen();
         if (!(dtSeconds > 0.0) || !Double.isFinite(dtSeconds)) {
             throw new IllegalArgumentException("dtSeconds must be > 0 and finite");
         }
+        double scaledDt = dtSeconds * timeScale;
         if (bodies.isEmpty()) {
             return;
         }
@@ -132,9 +147,9 @@ public final class OrekitWorld implements PhysicsWorld {
             PhysicsBodyState current = body.state;
 
             PhysicsBodyState next = switch (body.definition.bodyType()) {
-                case STATIC -> advanceTimestamp(current, dtSeconds);
-                case KINEMATIC -> integrateKinematic(current, dtSeconds);
-                case DYNAMIC -> integrateDynamic(handle, current, dtSeconds);
+                case STATIC -> advanceTimestamp(current, scaledDt);
+                case KINEMATIC -> integrateKinematic(current, scaledDt);
+                case DYNAMIC -> integrateDynamic(handle, current, scaledDt);
             };
             nextStates.put(handle, next);
         }

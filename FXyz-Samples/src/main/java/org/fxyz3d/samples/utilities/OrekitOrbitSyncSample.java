@@ -3,6 +3,7 @@ package org.fxyz3d.samples.utilities;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
@@ -18,6 +19,7 @@ import org.fxyz3d.physics.model.PhysicsWorldConfiguration;
 import org.fxyz3d.physics.model.ReferenceFrame;
 import org.fxyz3d.physics.model.SphereShape;
 import org.fxyz3d.physics.orekit.OrekitBackendFactory;
+import org.fxyz3d.physics.orekit.OrekitWorld;
 import org.fxyz3d.physics.step.FixedStepAccumulator;
 import org.fxyz3d.physics.sync.PhysicsSceneSync;
 import org.fxyz3d.samples.shapes.ShapeBaseSample;
@@ -33,6 +35,7 @@ public class OrekitOrbitSyncSample extends ShapeBaseSample<Group> {
     private PhysicsSceneSync<Node> sceneSync;
     private FixedStepAccumulator accumulator;
     private AnimationTimer timer;
+    private OrekitWorld orekitWorld;
 
     public static void main(String[] args) {
         launch(args);
@@ -47,6 +50,7 @@ public class OrekitOrbitSyncSample extends ShapeBaseSample<Group> {
                 ReferenceFrame.ICRF,
                 PhysicsVector3.ZERO,
                 1.0 / 60.0));
+        orekitWorld = (OrekitWorld) world;
         sceneSync = new PhysicsSceneSync<>((node, state) -> {
             node.setTranslateX(state.position().x() / 10_000.0);
             node.setTranslateY(state.position().y() / 10_000.0);
@@ -61,6 +65,16 @@ public class OrekitOrbitSyncSample extends ShapeBaseSample<Group> {
 
     @Override
     protected void addMeshAndListeners() {
+        subScene.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.OPEN_BRACKET) {
+                orekitWorld.setTimeScale(Math.max(0.1, orekitWorld.timeScale() * 0.5));
+                event.consume();
+            } else if (event.getCode() == KeyCode.CLOSE_BRACKET) {
+                orekitWorld.setTimeScale(Math.min(100.0, orekitWorld.timeScale() * 2.0));
+                event.consume();
+            }
+        });
+
         timer = new AnimationTimer() {
             private long lastNanos;
 

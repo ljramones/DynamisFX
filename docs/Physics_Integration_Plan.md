@@ -119,6 +119,9 @@ Current kickoff progress:
 - Orbital stepping scaffold added for inertial-frame N-body style integration:
   - static central bodies can influence dynamic body acceleration
   - fixed-step state updates remain backend-neutral through `PhysicsWorld`
+- Time-scale controls added on the Orekit world scaffold:
+  - `setTimeScale(...)`
+  - `timeScale()`
 - Runtime tuning plumbing preserved through the shared SPI for consistency.
 - Sample integration added:
   - `org.fxyz3d.samples.utilities.OrekitOrbitSyncSample`

@@ -440,6 +440,7 @@ Current Orekit module scope/shortcomings:
 
 - It is an astrodynamics-oriented scaffold through the shared `PhysicsWorld` SPI.
 - It currently provides deterministic inertial-frame N-body style stepping for orbital experiments.
+- Time scaling is available on `OrekitWorld` via `setTimeScale(...)` / `timeScale()`.
 - Constraint creation is intentionally unsupported in this backend.
 - Full Orekit propagator/frame transform binding is planned next in Phase 3.
 
