@@ -33,20 +33,61 @@ import java.util.logging.Logger;
 import org.fxyz3d.geometry.Point3D;
 
 /**
+ * A spring-like constraint that connects two {@link WeightedPoint}s in a cloth simulation.
+ * <p>
+ * Links maintain a target distance between two points using a stiffness coefficient.
+ * When solved, the link adjusts both point positions proportionally based on their
+ * inverse masses to satisfy the distance constraint.
+ * </p>
+ * <p>
+ * This implements a position-based dynamics (PBD) distance constraint commonly used
+ * in cloth and soft-body physics simulations.
+ * </p>
  *
  * @author Jason Pollastrini aka jdub1581
+ * @see WeightedPoint
+ * @see Constraint
  */
 public class Link implements Constraint {
     private static final Logger log = Logger.getLogger(Link.class.getName());
 
-    private final double distance, stiffness, damping = 0.75;
-    private final WeightedPoint p1, p2;
+    /** Default damping factor for velocity reduction (0.0 = no damping, 1.0 = full damping) */
+    private static final double DEFAULT_DAMPING = 0.75;
 
+    private final double distance;
+    private final double stiffness;
+    private final double damping;
+    private final WeightedPoint p1;
+    private final WeightedPoint p2;
+
+    /**
+     * Creates a new link constraint between two weighted points.
+     *
+     * @param p1 the first (anchor) point of the link
+     * @param p2 the second (attached) point of the link
+     * @param distance the target rest distance between the two points (must be positive)
+     * @param stiffness the stiffness coefficient (0.0 to 1.0, where 1.0 is fully rigid)
+     * @throws IllegalArgumentException if p1 or p2 is null, distance is not positive,
+     *         or stiffness is outside the valid range
+     */
     public Link(WeightedPoint p1, WeightedPoint p2, double distance, double stiffness) {
+        if (p1 == null) {
+            throw new IllegalArgumentException("p1 cannot be null");
+        }
+        if (p2 == null) {
+            throw new IllegalArgumentException("p2 cannot be null");
+        }
+        if (distance <= 0) {
+            throw new IllegalArgumentException("distance must be positive, got: " + distance);
+        }
+        if (stiffness < 0 || stiffness > 1) {
+            throw new IllegalArgumentException("stiffness must be between 0 and 1, got: " + stiffness);
+        }
         this.p1 = p1;
         this.p2 = p2;
         this.distance = distance;
         this.stiffness = stiffness;
+        this.damping = DEFAULT_DAMPING;
     }
 
     /* Option 2
@@ -98,12 +139,49 @@ public class Link implements Constraint {
         p2.position.z -= (float) (diff.z * scalarP2 * difference);
     }
 
+    /**
+     * Returns the first (anchor) point of this link.
+     *
+     * @return the anchor point
+     */
     public WeightedPoint getAnchorPoint() {
         return p1;
     }
 
+    /**
+     * Returns the second (attached) point of this link.
+     *
+     * @return the attached point
+     */
     public WeightedPoint getAttachedPoint() {
         return p2;
+    }
+
+    /**
+     * Returns the target rest distance for this link.
+     *
+     * @return the rest distance
+     */
+    public double getDistance() {
+        return distance;
+    }
+
+    /**
+     * Returns the stiffness coefficient of this link.
+     *
+     * @return the stiffness (0.0 to 1.0)
+     */
+    public double getStiffness() {
+        return stiffness;
+    }
+
+    /**
+     * Returns the damping coefficient of this link.
+     *
+     * @return the damping factor
+     */
+    public double getDamping() {
+        return damping;
     }
 
     @Override

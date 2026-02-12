@@ -53,9 +53,9 @@ public class PolyLine3DTest {
 
         PolyLine3D line = new PolyLine3D(points, 2.0f, Color.RED);
 
-        assertThat(line.points, is(points));
-        assertThat(line.width, is(2.0f));
-        assertThat(line.color, is(Color.RED));
+        assertThat(line.getPoints(), is(points));
+        assertThat(line.getWidth(), is(2.0f));
+        assertThat(line.getColor(), is(Color.RED));
     }
 
     @Test
@@ -69,8 +69,8 @@ public class PolyLine3DTest {
 
         PolyLine3D line = new PolyLine3D(points, 2.0f, Color.BLUE, PolyLine3D.LineType.TRIANGLE);
 
-        assertThat(line.points, is(points));
-        assertThat(line.meshView, is(notNullValue()));
+        assertThat(line.getPoints(), is(points));
+        assertThat(line.getMeshView(), is(notNullValue()));
     }
 
     @Test
@@ -83,8 +83,8 @@ public class PolyLine3DTest {
 
         PolyLine3D line = new PolyLine3D(points, 1.0f, Color.WHITE);
 
-        assertThat(line.meshView, is(notNullValue()));
-        assertThat(line.meshView.getMesh(), is(notNullValue()));
+        assertThat(line.getMeshView(), is(notNullValue()));
+        assertThat(line.getMeshView().getMesh(), is(notNullValue()));
     }
 
     @Test
@@ -97,7 +97,7 @@ public class PolyLine3DTest {
 
         PolyLine3D line = new PolyLine3D(points, 1.0f, Color.GREEN);
 
-        assertThat(line.material, is(notNullValue()));
+        assertThat(line.getMaterial(), is(notNullValue()));
     }
 
     @Test

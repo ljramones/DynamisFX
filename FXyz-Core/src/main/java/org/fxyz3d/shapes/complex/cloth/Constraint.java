@@ -32,15 +32,35 @@ package org.fxyz3d.shapes.complex.cloth;
 import java.util.stream.IntStream;
 
 /**
+ * A constraint that can be solved iteratively to satisfy physical conditions.
+ * <p>
+ * Constraints are used in physics simulations to maintain relationships between
+ * objects, such as distance constraints in cloth simulation.
+ * </p>
  *
  * @author Jason Pollastrini aka jdub1581
  */
 @FunctionalInterface
 public interface Constraint {
-    
-    public void solve();
-    
-    public default void solve(int iter){
-        IntStream.range(0, iter).parallel().forEach(i-> solve());
+
+    /**
+     * Solves this constraint once, adjusting positions to satisfy the constraint.
+     */
+    void solve();
+
+    /**
+     * Solves this constraint multiple times for improved accuracy.
+     * <p>
+     * Multiple iterations help converge to a more stable solution, especially
+     * when many constraints interact. Uses sequential execution to avoid
+     * race conditions on shared mutable state.
+     * </p>
+     *
+     * @param iter the number of iterations to perform
+     */
+    default void solve(int iter) {
+        for (int i = 0; i < iter; i++) {
+            solve();
+        }
     }
 }

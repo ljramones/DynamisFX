@@ -33,14 +33,34 @@ import java.util.HashMap;
 import org.fxyz3d.geometry.Point3D;
 
 /**
+ * A point with mass used in cloth physics simulation.
+ * <p>
+ * WeightedPoint represents a single vertex in a cloth mesh that participates in
+ * physics simulation. Each point has:
+ * <ul>
+ *   <li>A position that is updated each simulation step</li>
+ *   <li>A mass that affects how forces are applied</li>
+ *   <li>Constraints (links) to other points that maintain cloth structure</li>
+ *   <li>Optional anchoring to fix the point in place</li>
+ * </ul>
+ * </p>
+ * <p>
+ * The physics simulation uses Verlet integration to update positions based on
+ * accumulated forces and previous positions.
+ * </p>
  *
  * @author Jason Pollastrini aka jdub1581
+ * @see Link
  */
 public class WeightedPoint {
 
-        private final ClothMesh parent;
+        /** Default mass for new points */
+        private static final double DEFAULT_MASS = 0.1;
 
-        public double mass = 0;
+        /** Verlet integration coefficient (0.5 for standard Verlet) */
+        private static final float VERLET_COEFFICIENT = 0.5f;
+
+        private double mass = 0;
         public Point3D position,
                 oldPosition,
                 anchorPosition,
@@ -54,45 +74,79 @@ public class WeightedPoint {
         /*==========================================================================
          Constructors
          */
-        private WeightedPoint() {
-            this.parent = null;
+
+        /**
+         * Creates a new weighted point with default mass at the origin.
+         */
+        public WeightedPoint() {
+            this(DEFAULT_MASS, 0, 0, 0, false);
         }
 
-        public WeightedPoint(ClothMesh parent) {
-            this(parent, 0.1, 0, 0, 0, false);
+        /**
+         * Creates a new weighted point with specified mass at the origin.
+         *
+         * @param mass the mass of the point (affects force response)
+         */
+        public WeightedPoint(double mass) {
+            this(mass, 0, 0, 0, false);
         }
 
-        public WeightedPoint(ClothMesh parent, double mass) {
-            this(parent, mass, 0, 0, 0, false);
+        /**
+         * Creates a new weighted point with specified mass and position.
+         *
+         * @param mass the mass of the point
+         * @param x the x coordinate
+         * @param y the y coordinate
+         * @param z the z coordinate
+         */
+        public WeightedPoint(double mass, double x, double y, double z) {
+            this(mass, x, y, z, false);
         }
 
-        public WeightedPoint(ClothMesh parent, double mass, double x, double y, double z) {
-            this(parent, mass, x, y, z, false);
-        }
-
-        public WeightedPoint(ClothMesh parent, double mass, double x, double y, double z, boolean anchored) {
-
+        /**
+         * Creates a new weighted point with full configuration.
+         *
+         * @param mass the mass of the point (affects force response)
+         * @param x the x coordinate
+         * @param y the y coordinate
+         * @param z the z coordinate
+         * @param anchored whether this point is fixed in place
+         */
+        public WeightedPoint(double mass, double x, double y, double z, boolean anchored) {
             this.position = new Point3D((float) x, (float) y, (float) z);
             this.oldPosition = new Point3D((float) x, (float) y, (float) z);
             this.anchorPosition = new Point3D(0, 0, 0);
             this.force = new Point3D(0, 0, 0);
 
-            this.parent = parent;
             this.mass = mass;
             this.anchored = anchored;
-
         }
         /*==========================================================================
          Constraints
          */
 
-        public final void attatchTo(WeightedPoint other, double linkDistance, double stiffness) {
-            attatchTo(this, other, linkDistance, stiffness);
+        /**
+         * Attaches this point to another point with a spring-like constraint.
+         *
+         * @param other the point to attach to
+         * @param linkDistance the rest distance of the constraint
+         * @param stiffness the stiffness of the constraint (0.0 to 1.0)
+         */
+        public final void attachTo(WeightedPoint other, double linkDistance, double stiffness) {
+            attachTo(this, other, linkDistance, stiffness);
         }
 
-        public final void attatchTo(WeightedPoint self, WeightedPoint other, double linkDistance, double stiffness) {
+        /**
+         * Creates a constraint between two points.
+         *
+         * @param self the first point (anchor)
+         * @param other the second point (attached)
+         * @param linkDistance the rest distance of the constraint
+         * @param stiffness the stiffness of the constraint (0.0 to 1.0)
+         */
+        public final void attachTo(WeightedPoint self, WeightedPoint other, double linkDistance, double stiffness) {
             Link pl = new Link(self, other, linkDistance, stiffness);
-            addConstraint(other, (Constraint) pl);
+            addConstraint(other, pl);
         }
 
         //==========================================================================
@@ -107,9 +161,15 @@ public class WeightedPoint {
         public void addConstraint(Constraint c){
             this.constraints.put(this, c);
         }
-        
-        public void removeConstraint(Constraint pl) {
-            
+
+        /**
+         * Removes a constraint from this point.
+         *
+         * @param other the point whose constraint should be removed
+         * @return true if a constraint was removed, false otherwise
+         */
+        public boolean removeConstraint(WeightedPoint other) {
+            return constraints.remove(other) != null;
         }
 
         public void clearConstraints() {
@@ -130,6 +190,20 @@ public class WeightedPoint {
             }
         }
 
+        /**
+         * Updates the point's position using Verlet integration.
+         * <p>
+         * The Verlet integration formula calculates the next position based on:
+         * <ul>
+         *   <li>Current position</li>
+         *   <li>Velocity (derived from position - oldPosition)</li>
+         *   <li>Acceleration from accumulated forces</li>
+         * </ul>
+         * </p>
+         *
+         * @param dt the time delta for this physics step
+         * @param t the current simulation time (unused, reserved for future use)
+         */
         public void updatePhysics(double dt, double t) {
             synchronized (this) {
                 if (isAnchored()) {
@@ -144,10 +218,11 @@ public class WeightedPoint {
                 float dtSq = (float) (dt * dt);
 
                 // calculate the next position using Verlet Integration
+                // Formula: x_new = x + velocity + (acceleration * 0.5 * dt²)
                 Point3D next = new Point3D(
-                        position.x + (vel.x + (((force.x / (float) (mass)) * 0.5f) * dtSq)),
-                        position.y + (vel.y + (((force.y / (float) (mass)) * 0.5f) * dtSq)),
-                        position.z + (vel.z + (((force.z / (float) (mass)) * 0.5f) * dtSq))
+                        position.x + (vel.x + (((force.x / (float) mass) * VERLET_COEFFICIENT) * dtSq)),
+                        position.y + (vel.y + (((force.y / (float) mass) * VERLET_COEFFICIENT) * dtSq)),
+                        position.z + (vel.z + (((force.z / (float) mass) * VERLET_COEFFICIENT) * dtSq))
                 );
 
                 // reset variables

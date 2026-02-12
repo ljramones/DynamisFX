@@ -89,6 +89,22 @@ public class ClothMesh extends MeshView {
     
     private static final double DEFAULT_POINT_MASS = 1.0;
 
+    // Physics timing constants
+    /** Fixed time step for physics simulation (seconds) */
+    private static final double PHYSICS_FIXED_DELTA_TIME = 0.16;
+    /** Time scale factor for converting nanoseconds to simulation time */
+    private static final float PHYSICS_TIME_SCALE = 10.0f;
+    /** Maximum number of physics sub-steps per frame to prevent spiral of death */
+    private static final int PHYSICS_MAX_TIMESTEPS = 5;
+    /** Timer period in milliseconds (~60 FPS) */
+    private static final long TIMER_PERIOD_MS = 16;
+
+    // Force vectors for simulation
+    /** Edge force applied to cloth edges (wind-like effect) */
+    private static final Point3D EDGE_FORCE = new Point3D(5, -1, 1);
+    /** Gravity force applied to all points */
+    private static final Point3D GRAVITY_FORCE = new Point3D(4.8f, 1, -1);
+
     //==========================================================================
     private final ClothTimer timer = new ClothTimer();
     private TriangleMesh mesh = new TriangleMesh();
@@ -310,8 +326,8 @@ public class ClothMesh extends MeshView {
                 float currX = (float) X / sDivX;
                 float fx = (1 - currX) * minX + currX * maxX;
 
-                //create point: parent, mass, x, y, z
-                WeightedPoint p = new WeightedPoint(this, getPerPointMass(), fx, fy, Math.random());
+                //create point: mass, x, y, z
+                WeightedPoint p = new WeightedPoint(getPerPointMass(), fx, fy, Math.random());
 
                 //Pin Points in place
                 if (Y == 0 && X == 0 || (X == 0 && Y == sDivY)) {
@@ -325,11 +341,11 @@ public class ClothMesh extends MeshView {
                 }
                 // stabilLinks 
                 if (X != 0) {
-                    p.attatchTo((points.get(points.size() - 1)), xDist, getStretchStrength());
+                    p.attachTo((points.get(points.size() - 1)), xDist, getStretchStrength());
                     //log.log(Level.INFO, "\nLINK-INFO\nOther Index: {0}, This Index: {1}\nLink Distance: {2}\nStiffness: {3}\n", new Object[]{(points.size() - 2), points.indexOf(p),(width / divsX), stiffness});
                 }
                 if (Y != 0) {
-                    p.attatchTo((points.get((Y - 1) * (divsX) + X)), yDist, getStretchStrength());
+                    p.attachTo((points.get((Y - 1) * (divsX) + X)), yDist, getStretchStrength());
                     //log.log(Level.INFO, "\nLINK-INFO\nOther Index: {0}, This Index: {1}\nLink Distance: {2}\nStiffness: {3}\n", new Object[]{((Y - 1) * (divsX) + X), points.indexOf(p),(height / divsY), stiffness});
                 }
                 //add to points
@@ -347,11 +363,11 @@ public class ClothMesh extends MeshView {
                     WeightedPoint p = points.get(Y * divsX + X);
                     // top left(xy) to right(xy + 1)
                     if (X < (divsX - 1) && Y < (divsY - 1)) {
-                        p.attatchTo((points.get(((Y + 1) * (divsX) + (X + 1)))), sqrt((xDist * xDist) + (yDist * yDist)), getShearStrength());
+                        p.attachTo((points.get(((Y + 1) * (divsX) + (X + 1)))), sqrt((xDist * xDist) + (yDist * yDist)), getShearStrength());
                     }
                     // index(xy) to left(x - 1(y + 1))
                     if (Y != 0 && X != (divsX - 1)) {
-                        p.attatchTo((points.get(((Y - 1) * divsX + (X + 1)))), sqrt((xDist * xDist) + (yDist * yDist)), getShearStrength());
+                        p.attachTo((points.get(((Y - 1) * divsX + (X + 1)))), sqrt((xDist * xDist) + (yDist * yDist)), getShearStrength());
                     }
                 }
             }
@@ -363,10 +379,10 @@ public class ClothMesh extends MeshView {
                     WeightedPoint p = points.get(Y * divsX + X);
                     //skip every other
                     if (X < (divsX - 2)) {
-                        p.attatchTo((points.get((Y * divsX + (X + 2)))), xDist * 2, getBendStrength());
+                        p.attachTo((points.get((Y * divsX + (X + 2)))), xDist * 2, getBendStrength());
                     }
                     if (Y < (divsY - 2)) {
-                        p.attatchTo((points.get((Y + 2) * divsX + X)), xDist * 2, getBendStrength());
+                        p.attachTo((points.get((Y + 2) * divsX + X)), xDist * 2, getBendStrength());
                     }
                     p.setOldPosition(p.getPosition());
                 }
@@ -795,7 +811,6 @@ public class ClothMesh extends MeshView {
 
         private long startTime, previousTime;
         private double deltaTime;
-        private final double fixedDeltaTime = 0.16;
         private int leftOverDeltaTime, timeStepAmt;
 
         private final NanoThreadFactory tf;
@@ -804,7 +819,7 @@ public class ClothMesh extends MeshView {
         public ClothTimer() {
             super();
 
-            this.setPeriod(Duration.millis(16));
+            this.setPeriod(Duration.millis(TIMER_PERIOD_MS));
 
             this.tf = new NanoThreadFactory();
             this.setExecutor(Executors.newSingleThreadExecutor(tf));
@@ -846,11 +861,11 @@ public class ClothMesh extends MeshView {
          * @return updates Timers clock values
          */
         private void updateTimer() {
-            deltaTime = (getTime() - previousTime) * (10.0f / ONE_NANO);
+            deltaTime = (getTime() - previousTime) * (PHYSICS_TIME_SCALE / ONE_NANO);
             previousTime = getTime();
-            timeStepAmt = (int) ((deltaTime + leftOverDeltaTime) / fixedDeltaTime);
-            timeStepAmt = Math.min(timeStepAmt, 5);
-            leftOverDeltaTime = (int) (deltaTime - (timeStepAmt * fixedDeltaTime));
+            timeStepAmt = (int) ((deltaTime + leftOverDeltaTime) / PHYSICS_FIXED_DELTA_TIME);
+            timeStepAmt = Math.min(timeStepAmt, PHYSICS_MAX_TIMESTEPS);
+            leftOverDeltaTime = (int) (deltaTime - (timeStepAmt * PHYSICS_FIXED_DELTA_TIME));
         }
 
         @Override
@@ -860,12 +875,12 @@ public class ClothMesh extends MeshView {
                 protected Void call() throws Exception {
                     updateTimer();
 
-                    // Apply edge forces - use sequential stream for thread safety
+                    // Apply edge forces - use sequential iteration for thread safety
                     // Physics simulation has dependencies between points
                     int divsX = getDivisionsX();
                     for (int i = 0; i < points.size(); i++) {
                         if (i % (divsX - 1) == 0) {
-                            points.get(i).applyForce(new Point3D(5, -1, 1));
+                            points.get(i).applyForce(EDGE_FORCE);
                         }
                     }
 
@@ -878,7 +893,7 @@ public class ClothMesh extends MeshView {
 
                     // Apply gravity and update physics sequentially
                     for (WeightedPoint p : points) {
-                        p.applyForce(new Point3D(4.8f, 1, -1));
+                        p.applyForce(GRAVITY_FORCE);
                         p.updatePhysics(deltaTime, 1);
                     }
 
@@ -939,7 +954,7 @@ public class ClothMesh extends MeshView {
 
         @Override
         public String toString() {
-            return "ClothTimer{" + "startTime=" + startTime + ", previousTime=" + previousTime + ", deltaTime=" + deltaTime + ", fixedDeltaTime=" + fixedDeltaTime + ", leftOverDeltaTime=" + leftOverDeltaTime + ", timeStepAmt=" + timeStepAmt + '}';
+            return "ClothTimer{" + "startTime=" + startTime + ", previousTime=" + previousTime + ", deltaTime=" + deltaTime + ", fixedDeltaTime=" + PHYSICS_FIXED_DELTA_TIME + ", leftOverDeltaTime=" + leftOverDeltaTime + ", timeStepAmt=" + timeStepAmt + '}';
         }
 
         /*==========================================================================

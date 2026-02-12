@@ -63,11 +63,11 @@ import org.fxyz3d.utils.CameraTransformer;
  * 
  * 
  * Following changes were made:
- *  replaced Affine with standard Rotate transforms for Camera rx, ry, rz with first person controls.
- *  extended ImageView directly (rather than nested node).
- *  changed constructors to accept a SubScene, or Group, and/or specified PerspectiveCamera ***ToDo
- *  
- * 
+ *  - Replaced Affine with standard Rotate transforms for Camera rx, ry, rz with first person controls.
+ *  - Extended ImageView directly (rather than nested node).
+ *  - Changed constructors to accept a SubScene, or Group, and/or specified PerspectiveCamera.
+ *
+ *
  * @author Dub
  */
 public final class CameraView extends ImageView {

@@ -50,7 +50,9 @@ public final class Importer3D {
      * @return array of extension filters for supported file formats.
      */
     public static String[] getSupportedFormatExtensionFilters() {
-        return new String[]{"*.ma", "*.ase", "*.obj", "*.fxml", "*.dae"};
+        return new String[]{"*.ma", "*.ase", "*.obj", "*.fxml", "*.stl", "*.gltf", "*.glb", "*.ply",
+                "*.off", "*.3ds", "*.dae", "*.x3d", "*.3mf", "*.wrl", "*.dxf",
+                "*.usd", "*.usda", "*.usdc", "*.usdz", "*.step", "*.stp", "*.iges", "*.igs"};
     }
 
     /**
@@ -111,11 +113,21 @@ public final class Importer3D {
         // Check well known loaders that might not be in a jar (ie. running from an IDE)
         if (importer == null) {
             String [] names = {
-//                 "org.fxyz3d.importers.dae.DaeImporter", // Not supported yet
-//                 "org.fxyz3d.importers.max.MaxLoader",   // Not supported yet
                  "org.fxyz3d.importers.maya.MayaImporter",
                  "org.fxyz3d.importers.obj.ObjImporter",
                  "org.fxyz3d.importers.fxml.FXMLImporter",
+                 "org.fxyz3d.importers.stl.StlImporter",
+                 "org.fxyz3d.importers.gltf.GltfImporter",
+                 "org.fxyz3d.importers.ply.PlyImporter",
+                 "org.fxyz3d.importers.off.OffImporter",
+                 "org.fxyz3d.importers.tds.TdsImporter",
+                 "org.fxyz3d.importers.dae.ColladaImporter",
+                 "org.fxyz3d.importers.x3d.X3dImporter",
+                 "org.fxyz3d.importers.threemf.ThreeMfImporter",
+                 "org.fxyz3d.importers.vrml.VrmlImporter",
+                 "org.fxyz3d.importers.dxf.DxfImporter",
+                 "org.fxyz3d.importers.usd.UsdImporter",
+                 "org.fxyz3d.importers.cad.CadImporter",
             };
             boolean fail = true;
             for (String name : names) {

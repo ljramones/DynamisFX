@@ -243,7 +243,7 @@ public class Skybox extends Group{
         double width = singleImg.getWidth(),
                height = singleImg.getHeight();
                
-        //simple chack to see if cells will be square
+        // Simple check to see if cells will be square
         if(width / 4 != height / 3){
             throw new UnsupportedOperationException("Image does not comply with size constraints");            
         }

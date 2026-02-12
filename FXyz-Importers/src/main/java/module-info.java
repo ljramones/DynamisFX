@@ -32,13 +32,25 @@ module org.fxyz3d.importers {
     requires transitive javafx.graphics;
     requires static javafx.fxml;
     requires java.logging;
-    
+
     opens org.fxyz3d.importers to javafx.fxml;
-    
+
     uses org.fxyz3d.importers.Importer;
-    
+
     exports org.fxyz3d.importers;
+    exports org.fxyz3d.importers.cad;
+    exports org.fxyz3d.importers.dae;
+    exports org.fxyz3d.importers.dxf;
     exports org.fxyz3d.importers.fxml;
+    exports org.fxyz3d.importers.gltf;
     exports org.fxyz3d.importers.maya;
     exports org.fxyz3d.importers.obj;
+    exports org.fxyz3d.importers.off;
+    exports org.fxyz3d.importers.ply;
+    exports org.fxyz3d.importers.stl;
+    exports org.fxyz3d.importers.tds;
+    exports org.fxyz3d.importers.threemf;
+    exports org.fxyz3d.importers.usd;
+    exports org.fxyz3d.importers.vrml;
+    exports org.fxyz3d.importers.x3d;
 }
