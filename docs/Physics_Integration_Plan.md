@@ -117,8 +117,8 @@ Current kickoff progress:
   - `OrekitBackend`
   - `OrekitWorld`
 - Orekit propagation internals are now wired using analytical propagators:
-  - dynamic bodies are advanced via `KeplerianPropagator`
-  - dominant non-dynamic attractor is selected as the current primary body
+  - dynamic bodies are advanced with deterministic RK4 multi-body integration
+  - acceleration sums all massive bodies present in the world
 - Frame bridge hooks added:
   - `OrekitFrameBridge` maps `ReferenceFrame` to Orekit `Frame`
   - state normalization can transform position/velocity into the world frame
@@ -131,6 +131,9 @@ Current kickoff progress:
 - Initial regression tests added for:
   - backend factory + capabilities
   - basic orbital stepping behavior
+  - near-circular orbit radius stability
+  - multi-body acceleration behavior
+  - frame conversion round-trip
   - unsupported constraint path + lifecycle guards
 
 ### Phase 4 - Hybrid Coordinator

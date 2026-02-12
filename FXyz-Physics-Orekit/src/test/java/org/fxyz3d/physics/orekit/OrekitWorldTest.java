@@ -118,4 +118,94 @@ class OrekitWorldTest {
         assertEquals(5.0, state.position().y(), 1e-9);
         assertEquals(5.0, state.timestampSeconds(), 1e-9);
     }
+
+    @Test
+    void usesAllMassiveBodiesForAcceleration() {
+        OrekitWorld world = new OrekitWorld(new PhysicsWorldConfiguration(
+                ReferenceFrame.ICRF,
+                PhysicsVector3.ZERO,
+                1.0));
+        world.createBody(new PhysicsBodyDefinition(
+                PhysicsBodyType.STATIC,
+                7.0e24,
+                new SphereShape(1.0),
+                new PhysicsBodyState(
+                        new PhysicsVector3(0.0, 0.0, 0.0),
+                        org.fxyz3d.physics.model.PhysicsQuaternion.IDENTITY,
+                        PhysicsVector3.ZERO,
+                        PhysicsVector3.ZERO,
+                        ReferenceFrame.ICRF,
+                        0.0)));
+        world.createBody(new PhysicsBodyDefinition(
+                PhysicsBodyType.STATIC,
+                7.0e24,
+                new SphereShape(1.0),
+                new PhysicsBodyState(
+                        new PhysicsVector3(0.0, 10_000_000.0, 0.0),
+                        org.fxyz3d.physics.model.PhysicsQuaternion.IDENTITY,
+                        PhysicsVector3.ZERO,
+                        PhysicsVector3.ZERO,
+                        ReferenceFrame.ICRF,
+                        0.0)));
+        PhysicsBodyHandle probe = world.createBody(new PhysicsBodyDefinition(
+                PhysicsBodyType.DYNAMIC,
+                1.0,
+                new SphereShape(1.0),
+                new PhysicsBodyState(
+                        new PhysicsVector3(10_000_000.0, 0.0, 0.0),
+                        org.fxyz3d.physics.model.PhysicsQuaternion.IDENTITY,
+                        PhysicsVector3.ZERO,
+                        PhysicsVector3.ZERO,
+                        ReferenceFrame.ICRF,
+                        0.0)));
+
+        world.step(20.0);
+        PhysicsBodyState state = world.getBodyState(probe);
+
+        assertTrue(state.linearVelocity().x() < 0.0);
+        assertTrue(state.linearVelocity().y() > 0.0);
+    }
+
+    @Test
+    void keepsNearCircularOrbitRadiusWithinTolerance() {
+        OrekitWorld world = new OrekitWorld(new PhysicsWorldConfiguration(
+                ReferenceFrame.ICRF,
+                PhysicsVector3.ZERO,
+                1.0));
+        double earthMass = 5.972e24;
+        double radius = 7_000_000.0;
+        double mu = OrekitWorld.UNIVERSAL_GRAVITATION * earthMass;
+        double circularSpeed = Math.sqrt(mu / radius);
+
+        world.createBody(new PhysicsBodyDefinition(
+                PhysicsBodyType.STATIC,
+                earthMass,
+                new SphereShape(6_371_000.0),
+                new PhysicsBodyState(
+                        PhysicsVector3.ZERO,
+                        org.fxyz3d.physics.model.PhysicsQuaternion.IDENTITY,
+                        PhysicsVector3.ZERO,
+                        PhysicsVector3.ZERO,
+                        ReferenceFrame.ICRF,
+                        0.0)));
+        PhysicsBodyHandle orbiter = world.createBody(new PhysicsBodyDefinition(
+                PhysicsBodyType.DYNAMIC,
+                500.0,
+                new SphereShape(1.0),
+                new PhysicsBodyState(
+                        new PhysicsVector3(radius, 0.0, 0.0),
+                        org.fxyz3d.physics.model.PhysicsQuaternion.IDENTITY,
+                        new PhysicsVector3(0.0, circularSpeed, 0.0),
+                        PhysicsVector3.ZERO,
+                        ReferenceFrame.ICRF,
+                        0.0)));
+
+        int steps = 5800;
+        for (int i = 0; i < steps; i++) {
+            world.step(1.0);
+        }
+        PhysicsBodyState state = world.getBodyState(orbiter);
+        double finalRadius = Math.hypot(state.position().x(), state.position().y());
+        assertTrue(Math.abs(finalRadius - radius) < 150_000.0);
+    }
 }

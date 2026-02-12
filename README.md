@@ -439,11 +439,11 @@ Phase 3 kickoff is also now in progress with:
 Current Orekit module scope/shortcomings:
 
 - It is an astrodynamics-oriented scaffold through the shared `PhysicsWorld` SPI.
-- It currently advances orbital bodies with Orekit analytical propagation (`KeplerianPropagator`) around a dominant primary attractor.
+- It currently advances orbital bodies with deterministic RK4 multi-body integration (all massive bodies can contribute).
 - It includes a frame bridge hook (`OrekitFrameBridge`) for `ReferenceFrame` to Orekit `Frame` mapping and state normalization.
 - Time scaling is available on `OrekitWorld` via `setTimeScale(...)` / `timeScale()`.
 - Constraint creation is intentionally unsupported in this backend.
-- Higher-fidelity multi-body and full frame/time-scale integration are still planned next in Phase 3.
+- Additional high-fidelity force models and deeper Orekit propagator abstractions are still planned next in Phase 3.
 
 Phase 4 kickoff is now in progress in `FXyz-Core` with a hybrid coordinator layer:
 

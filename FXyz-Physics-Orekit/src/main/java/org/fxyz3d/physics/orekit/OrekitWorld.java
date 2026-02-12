@@ -16,15 +16,7 @@ import org.fxyz3d.physics.model.PhysicsBodyType;
 import org.fxyz3d.physics.model.PhysicsRuntimeTuning;
 import org.fxyz3d.physics.model.PhysicsVector3;
 import org.fxyz3d.physics.model.PhysicsWorldConfiguration;
-import org.hipparchus.geometry.euclidean.threed.Vector3D;
-import org.orekit.frames.Frame;
-import org.orekit.orbits.CartesianOrbit;
-import org.orekit.orbits.Orbit;
-import org.orekit.propagation.Propagator;
-import org.orekit.propagation.SpacecraftState;
-import org.orekit.propagation.analytical.KeplerianPropagator;
 import org.orekit.time.AbsoluteDate;
-import org.orekit.utils.PVCoordinates;
 
 /**
  * Phase-3 astrodynamics world scaffold aligned to the backend-neutral SPI.
@@ -34,7 +26,6 @@ public final class OrekitWorld implements PhysicsWorld {
     static final double UNIVERSAL_GRAVITATION = 6.67430e-11;
 
     private final PhysicsWorldConfiguration configuration;
-    private final Frame orekitFrame;
     private final Map<PhysicsBodyHandle, BodyEntry> bodies = new LinkedHashMap<>();
     private long nextBodyHandle = 1L;
     private PhysicsRuntimeTuning runtimeTuning;
@@ -48,7 +39,6 @@ public final class OrekitWorld implements PhysicsWorld {
             throw new IllegalArgumentException("configuration must not be null");
         }
         this.configuration = configuration;
-        this.orekitFrame = OrekitFrameBridge.toOrekitFrame(configuration.referenceFrame());
         this.runtimeTuning = configuration.runtimeTuning();
     }
 
@@ -65,27 +55,14 @@ public final class OrekitWorld implements PhysicsWorld {
         }
         PhysicsBodyHandle handle = new PhysicsBodyHandle(nextBodyHandle++);
         PhysicsBodyState normalized = normalizeFrame(definition.initialState());
-        BodyEntry entry = new BodyEntry(definition, normalized);
-        bodies.put(handle, entry);
-        if (definition.bodyType() == PhysicsBodyType.DYNAMIC) {
-            configurePropagator(handle, entry);
-        }
+        bodies.put(handle, new BodyEntry(definition, normalized));
         return handle;
     }
 
     @Override
     public boolean removeBody(PhysicsBodyHandle handle) {
         ensureOpen();
-        boolean removed = bodies.remove(handle) != null;
-        if (removed) {
-            for (Map.Entry<PhysicsBodyHandle, BodyEntry> pair : bodies.entrySet()) {
-                BodyEntry entry = pair.getValue();
-                if (entry.primaryBody != null && entry.primaryBody.equals(handle)) {
-                    configurePropagator(pair.getKey(), entry);
-                }
-            }
-        }
-        return removed;
+        return bodies.remove(handle) != null;
     }
 
     @Override
@@ -106,9 +83,6 @@ public final class OrekitWorld implements PhysicsWorld {
         ensureOpen();
         BodyEntry entry = entryFor(handle);
         entry.state = normalizeFrame(state);
-        if (entry.definition.bodyType() == PhysicsBodyType.DYNAMIC) {
-            configurePropagator(handle, entry);
-        }
     }
 
     @Override
@@ -170,19 +144,21 @@ public final class OrekitWorld implements PhysicsWorld {
         simulationTimeSeconds += scaledDt;
         simulationDate = simulationDate.shiftedBy(scaledDt);
 
+        Map<PhysicsBodyHandle, PhysicsBodyState> currentStates = new LinkedHashMap<>();
+        for (Map.Entry<PhysicsBodyHandle, BodyEntry> pair : bodies.entrySet()) {
+            currentStates.put(pair.getKey(), pair.getValue().state);
+        }
+
         Map<PhysicsBodyHandle, PhysicsBodyState> nextStates = new LinkedHashMap<>();
         for (Map.Entry<PhysicsBodyHandle, BodyEntry> pair : bodies.entrySet()) {
             PhysicsBodyHandle handle = pair.getKey();
             BodyEntry body = pair.getValue();
-            PhysicsBodyState current = body.state;
-            if (body.definition.bodyType() == PhysicsBodyType.DYNAMIC) {
-                configurePropagator(handle, body);
-            }
+            PhysicsBodyState current = currentStates.get(handle);
 
             PhysicsBodyState next = switch (body.definition.bodyType()) {
                 case STATIC -> advanceTimestamp(current, scaledDt);
                 case KINEMATIC -> integrateKinematic(current, scaledDt);
-                case DYNAMIC -> integrateDynamic(handle, current, scaledDt);
+                case DYNAMIC -> integrateDynamic(handle, current, scaledDt, currentStates);
             };
             nextStates.put(handle, next);
         }
@@ -201,29 +177,34 @@ public final class OrekitWorld implements PhysicsWorld {
     private PhysicsBodyState integrateDynamic(
             PhysicsBodyHandle self,
             PhysicsBodyState current,
-            double dtSeconds) {
-        BodyEntry body = entryFor(self);
-        if (body.propagator == null) {
-            return integrateKinematic(current, dtSeconds);
-        }
+            double dtSeconds,
+            Map<PhysicsBodyHandle, PhysicsBodyState> states) {
+        PhysicsVector3 p0 = current.position();
+        PhysicsVector3 v0 = current.linearVelocity();
 
-        SpacecraftState propagated = body.propagator.propagate(simulationDate);
-        PVCoordinates relativePv = propagated.getPVCoordinates(orekitFrame);
-        PhysicsBodyState primaryState = body.primaryBody == null
-                ? null
-                : entryFor(body.primaryBody).state;
+        PhysicsVector3 k1p = v0;
+        PhysicsVector3 k1v = sumAcceleration(self, p0, states);
 
-        Vector3D absolutePos = relativePv.getPosition();
-        Vector3D absoluteVel = relativePv.getVelocity();
-        if (primaryState != null) {
-            absolutePos = absolutePos.add(OrekitFrameBridge.toVector(primaryState.position()));
-            absoluteVel = absoluteVel.add(OrekitFrameBridge.toVector(primaryState.linearVelocity()));
-        }
+        PhysicsVector3 k2p = add(v0, scale(k1v, 0.5 * dtSeconds));
+        PhysicsVector3 k2v = sumAcceleration(self, add(p0, scale(k1p, 0.5 * dtSeconds)), states);
+
+        PhysicsVector3 k3p = add(v0, scale(k2v, 0.5 * dtSeconds));
+        PhysicsVector3 k3v = sumAcceleration(self, add(p0, scale(k2p, 0.5 * dtSeconds)), states);
+
+        PhysicsVector3 k4p = add(v0, scale(k3v, dtSeconds));
+        PhysicsVector3 k4v = sumAcceleration(self, add(p0, scale(k3p, dtSeconds)), states);
+
+        PhysicsVector3 nextPosition = add(p0, scale(
+                add(add(k1p, scale(add(k2p, k3p), 2.0)), k4p),
+                dtSeconds / 6.0));
+        PhysicsVector3 nextVelocity = add(v0, scale(
+                add(add(k1v, scale(add(k2v, k3v), 2.0)), k4v),
+                dtSeconds / 6.0));
 
         return new PhysicsBodyState(
-                OrekitFrameBridge.toPhysics(absolutePos),
+                nextPosition,
                 current.orientation(),
-                OrekitFrameBridge.toPhysics(absoluteVel),
+                nextVelocity,
                 current.angularVelocity(),
                 configuration.referenceFrame(),
                 simulationTimeSeconds);
@@ -285,8 +266,6 @@ public final class OrekitWorld implements PhysicsWorld {
     private static final class BodyEntry {
         private final PhysicsBodyDefinition definition;
         private PhysicsBodyState state;
-        private PhysicsBodyHandle primaryBody;
-        private Propagator propagator;
 
         private BodyEntry(PhysicsBodyDefinition definition, PhysicsBodyState state) {
             this.definition = definition;
@@ -294,59 +273,40 @@ public final class OrekitWorld implements PhysicsWorld {
         }
     }
 
-    private void configurePropagator(PhysicsBodyHandle self, BodyEntry entry) {
-        PrimaryAttractor primary = resolvePrimaryAttractor(self);
-        if (primary == null) {
-            entry.primaryBody = null;
-            entry.propagator = null;
-            return;
-        }
-
-        PhysicsVector3 primaryPos = primary.state.position();
-        PhysicsVector3 primaryVel = primary.state.linearVelocity();
-        PhysicsVector3 relPos = new PhysicsVector3(
-                entry.state.position().x() - primaryPos.x(),
-                entry.state.position().y() - primaryPos.y(),
-                entry.state.position().z() - primaryPos.z());
-        PhysicsVector3 relVel = new PhysicsVector3(
-                entry.state.linearVelocity().x() - primaryVel.x(),
-                entry.state.linearVelocity().y() - primaryVel.y(),
-                entry.state.linearVelocity().z() - primaryVel.z());
-
-        Orbit orbit = new CartesianOrbit(
-                OrekitFrameBridge.toPV(relPos, relVel),
-                orekitFrame,
-                simulationDate,
-                primary.mu);
-        entry.primaryBody = primary.handle;
-        entry.propagator = new KeplerianPropagator(orbit);
-    }
-
-    private PrimaryAttractor resolvePrimaryAttractor(PhysicsBodyHandle self) {
-        PhysicsBodyHandle bestHandle = null;
-        PhysicsBodyState bestState = null;
-        double bestMass = 0.0;
+    private PhysicsVector3 sumAcceleration(
+            PhysicsBodyHandle self,
+            PhysicsVector3 position,
+            Map<PhysicsBodyHandle, PhysicsBodyState> states) {
+        PhysicsVector3 gravity = configuration.gravity();
+        double ax = gravity.x();
+        double ay = gravity.y();
+        double az = gravity.z();
         for (Map.Entry<PhysicsBodyHandle, BodyEntry> pair : bodies.entrySet()) {
             if (pair.getKey().equals(self)) {
                 continue;
             }
-            BodyEntry candidate = pair.getValue();
-            if (candidate.definition.bodyType() == PhysicsBodyType.DYNAMIC) {
+            double mass = pair.getValue().definition.massKg();
+            if (!(mass > 0.0)) {
                 continue;
             }
-            double mass = candidate.definition.massKg();
-            if (mass > bestMass) {
-                bestMass = mass;
-                bestHandle = pair.getKey();
-                bestState = candidate.state;
+            PhysicsBodyState other = states.get(pair.getKey());
+            if (other == null) {
+                continue;
             }
+            double dx = other.position().x() - position.x();
+            double dy = other.position().y() - position.y();
+            double dz = other.position().z() - position.z();
+            double r2 = dx * dx + dy * dy + dz * dz;
+            if (r2 < 1e-6) {
+                continue;
+            }
+            double invR = 1.0 / Math.sqrt(r2);
+            double invR3 = invR * invR * invR;
+            double scale = UNIVERSAL_GRAVITATION * mass * invR3;
+            ax += dx * scale;
+            ay += dy * scale;
+            az += dz * scale;
         }
-        if (!(bestMass > 0.0)) {
-            return null;
-        }
-        return new PrimaryAttractor(bestHandle, bestState, UNIVERSAL_GRAVITATION * bestMass);
-    }
-
-    private record PrimaryAttractor(PhysicsBodyHandle handle, PhysicsBodyState state, double mu) {
+        return new PhysicsVector3(ax, ay, az);
     }
 }
