@@ -93,4 +93,11 @@ public interface FXyzSample {
      */
     public boolean isVisible();
 
+    /**
+     * @return Optional transform gizmo controls for this sample, if supported.
+     */
+    default SampleGizmoSupport getGizmoSupport() {
+        return null;
+    }
+
 }

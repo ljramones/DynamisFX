@@ -50,6 +50,8 @@ import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
@@ -70,6 +72,7 @@ import javafx.stage.StageStyle;
 import javafx.util.Callback;
 import org.fxyz3d.FXyzSample;
 import org.fxyz3d.FXyzSampleBase;
+import org.fxyz3d.SampleGizmoSupport;
 import org.fxyz3d.model.EmptySample;
 import org.fxyz3d.model.Project;
 import org.fxyz3d.model.SampleTree;
@@ -104,6 +107,8 @@ public class FXyzClient extends Application {
     private Stage stage;
     private FXyzSample selectedSample;
     private TextField searchBar;
+    private CheckBox gizmoEnabled;
+    private ComboBox<SampleGizmoSupport.Mode> gizmoMode;
     private TreeView<FXyzSample> contentTree;
     private TreeItem<FXyzSample> root;
 
@@ -155,6 +160,17 @@ public class FXyzClient extends Application {
         ab.setOnAction(e->{
             client.setPinnedSide(null);
         });
+
+        gizmoEnabled = new CheckBox("Gizmo");
+        gizmoEnabled.setFocusTraversable(false);
+        gizmoEnabled.setSelected(true);
+        gizmoEnabled.selectedProperty().addListener((obs, oldValue, newValue) -> applyGizmoSettings());
+
+        gizmoMode = new ComboBox<>();
+        gizmoMode.setFocusTraversable(false);
+        gizmoMode.getItems().setAll(SampleGizmoSupport.Mode.values());
+        gizmoMode.setValue(SampleGizmoSupport.Mode.ALL);
+        gizmoMode.valueProperty().addListener((obs, oldValue, newValue) -> applyGizmoSettings());
         
         contentTree = new TreeView<>(root);
         contentTree.getStyleClass().add("fxyz3d-control");
@@ -185,15 +201,17 @@ public class FXyzClient extends Application {
                 Project selectedProject = projectsMap.get(selectedSample1.getSampleName());
                 LOG.log(Level.FINE, "Selected project {0}", selectedProject);
                 if (selectedProject != null) {
+                    selectedSample = null;
                     changeToWelcomePage(selectedProject.getWelcomePage());
                 }
+                syncGizmoControls();
                 return;
             }
             selectedSample = newSample.getValue();
             changeContent();
         });
         contentTree.setFocusTraversable(false);
-        leftSideContent.getChildren().addAll(new HBox(searchBar, ab),contentTree);       
+        leftSideContent.getChildren().addAll(new HBox(searchBar, gizmoEnabled, gizmoMode, ab),contentTree);
         VBox.setVgrow(contentTree, Priority.ALWAYS);
 
         client = new HiddenSidesClient();
@@ -212,6 +230,7 @@ public class FXyzClient extends Application {
         } else {
             changeToWelcomePage(null);
         }
+        syncGizmoControls();
 
         Scene scene = new Scene(frame, INITIAL_WINDOW_WIDTH, INITIAL_WINDOW_HEIGHT);
         scene.setFill(Color.TRANSPARENT);
@@ -326,6 +345,7 @@ public class FXyzClient extends Application {
             wPage = getDefaultWelcomePage();
         }
         centerContent.getChildren().addAll(wPage.getContent());
+        syncGizmoControls();
     }
 
     private WelcomePage getDefaultWelcomePage() {
@@ -355,6 +375,7 @@ public class FXyzClient extends Application {
         }
 
         updateContent();
+        syncGizmoControls();
     }
 
     private void updateContent() {
@@ -465,6 +486,26 @@ public class FXyzClient extends Application {
 
         String template = getResource("/org/fxyz3d/util/CssTemplate.html", null);
         return template.replace("<source/>", src);
+    }
+
+    private void syncGizmoControls() {
+        SampleGizmoSupport support = selectedSample == null ? null : selectedSample.getGizmoSupport();
+        boolean available = support != null;
+        gizmoEnabled.setDisable(!available);
+        gizmoMode.setDisable(!available);
+        if (available) {
+            applyGizmoSettings();
+        }
+    }
+
+    private void applyGizmoSettings() {
+        SampleGizmoSupport support = selectedSample == null ? null : selectedSample.getGizmoSupport();
+        if (support == null) {
+            return;
+        }
+        support.setEnabled(gizmoEnabled.isSelected());
+        SampleGizmoSupport.Mode mode = gizmoMode.getValue();
+        support.setMode(mode == null ? SampleGizmoSupport.Mode.ALL : mode);
     }
 
     public static void main(String[] args) {

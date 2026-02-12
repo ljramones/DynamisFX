@@ -76,7 +76,10 @@ public class SelectableGroup3D extends Group {
      * Override when you need custom selection filtering.
      */
     protected boolean isSelectablePickTarget(Node node) {
-        return node != null && node != this && !(node instanceof Group);
+        return node != null
+                && node != this
+                && !(node instanceof Group)
+                && !Boolean.TRUE.equals(node.getProperties().get(TransformGizmo3D.HANDLE_PROPERTY_KEY));
     }
 
     private void installSelectionHandler() {
@@ -88,4 +91,3 @@ public class SelectableGroup3D extends Group {
         removeEventHandler(javafx.scene.input.MouseEvent.MOUSE_CLICKED, selectionHandler);
     }
 }
-

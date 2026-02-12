@@ -74,7 +74,10 @@ import org.fxmisc.easybind.Subscription;
 import org.fxyz3d.client.ModelInfoTracker;
 import org.fxyz3d.controls.ControlPanel;
 import org.fxyz3d.controls.factory.ControlFactory;
+import org.fxyz3d.SampleGizmoSupport;
 import org.fxyz3d.samples.FXyzSample;
+import org.fxyz3d.samples.utilities.SceneGizmoController;
+import org.fxyz3d.scene.selection.TransformGizmo3D;
 import org.fxyz3d.scene.Skybox;
 import org.fxyz3d.shapes.primitives.Text3DMesh;
 import org.fxyz3d.shapes.primitives.TexturedMesh;
@@ -132,6 +135,8 @@ public abstract class ShapeBaseSample<T extends Node> extends FXyzSample {
     private Vec3d vecIni, vecPos;
     private double distance;
     private Sphere sphere;
+    private SceneGizmoController sceneGizmoController;
+    private SampleGizmoSupport sampleGizmoSupport;
 
     //Bindings..
     Subscription modelWidthBinder, modelHeightBinder, modelDepthBinder;
@@ -149,6 +154,7 @@ public abstract class ShapeBaseSample<T extends Node> extends FXyzSample {
         buildSkybox();
         buildModelContainer();
         buildSubScene();
+        buildSceneGizmoController();
         buildSubScenePane();
         buildParentPane();
 
@@ -373,6 +379,41 @@ public abstract class ShapeBaseSample<T extends Node> extends FXyzSample {
 
     }
 
+    private void buildSceneGizmoController() {
+        sceneGizmoController = new SceneGizmoController(
+                root,
+                subScene,
+                node -> node instanceof Shape3D && isDescendantOf(node, group)
+        );
+        sceneGizmoController.setMode(TransformGizmo3D.Mode.ALL);
+        sceneGizmoController.setEnabled(true);
+        sampleGizmoSupport = new SampleGizmoSupport() {
+            @Override
+            public void setEnabled(boolean enabled) {
+                sceneGizmoController.setEnabled(enabled);
+            }
+
+            @Override
+            public void setMode(Mode mode) {
+                if (mode == null) {
+                    return;
+                }
+                sceneGizmoController.setMode(TransformGizmo3D.Mode.valueOf(mode.name()));
+            }
+        };
+    }
+
+    private boolean isDescendantOf(Node node, Node ancestor) {
+        Node current = node;
+        while (current != null) {
+            if (current == ancestor) {
+                return true;
+            }
+            current = current.getParent();
+        }
+        return false;
+    }
+
     private void buildParentPane() {
         parentPane = new HiddenSidesPane();
         modelInfo = new ModelInfoTracker(parentPane);
@@ -534,6 +575,15 @@ public abstract class ShapeBaseSample<T extends Node> extends FXyzSample {
 
     protected Scene getScene() {
         return subScene.getScene();
+    }
+
+    protected SceneGizmoController getSceneGizmoController() {
+        return sceneGizmoController;
+    }
+
+    @Override
+    public SampleGizmoSupport getGizmoSupport() {
+        return sampleGizmoSupport;
     }
 
     /*
