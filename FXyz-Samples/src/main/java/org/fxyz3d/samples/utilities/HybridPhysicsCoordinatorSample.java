@@ -28,6 +28,7 @@ import org.fxyz3d.physics.ode4j.Ode4jBackendFactory;
 import org.fxyz3d.physics.orekit.OrekitBackendFactory;
 import org.fxyz3d.physics.orekit.OrekitWorld;
 import org.fxyz3d.physics.step.FixedStepAccumulator;
+import org.fxyz3d.physics.step.FixedStepResult;
 import org.fxyz3d.samples.shapes.ShapeBaseSample;
 
 /**
@@ -86,7 +87,10 @@ public class HybridPhysicsCoordinatorSample extends ShapeBaseSample<Group> {
                 }
                 double dt = Math.min((now - lastNanos) * 1.0e-9, 0.1);
                 lastNanos = now;
-                accumulator.advance(dt, coordinator::step);
+                FixedStepResult stepResult = accumulator.advance(dt, coordinator::step);
+                coordinator.updateRenderMetadata(
+                        stepResult.interpolationAlpha(),
+                        stepResult.accumulatedRemainderSeconds());
 
                 HybridSnapshot snapshot = coordinator.latestSnapshot();
                 if (snapshot != null) {

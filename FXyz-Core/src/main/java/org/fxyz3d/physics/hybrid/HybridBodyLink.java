@@ -11,7 +11,9 @@ public record HybridBodyLink(
         HybridOwnership ownership,
         StateHandoffMode handoffMode,
         ConflictPolicy conflictPolicy,
-        double maxPositionDivergenceMeters) {
+        double maxPositionDivergenceMeters,
+        double maxLinearVelocityDivergenceMetersPerSecond,
+        double maxAngularVelocityDivergenceRadiansPerSecond) {
 
     public HybridBodyLink(
             PhysicsBodyHandle generalBody,
@@ -24,6 +26,26 @@ public record HybridBodyLink(
                 ownership,
                 handoffMode,
                 ConflictPolicy.OVERWRITE,
+                Double.POSITIVE_INFINITY,
+                Double.POSITIVE_INFINITY,
+                Double.POSITIVE_INFINITY);
+    }
+
+    public HybridBodyLink(
+            PhysicsBodyHandle generalBody,
+            PhysicsBodyHandle orbitalBody,
+            HybridOwnership ownership,
+            StateHandoffMode handoffMode,
+            ConflictPolicy conflictPolicy,
+            double maxPositionDivergenceMeters) {
+        this(
+                generalBody,
+                orbitalBody,
+                ownership,
+                handoffMode,
+                conflictPolicy,
+                maxPositionDivergenceMeters,
+                Double.POSITIVE_INFINITY,
                 Double.POSITIVE_INFINITY);
     }
 
@@ -33,9 +55,19 @@ public record HybridBodyLink(
             throw new IllegalArgumentException(
                     "generalBody, orbitalBody, ownership, handoffMode and conflictPolicy must not be null");
         }
-        if (!(maxPositionDivergenceMeters >= 0.0)
-                || (Double.isNaN(maxPositionDivergenceMeters))) {
+        if (!isValidThreshold(maxPositionDivergenceMeters)) {
             throw new IllegalArgumentException("maxPositionDivergenceMeters must be >= 0 and not NaN");
         }
+        if (!isValidThreshold(maxLinearVelocityDivergenceMetersPerSecond)) {
+            throw new IllegalArgumentException("maxLinearVelocityDivergenceMetersPerSecond must be >= 0 and not NaN");
+        }
+        if (!isValidThreshold(maxAngularVelocityDivergenceRadiansPerSecond)) {
+            throw new IllegalArgumentException(
+                    "maxAngularVelocityDivergenceRadiansPerSecond must be >= 0 and not NaN");
+        }
+    }
+
+    private static boolean isValidThreshold(double value) {
+        return value >= 0.0 && !Double.isNaN(value);
     }
 }

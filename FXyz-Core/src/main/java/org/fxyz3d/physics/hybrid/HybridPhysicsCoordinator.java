@@ -19,7 +19,7 @@ public final class HybridPhysicsCoordinator {
     private final PhysicsWorld generalWorld;
     private final PhysicsWorld orbitalWorld;
     private final AtomicLong nextLinkId = new AtomicLong(1L);
-    private final Map<Long, HybridBodyLink> links = new LinkedHashMap<>();
+    private final Map<Long, LinkRuntime> links = new LinkedHashMap<>();
     private final AtomicReference<HybridSnapshot> latestSnapshot = new AtomicReference<>();
     private double simulationTimeSeconds;
     private double lastStepSeconds;
@@ -39,7 +39,7 @@ public final class HybridPhysicsCoordinator {
             throw new IllegalArgumentException("orbitalBody is not present in orbitalWorld: " + link.orbitalBody());
         }
         long id = nextLinkId.getAndIncrement();
-        links.put(id, link);
+        links.put(id, new LinkRuntime(link));
         return id;
     }
 
@@ -47,8 +47,71 @@ public final class HybridPhysicsCoordinator {
         return links.remove(linkId) != null;
     }
 
+    public boolean setLinkEnabled(long linkId, boolean enabled) {
+        LinkRuntime runtime = links.get(linkId);
+        if (runtime == null) {
+            return false;
+        }
+        runtime.enabled = enabled;
+        return true;
+    }
+
+    public boolean isLinkEnabled(long linkId) {
+        LinkRuntime runtime = links.get(linkId);
+        return runtime != null && runtime.enabled;
+    }
+
+    public boolean updateLink(long linkId, HybridBodyLink replacement) {
+        Objects.requireNonNull(replacement, "replacement must not be null");
+        LinkRuntime runtime = links.get(linkId);
+        if (runtime == null) {
+            return false;
+        }
+        runtime.link = replacement;
+        return true;
+    }
+
+    public int removeLinksForBody(PhysicsBodyHandle handle) {
+        int removed = 0;
+        java.util.Iterator<Map.Entry<Long, LinkRuntime>> iterator = links.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Long, LinkRuntime> pair = iterator.next();
+            HybridBodyLink link = pair.getValue().link;
+            if (link.generalBody().equals(handle) || link.orbitalBody().equals(handle)) {
+                iterator.remove();
+                removed++;
+            }
+        }
+        return removed;
+    }
+
+    public void clearLinks() {
+        links.clear();
+    }
+
     public Collection<HybridBodyLink> links() {
-        return new ArrayList<>(links.values());
+        ArrayList<HybridBodyLink> result = new ArrayList<>(links.size());
+        for (LinkRuntime runtime : links.values()) {
+            result.add(runtime.link);
+        }
+        return result;
+    }
+
+    public Collection<HybridLinkDiagnostics> linkDiagnostics() {
+        ArrayList<HybridLinkDiagnostics> result = new ArrayList<>(links.size());
+        for (Map.Entry<Long, LinkRuntime> pair : links.entrySet()) {
+            LinkRuntime runtime = pair.getValue();
+            result.add(new HybridLinkDiagnostics(
+                    pair.getKey(),
+                    runtime.link,
+                    runtime.enabled,
+                    runtime.rejectedCount,
+                    runtime.lastPositionErrorMeters,
+                    runtime.lastLinearVelocityErrorMetersPerSecond,
+                    runtime.lastAngularVelocityErrorRadiansPerSecond,
+                    runtime.lastHandoffTimeSeconds));
+        }
+        return result;
     }
 
     public HybridSnapshot latestSnapshot() {
@@ -60,60 +123,89 @@ public final class HybridPhysicsCoordinator {
     }
 
     public HybridSnapshot step(double dtSeconds) {
+        return step(dtSeconds, 0.0, dtSeconds);
+    }
+
+    public HybridSnapshot step(double dtSeconds, double interpolationAlpha, double extrapolationSeconds) {
         if (!(dtSeconds > 0.0) || !Double.isFinite(dtSeconds)) {
             throw new IllegalArgumentException("dtSeconds must be > 0 and finite");
         }
+        validateRenderMetadata(interpolationAlpha, extrapolationSeconds);
 
         orbitalWorld.step(dtSeconds);
         generalWorld.step(dtSeconds);
 
         lastRejectedHandoffs = 0;
-        for (HybridBodyLink link : links.values()) {
-            applyHandoff(link);
+        for (LinkRuntime runtime : links.values()) {
+            if (!runtime.enabled) {
+                continue;
+            }
+            applyHandoff(runtime);
         }
 
         simulationTimeSeconds += dtSeconds;
         lastStepSeconds = dtSeconds;
-        HybridSnapshot snapshot = captureSnapshot();
+        HybridSnapshot snapshot = captureSnapshot(interpolationAlpha, extrapolationSeconds);
         latestSnapshot.set(snapshot);
         return snapshot;
+    }
+
+    public HybridSnapshot updateRenderMetadata(double interpolationAlpha, double extrapolationSeconds) {
+        validateRenderMetadata(interpolationAlpha, extrapolationSeconds);
+        HybridSnapshot current = latestSnapshot.get();
+        if (current == null) {
+            return null;
+        }
+        HybridSnapshot updated = new HybridSnapshot(
+                current.simulationTimeSeconds(),
+                interpolationAlpha,
+                extrapolationSeconds,
+                current.generalStates(),
+                current.orbitalStates());
+        latestSnapshot.set(updated);
+        return updated;
     }
 
     public int lastRejectedHandoffs() {
         return lastRejectedHandoffs;
     }
 
-    private void applyHandoff(HybridBodyLink link) {
+    private void applyHandoff(LinkRuntime runtime) {
+        HybridBodyLink link = runtime.link;
         PhysicsBodyState ownerState;
         PhysicsBodyState followerState;
         if (link.ownership() == HybridOwnership.GENERAL) {
             ownerState = generalWorld.getBodyState(link.generalBody());
             followerState = orbitalWorld.getBodyState(link.orbitalBody());
-            if (shouldReject(ownerState, followerState, link)) {
+            updateDiagnostics(runtime, ownerState, followerState);
+            if (shouldReject(runtime, link)) {
                 lastRejectedHandoffs++;
+                runtime.rejectedCount++;
                 return;
             }
             orbitalWorld.setBodyState(link.orbitalBody(), mergeState(ownerState, followerState, link.handoffMode()));
         } else {
             ownerState = orbitalWorld.getBodyState(link.orbitalBody());
             followerState = generalWorld.getBodyState(link.generalBody());
-            if (shouldReject(ownerState, followerState, link)) {
+            updateDiagnostics(runtime, ownerState, followerState);
+            if (shouldReject(runtime, link)) {
                 lastRejectedHandoffs++;
+                runtime.rejectedCount++;
                 return;
             }
             generalWorld.setBodyState(link.generalBody(), mergeState(ownerState, followerState, link.handoffMode()));
         }
+        runtime.lastHandoffTimeSeconds = simulationTimeSeconds + lastStepSeconds;
     }
 
-    private boolean shouldReject(PhysicsBodyState ownerState, PhysicsBodyState followerState, HybridBodyLink link) {
+    private boolean shouldReject(LinkRuntime runtime, HybridBodyLink link) {
         if (link.conflictPolicy() != ConflictPolicy.REJECT_ON_DIVERGENCE) {
             return false;
         }
-        double dx = ownerState.position().x() - followerState.position().x();
-        double dy = ownerState.position().y() - followerState.position().y();
-        double dz = ownerState.position().z() - followerState.position().z();
-        double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        return distance > link.maxPositionDivergenceMeters();
+        return runtime.lastPositionErrorMeters > link.maxPositionDivergenceMeters()
+                || runtime.lastLinearVelocityErrorMetersPerSecond > link.maxLinearVelocityDivergenceMetersPerSecond()
+                || runtime.lastAngularVelocityErrorRadiansPerSecond
+                > link.maxAngularVelocityDivergenceRadiansPerSecond();
     }
 
     private PhysicsBodyState mergeState(
@@ -138,7 +230,7 @@ public final class HybridPhysicsCoordinator {
         };
     }
 
-    private HybridSnapshot captureSnapshot() {
+    private HybridSnapshot captureSnapshot(double interpolationAlpha, double extrapolationSeconds) {
         Map<PhysicsBodyHandle, PhysicsBodyState> generalStates = new LinkedHashMap<>();
         for (PhysicsBodyHandle handle : generalWorld.bodies()) {
             generalStates.put(handle, generalWorld.getBodyState(handle));
@@ -149,9 +241,45 @@ public final class HybridPhysicsCoordinator {
         }
         return new HybridSnapshot(
                 simulationTimeSeconds,
-                0.0,
-                lastStepSeconds,
+                interpolationAlpha,
+                extrapolationSeconds,
                 generalStates,
                 orbitalStates);
+    }
+
+    private static void validateRenderMetadata(double interpolationAlpha, double extrapolationSeconds) {
+        if (!Double.isFinite(interpolationAlpha) || interpolationAlpha < 0.0 || interpolationAlpha > 1.0) {
+            throw new IllegalArgumentException("interpolationAlpha must be finite in [0,1]");
+        }
+        if (!Double.isFinite(extrapolationSeconds) || extrapolationSeconds < 0.0) {
+            throw new IllegalArgumentException("extrapolationSeconds must be finite and >= 0");
+        }
+    }
+
+    private static void updateDiagnostics(LinkRuntime runtime, PhysicsBodyState owner, PhysicsBodyState follower) {
+        runtime.lastPositionErrorMeters = distance(owner.position(), follower.position());
+        runtime.lastLinearVelocityErrorMetersPerSecond = distance(owner.linearVelocity(), follower.linearVelocity());
+        runtime.lastAngularVelocityErrorRadiansPerSecond = distance(owner.angularVelocity(), follower.angularVelocity());
+    }
+
+    private static double distance(org.fxyz3d.physics.model.PhysicsVector3 a, org.fxyz3d.physics.model.PhysicsVector3 b) {
+        double dx = a.x() - b.x();
+        double dy = a.y() - b.y();
+        double dz = a.z() - b.z();
+        return Math.sqrt(dx * dx + dy * dy + dz * dz);
+    }
+
+    private static final class LinkRuntime {
+        private HybridBodyLink link;
+        private boolean enabled = true;
+        private long rejectedCount;
+        private double lastPositionErrorMeters;
+        private double lastLinearVelocityErrorMetersPerSecond;
+        private double lastAngularVelocityErrorRadiansPerSecond;
+        private double lastHandoffTimeSeconds;
+
+        private LinkRuntime(HybridBodyLink link) {
+            this.link = link;
+        }
     }
 }

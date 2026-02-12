@@ -453,9 +453,18 @@ Phase 4 kickoff is now in progress in `FXyz-Core` with a hybrid coordinator laye
 - conflict handling via `ConflictPolicy`
 - thread-safe combined snapshots via `HybridSnapshot`
 - per-link divergence thresholds with reject-on-divergence policy
+- divergence checks support position, linear velocity, and angular velocity
+- link lifecycle controls:
+  - enable/disable
+  - relink/update
+  - remove by body / clear links
+- diagnostics:
+  - `HybridLinkDiagnostics` for rejection counts and latest divergence metrics
 - render metadata in snapshots:
   - interpolation alpha
   - extrapolation seconds
+- runtime render metadata update API:
+  - `updateRenderMetadata(interpolationAlpha, extrapolationSeconds)`
 
 Sample wiring:
 

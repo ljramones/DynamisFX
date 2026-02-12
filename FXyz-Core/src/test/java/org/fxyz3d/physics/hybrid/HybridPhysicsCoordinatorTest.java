@@ -1,8 +1,10 @@
 package org.fxyz3d.physics.hybrid;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -176,6 +178,114 @@ class HybridPhysicsCoordinatorTest {
         PhysicsBodyState currentGeneral = general.getBodyState(generalBody);
         assertEquals(0.0, currentGeneral.position().x(), 1e-9);
         assertEquals(1, coordinator.lastRejectedHandoffs());
+    }
+
+    @Test
+    void rejectsOnVelocityAndAngularDivergenceWhenConfigured() {
+        FakeWorld general = new FakeWorld();
+        FakeWorld orbital = new FakeWorld();
+        HybridPhysicsCoordinator coordinator = new HybridPhysicsCoordinator(general, orbital);
+
+        PhysicsBodyHandle generalBody = general.createBody(new PhysicsBodyDefinition(
+                PhysicsBodyType.DYNAMIC, 1.0, new BoxShape(1, 1, 1),
+                new PhysicsBodyState(
+                        PhysicsVector3.ZERO,
+                        PhysicsQuaternion.IDENTITY,
+                        PhysicsVector3.ZERO,
+                        PhysicsVector3.ZERO,
+                        ReferenceFrame.WORLD,
+                        0.0)));
+        PhysicsBodyHandle orbitalBody = orbital.createBody(new PhysicsBodyDefinition(
+                PhysicsBodyType.DYNAMIC, 1.0, new BoxShape(1, 1, 1),
+                new PhysicsBodyState(
+                        PhysicsVector3.ZERO,
+                        PhysicsQuaternion.IDENTITY,
+                        new PhysicsVector3(50.0, 0.0, 0.0),
+                        new PhysicsVector3(0.0, 10.0, 0.0),
+                        ReferenceFrame.WORLD,
+                        0.0)));
+
+        coordinator.registerLink(new HybridBodyLink(
+                generalBody,
+                orbitalBody,
+                HybridOwnership.ORBITAL,
+                StateHandoffMode.FULL_STATE,
+                ConflictPolicy.REJECT_ON_DIVERGENCE,
+                Double.POSITIVE_INFINITY,
+                1.0,
+                1.0));
+        coordinator.step(0.1);
+
+        PhysicsBodyState currentGeneral = general.getBodyState(generalBody);
+        assertEquals(0.0, currentGeneral.linearVelocity().x(), 1e-9);
+        assertEquals(1, coordinator.lastRejectedHandoffs());
+    }
+
+    @Test
+    void supportsLinkLifecycleAndDiagnostics() {
+        FakeWorld general = new FakeWorld();
+        FakeWorld orbital = new FakeWorld();
+        HybridPhysicsCoordinator coordinator = new HybridPhysicsCoordinator(general, orbital);
+
+        PhysicsBodyHandle generalBody = general.createBody(new PhysicsBodyDefinition(
+                PhysicsBodyType.DYNAMIC, 1.0, new BoxShape(1, 1, 1), PhysicsBodyState.IDENTITY));
+        PhysicsBodyHandle orbitalBody = orbital.createBody(new PhysicsBodyDefinition(
+                PhysicsBodyType.DYNAMIC, 1.0, new BoxShape(1, 1, 1), PhysicsBodyState.IDENTITY));
+
+        long linkId = coordinator.registerLink(new HybridBodyLink(
+                generalBody, orbitalBody, HybridOwnership.ORBITAL, StateHandoffMode.FULL_STATE));
+
+        assertTrue(coordinator.isLinkEnabled(linkId));
+        assertTrue(coordinator.setLinkEnabled(linkId, false));
+        assertFalse(coordinator.isLinkEnabled(linkId));
+        coordinator.step(0.1);
+        assertEquals(0, coordinator.lastRejectedHandoffs());
+
+        assertTrue(coordinator.setLinkEnabled(linkId, true));
+        assertTrue(coordinator.updateLink(linkId, new HybridBodyLink(
+                generalBody,
+                orbitalBody,
+                HybridOwnership.ORBITAL,
+                StateHandoffMode.FULL_STATE,
+                ConflictPolicy.REJECT_ON_DIVERGENCE,
+                0.0)));
+        general.setBodyState(generalBody, new PhysicsBodyState(
+                new PhysicsVector3(5.0, 0.0, 0.0),
+                PhysicsQuaternion.IDENTITY,
+                PhysicsVector3.ZERO,
+                PhysicsVector3.ZERO,
+                ReferenceFrame.WORLD,
+                0.0));
+        coordinator.step(0.1);
+        assertEquals(1, coordinator.lastRejectedHandoffs());
+
+        HybridLinkDiagnostics diag = coordinator.linkDiagnostics().iterator().next();
+        assertEquals(linkId, diag.linkId());
+        assertTrue(diag.enabled());
+        assertTrue(diag.rejectedCount() >= 1);
+
+        assertEquals(1, coordinator.removeLinksForBody(generalBody));
+        assertEquals(0, coordinator.links().size());
+    }
+
+    @Test
+    void updatesRenderMetadataFromAccumulatorOutput() {
+        FakeWorld general = new FakeWorld();
+        FakeWorld orbital = new FakeWorld();
+        HybridPhysicsCoordinator coordinator = new HybridPhysicsCoordinator(general, orbital);
+
+        PhysicsBodyHandle generalBody = general.createBody(new PhysicsBodyDefinition(
+                PhysicsBodyType.DYNAMIC, 1.0, new BoxShape(1, 1, 1), PhysicsBodyState.IDENTITY));
+        PhysicsBodyHandle orbitalBody = orbital.createBody(new PhysicsBodyDefinition(
+                PhysicsBodyType.DYNAMIC, 1.0, new BoxShape(1, 1, 1), PhysicsBodyState.IDENTITY));
+        coordinator.registerLink(new HybridBodyLink(
+                generalBody, orbitalBody, HybridOwnership.ORBITAL, StateHandoffMode.FULL_STATE));
+
+        coordinator.step(0.2);
+        HybridSnapshot updated = coordinator.updateRenderMetadata(0.4, 0.03);
+        assertNotNull(updated);
+        assertEquals(0.4, updated.interpolationAlpha(), 1e-9);
+        assertEquals(0.03, updated.extrapolationSeconds(), 1e-9);
     }
 
     private static final class FakeWorld implements PhysicsWorld {

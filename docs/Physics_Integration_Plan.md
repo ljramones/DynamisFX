@@ -170,10 +170,23 @@ Current kickoff progress:
 - Conflict policy controls now available per link:
   - overwrite
   - reject-on-divergence with configurable distance tolerance
+- Divergence checks now include:
+  - position error
+  - linear velocity error
+  - angular velocity error
+- Link lifecycle controls added:
+  - enable/disable by link id
+  - relink/update by id
+  - remove by body / clear all links
+- Per-link diagnostics added for runtime inspection:
+  - rejection counts
+  - latest divergence magnitudes
+  - last handoff time
 - Snapshot publication uses an atomic reference for safe cross-thread reads.
 - Snapshot metadata now includes render-facing fields:
   - interpolation alpha
   - extrapolation seconds
+- Coordinator can update render metadata from accumulator output after stepping.
 - Hybrid sample wiring added in `FXyz-Samples`:
   - `org.fxyz3d.samples.utilities.HybridPhysicsCoordinatorSample`
 
