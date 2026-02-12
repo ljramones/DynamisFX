@@ -13,6 +13,7 @@
     <modules>
         <module>FXyz-Core</module>
         <module>FXyz-Physics-ODE4j</module>
+        <module>FXyz-Physics-Orekit</module>
         <module>FXyz-Importers</module>
         <module>FXyz-Client</module>
         <module>FXyz-Samples</module>
@@ -154,6 +155,11 @@
             <dependency>
                 <groupId>org.fxyz3d</groupId>
                 <artifactId>fxyz3d-physics-ode4j</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.fxyz3d</groupId>
+                <artifactId>fxyz3d-physics-orekit</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

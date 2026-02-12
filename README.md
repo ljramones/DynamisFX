@@ -424,10 +424,24 @@ Current status:
 
 - `Ode4jWorld` is bound to ODE4j core world/body/shape primitives for create/update/step lifecycle.
 - Contact resolution is enabled via ODE4j space-collide + contact joints.
-- Minimal cross-backend constraint API is available (`BALL`, `FIXED`) and mapped in ODE4j world.
 - Minimal cross-backend constraint API is available (`BALL`, `FIXED`, `HINGE`, `SLIDER`) and mapped in ODE4j world.
 - Sample integration is available in:
   - `org.fxyz3d.samples.utilities.Ode4jPhysicsSyncSample`
+
+Phase 3 kickoff is also now in progress with:
+
+- `FXyz-Physics-Orekit`
+  - `OrekitBackendFactory`
+  - `OrekitBackend`
+  - `OrekitWorld`
+  - sample: `org.fxyz3d.samples.utilities.OrekitOrbitSyncSample`
+
+Current Orekit module scope/shortcomings:
+
+- It is an astrodynamics-oriented scaffold through the shared `PhysicsWorld` SPI.
+- It currently provides deterministic inertial-frame N-body style stepping for orbital experiments.
+- Constraint creation is intentionally unsupported in this backend.
+- Full Orekit propagator/frame transform binding is planned next in Phase 3.
 
 ### Supported Formats
 

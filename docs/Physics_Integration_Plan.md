@@ -18,7 +18,7 @@ Integrate two physics domains without coupling FXyz core to a specific engine:
 
 ### Phase 0 - Architecture Freeze
 
-Status: `IN PROGRESS`
+Status: `COMPLETE`
 
 Deliverables:
 
@@ -34,7 +34,7 @@ Exit criteria:
 
 ### Phase 1 - Core SPI + Sync Skeleton
 
-Status: `IN PROGRESS`
+Status: `COMPLETE`
 
 Deliverables:
 
@@ -97,7 +97,7 @@ Next sub-phase:
 
 ### Phase 3 - Orekit Adapter MVP
 
-Status: `PENDING`
+Status: `IN PROGRESS`
 
 Deliverables:
 
@@ -108,6 +108,24 @@ Deliverables:
 Exit criteria:
 
 - Orbital entities updated through the same SPI contract.
+
+Current kickoff progress:
+
+- Module created with Maven wiring and parent aggregation.
+- Backend shell implemented:
+  - `OrekitBackendFactory`
+  - `OrekitBackend`
+  - `OrekitWorld`
+- Orbital stepping scaffold added for inertial-frame N-body style integration:
+  - static central bodies can influence dynamic body acceleration
+  - fixed-step state updates remain backend-neutral through `PhysicsWorld`
+- Runtime tuning plumbing preserved through the shared SPI for consistency.
+- Sample integration added:
+  - `org.fxyz3d.samples.utilities.OrekitOrbitSyncSample`
+- Initial regression tests added for:
+  - backend factory + capabilities
+  - basic orbital stepping behavior
+  - unsupported constraint path + lifecycle guards
 
 ### Phase 4 - Hybrid Coordinator
 
@@ -142,15 +160,13 @@ Exit criteria:
 
 Implemented in this slice:
 
-- Phase 0 baseline conventions documented here.
-- Phase 1 scaffolding in `FXyz-Core`:
-  - physics backend SPI
-  - immutable body/world model records
-  - sync helper
-  - fixed-step accumulator
-  - unit tests
+- Commit-level consolidation of Phase 0/1/2 foundations.
+- Phase 3 kickoff module and orbital scaffold:
+  - `FXyz-Physics-Orekit`
+  - backend/world shell + tests + sample wiring.
 
 Next slice:
 
-- Add mock backend sample in `FXyz-Samples`.
-- Start `FXyz-Physics-ODE4j` module shell.
+- Replace orbital scaffold internals with Orekit propagator primitives.
+- Add explicit time-scale controls and frame transformation hooks.
+- Define Phase 4 hybrid coordinator ownership contracts.
