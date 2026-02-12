@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="org.fxyz3d.importers.fxml.FXMLImporterTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-02-12T01:41:07.934Z" hostname="MacBook-Pro.local" time="0.079">
-  <properties/>
-  <testcase name="testLoad()" classname="org.fxyz3d.importers.fxml.FXMLImporterTest" time="0.078"/>
-  <testcase name="testExtensions()" classname="org.fxyz3d.importers.fxml.FXMLImporterTest" time="0.0"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>

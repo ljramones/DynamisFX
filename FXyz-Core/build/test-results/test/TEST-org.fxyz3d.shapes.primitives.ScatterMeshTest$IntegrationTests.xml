@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="Integration Tests" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-02-12T02:26:01.162Z" hostname="MacBook-Pro.local" time="0.018">
-  <properties/>
-  <testcase name="Position update works with per-particle attributes" classname="org.fxyz3d.shapes.primitives.ScatterMeshTest$IntegrationTests" time="0.008"/>
-  <testcase name="All attributes combined works" classname="org.fxyz3d.shapes.primitives.ScatterMeshTest$IntegrationTests" time="0.009"/>
-  <testcase name="Combined color and scale works together" classname="org.fxyz3d.shapes.primitives.ScatterMeshTest$IntegrationTests" time="0.0"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>

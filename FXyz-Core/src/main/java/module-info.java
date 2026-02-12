@@ -32,9 +32,9 @@ module org.fxyz3d.core {
     requires static javafx.swing;
     requires java.desktop;
     requires java.logging;
-    requires static eu.mihosoft.vrl.jcsg;		// unnamed module converted to automatic module in gradle
-    requires static eu.mihosoft.vvecmath;		// unnamed module converted to automatic module in gradle
-    requires static org.orbisgis.poly2tri.core; // unnamed module converted to automatic module in gradle
+    requires static eu.mihosoft.vrl.jcsg;		// resolved as automatic module
+    requires static eu.mihosoft.vvecmath;		// resolved as automatic module
+    requires static org.orbisgis.poly2tri.core; // resolved as automatic module
     requires org.slf4j;
 
     exports org.fxyz3d.geometry;

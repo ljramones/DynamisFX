@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="CullFace Tests" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-02-12T02:26:01.200Z" hostname="MacBook-Pro.local" time="0.0">
-  <properties/>
-  <testcase name="Default cullFace is NONE for particle visibility from all angles" classname="org.fxyz3d.shapes.primitives.ScatterMeshTest$CullFaceTests" time="0.0"/>
-  <testcase name="setCullFace applies to all child meshes" classname="org.fxyz3d.shapes.primitives.ScatterMeshTest$CullFaceTests" time="0.0"/>
-  <testcase name="setCullFace changes cull face mode" classname="org.fxyz3d.shapes.primitives.ScatterMeshTest$CullFaceTests" time="0.0"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>

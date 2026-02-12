@@ -35,8 +35,8 @@ module org.fxyz3d.samples {
     requires transitive javafx.fxml;
     requires java.logging;
     requires org.controlsfx.controls;
-    requires org.reactfx;		  // unnamed module converted to automatic module in gradle
-    requires org.fxmisc.easybind; // unnamed module converted to automatic module in gradle
+    requires org.reactfx;		  // resolved as automatic module
+    requires org.fxmisc.easybind; // resolved as automatic module
     requires jfxtras.common;
     requires jfxtras.controls;
     requires jfxtras.fxml;

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="Unguarded DoubleProperty Tests" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-02-12T02:26:01.638Z" hostname="MacBook-Pro.local" time="0.0">
-  <properties/>
-  <testcase name="createDoubleUnguarded always calls update on change when observed" classname="org.fxyz3d.shapes.primitives.helper.MeshPropertyTest$UnguardedDoubleTests" time="0.0"/>
-  <testcase name="createDoubleUnguarded returns property with initial value" classname="org.fxyz3d.shapes.primitives.helper.MeshPropertyTest$UnguardedDoubleTests" time="0.0"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>

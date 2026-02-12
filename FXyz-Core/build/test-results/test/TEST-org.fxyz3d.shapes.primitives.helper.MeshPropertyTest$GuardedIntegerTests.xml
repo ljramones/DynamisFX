@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="Guarded IntegerProperty Tests" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-02-12T02:26:01.642Z" hostname="MacBook-Pro.local" time="0.0">
-  <properties/>
-  <testcase name="createInteger returns property with initial value" classname="org.fxyz3d.shapes.primitives.helper.MeshPropertyTest$GuardedIntegerTests" time="0.0"/>
-  <testcase name="createInteger calls update when mesh is non-null" classname="org.fxyz3d.shapes.primitives.helper.MeshPropertyTest$GuardedIntegerTests" time="0.0"/>
-  <testcase name="createInteger does not call update when mesh is null" classname="org.fxyz3d.shapes.primitives.helper.MeshPropertyTest$GuardedIntegerTests" time="0.0"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
