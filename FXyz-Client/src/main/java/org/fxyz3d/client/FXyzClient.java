@@ -92,6 +92,9 @@ public class FXyzClient extends Application {
 
     private static final int INITIAL_WINDOW_WIDTH = 1200;
     private static final int INITIAL_WINDOW_HEIGHT = 768;
+    private static final double DEFAULT_TRANSLATION_SNAP = 1.0;
+    private static final double DEFAULT_ROTATION_SNAP = 15.0;
+    private static final double DEFAULT_SCALE_SNAP = 0.1;
 
     private static FXyzClient rootClientInstance;
 
@@ -109,6 +112,10 @@ public class FXyzClient extends Application {
     private TextField searchBar;
     private CheckBox gizmoEnabled;
     private ComboBox<SampleGizmoSupport.Mode> gizmoMode;
+    private CheckBox gizmoSnapEnabled;
+    private TextField gizmoTranslationSnap;
+    private TextField gizmoRotationSnap;
+    private TextField gizmoScaleSnap;
     private TreeView<FXyzSample> contentTree;
     private TreeItem<FXyzSample> root;
 
@@ -171,6 +178,15 @@ public class FXyzClient extends Application {
         gizmoMode.getItems().setAll(SampleGizmoSupport.Mode.values());
         gizmoMode.setValue(SampleGizmoSupport.Mode.ALL);
         gizmoMode.valueProperty().addListener((obs, oldValue, newValue) -> applyGizmoSettings());
+
+        gizmoSnapEnabled = new CheckBox("Snap");
+        gizmoSnapEnabled.setFocusTraversable(false);
+        gizmoSnapEnabled.setSelected(false);
+        gizmoSnapEnabled.selectedProperty().addListener((obs, oldValue, newValue) -> applyGizmoSettings());
+
+        gizmoTranslationSnap = createSnapField(DEFAULT_TRANSLATION_SNAP);
+        gizmoRotationSnap = createSnapField(DEFAULT_ROTATION_SNAP);
+        gizmoScaleSnap = createSnapField(DEFAULT_SCALE_SNAP);
         
         contentTree = new TreeView<>(root);
         contentTree.getStyleClass().add("fxyz3d-control");
@@ -211,7 +227,13 @@ public class FXyzClient extends Application {
             changeContent();
         });
         contentTree.setFocusTraversable(false);
-        leftSideContent.getChildren().addAll(new HBox(searchBar, gizmoEnabled, gizmoMode, ab),contentTree);
+        HBox toolbar = new HBox(6, searchBar, gizmoEnabled, gizmoMode, gizmoSnapEnabled, ab);
+        HBox snapBar = new HBox(4,
+                new Label("T"), gizmoTranslationSnap,
+                new Label("R"), gizmoRotationSnap,
+                new Label("S"), gizmoScaleSnap
+        );
+        leftSideContent.getChildren().addAll(toolbar, snapBar, contentTree);
         VBox.setVgrow(contentTree, Priority.ALWAYS);
 
         client = new HiddenSidesClient();
@@ -493,6 +515,10 @@ public class FXyzClient extends Application {
         boolean available = support != null;
         gizmoEnabled.setDisable(!available);
         gizmoMode.setDisable(!available);
+        gizmoSnapEnabled.setDisable(!available);
+        gizmoTranslationSnap.setDisable(!available);
+        gizmoRotationSnap.setDisable(!available);
+        gizmoScaleSnap.setDisable(!available);
         if (available) {
             applyGizmoSettings();
         }
@@ -506,6 +532,35 @@ public class FXyzClient extends Application {
         support.setEnabled(gizmoEnabled.isSelected());
         SampleGizmoSupport.Mode mode = gizmoMode.getValue();
         support.setMode(mode == null ? SampleGizmoSupport.Mode.ALL : mode);
+        support.setSnapEnabled(gizmoSnapEnabled.isSelected());
+        support.setSnapIncrements(
+                parseSnapValue(gizmoTranslationSnap, DEFAULT_TRANSLATION_SNAP),
+                parseSnapValue(gizmoRotationSnap, DEFAULT_ROTATION_SNAP),
+                parseSnapValue(gizmoScaleSnap, DEFAULT_SCALE_SNAP)
+        );
+    }
+
+    private TextField createSnapField(double initialValue) {
+        TextField field = new TextField(String.valueOf(initialValue));
+        field.setFocusTraversable(false);
+        field.setPrefColumnCount(4);
+        field.setOnAction(e -> applyGizmoSettings());
+        field.focusedProperty().addListener((obs, oldValue, focused) -> {
+            if (!focused) {
+                applyGizmoSettings();
+            }
+        });
+        return field;
+    }
+
+    private double parseSnapValue(TextField field, double defaultValue) {
+        try {
+            double value = Double.parseDouble(field.getText());
+            return value > 0 ? value : defaultValue;
+        } catch (NumberFormatException ex) {
+            field.setText(String.valueOf(defaultValue));
+            return defaultValue;
+        }
     }
 
     public static void main(String[] args) {

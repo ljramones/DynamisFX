@@ -37,6 +37,7 @@ module org.fxyz3d.core {
     requires static org.orbisgis.poly2tri.core; // resolved as automatic module
     requires org.slf4j;
 
+    exports org.fxyz3d.collision;
     exports org.fxyz3d.geometry;
     exports org.fxyz3d.io;
     exports org.fxyz3d.scene;

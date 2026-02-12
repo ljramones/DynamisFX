@@ -400,6 +400,16 @@ public abstract class ShapeBaseSample<T extends Node> extends FXyzSample {
                 }
                 sceneGizmoController.setMode(TransformGizmo3D.Mode.valueOf(mode.name()));
             }
+
+            @Override
+            public void setSnapEnabled(boolean enabled) {
+                sceneGizmoController.setSnapEnabled(enabled);
+            }
+
+            @Override
+            public void setSnapIncrements(double translationSnap, double rotationSnap, double scaleSnap) {
+                sceneGizmoController.setSnapIncrements(translationSnap, rotationSnap, scaleSnap);
+            }
         };
     }
 

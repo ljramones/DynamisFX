@@ -275,6 +275,68 @@ viewer.getSelectionModel().getSelectedNodes().addListener((change) -> {
 });
 ```
 
+## Collision Foundations (2026)
+
+FXyz-Core now includes a baseline collision package: `org.fxyz3d.collision`.
+
+### Core API
+
+- `BroadPhase3D<T>`
+- `Aabb`
+- `BoundingSphere`
+- `Ray3D`
+- `Intersection3D`
+- `SpatialHash3D<T>`
+- `SweepAndPrune3D<T>`
+- `CollisionPair<T>`
+- `ConvexPolygon2D`
+- `ProjectionInterval`
+- `Sat2D`
+- `CollisionManifold2D`
+- `ConvexSupport3D`
+- `Gjk3D`
+- `CollisionManifold3D`
+- `Ccd3D`
+- `CollisionPipeline`
+
+### Supported Checks
+
+- `Aabb` vs `Aabb`
+- `BoundingSphere` vs `BoundingSphere`
+- `BoundingSphere` vs `Aabb`
+- `Ray3D` vs `Aabb` (including first hit distance via `OptionalDouble`)
+- `ConvexPolygon2D` vs `ConvexPolygon2D` via SAT (with optional manifold)
+- Convex 3D support-mapped shapes via `Gjk3D` intersection checks
+- Convex 3D EPA manifold extraction via `Gjk3D.intersectsWithManifold(...)`
+- Segment-vs-AABB and swept-AABB time-of-impact via `Ccd3D`
+- Approximate swept convex-convex TOI via `Ccd3D.sweptConvexTimeOfImpact(...)`
+
+### Broad-Phase
+
+`SpatialHash3D` provides uniform-grid candidate generation for possible collisions.
+`SweepAndPrune3D` provides axis-sweep candidate generation for dynamic scenes.
+Both are broad-phase only and should be followed by narrow-phase validation.
+
+`CollisionPipeline` can be used to filter broad-phase candidate pairs through a narrow-phase predicate (for example, SAT).
+
+### Current Shortcomings
+
+- No OBB (oriented bounding box) support
+- No mesh-level narrow phase
+- No rigid-body dynamics/response integration yet
+- SAT is currently 2D convex-polygon only (concave shapes require decomposition)
+- Convex-convex CCD currently uses sampled bracketing + bisection (not full conservative advancement yet)
+
+### Broad-Phase Benchmark Harness
+
+For local performance comparisons of broad-phase strategies, use:
+
+- `FXyz-Core/src/test/java/org/fxyz3d/collision/BroadPhase3DBenchmark.java`
+
+This compares `SpatialHash3D` and `SweepAndPrune3D` on generated AABB scenes.
+
+See `docs/Core_Collision.md` for details.
+
 ### Supported Formats
 
 | Format | Extension | Import | Export | Description |

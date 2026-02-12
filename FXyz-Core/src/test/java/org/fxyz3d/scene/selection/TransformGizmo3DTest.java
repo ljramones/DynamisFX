@@ -91,25 +91,52 @@ class TransformGizmo3DTest {
         setDoubleField(gizmo, "startTranslateX", 0.0);
         setDoubleField(gizmo, "startTranslateY", 0.0);
         setDoubleField(gizmo, "startTranslateZ", 0.0);
-        invokeAxisMethod(gizmo, "applyTranslate", axisClass, axisX, 10.0, 0.0);
-        invokeAxisMethod(gizmo, "applyTranslate", axisClass, axisY, 0.0, 8.0);
-        invokeAxisMethod(gizmo, "applyTranslate", axisClass, axisZ, 10.0, 2.0);
+        invokeAxisMethod(gizmo, "applyTranslate", axisClass, axisX, 10.0, 0.0, false);
+        invokeAxisMethod(gizmo, "applyTranslate", axisClass, axisY, 0.0, 8.0, false);
+        invokeAxisMethod(gizmo, "applyTranslate", axisClass, axisZ, 10.0, 2.0, false);
         assertEquals(10.0, target.getTranslateX(), 0.0001);
         assertEquals(8.0, target.getTranslateY(), 0.0001);
         assertEquals(4.0, target.getTranslateZ(), 0.0001);
 
         setDoubleField(gizmo, "startRotateY", 0.0);
-        invokeAxisMethod(gizmo, "applyRotate", axisClass, axisY, 20.0);
+        invokeAxisMethod(gizmo, "applyRotate", axisClass, axisY, 20.0, false);
         assertEquals(7.0, target.getRotate(), 0.0001); // 20 * 0.35
 
         target.setScaleX(1.0);
         setDoubleField(gizmo, "startScaleX", 1.0);
-        invokeAxisMethod(gizmo, "applyScale", axisClass, axisX, 10.0);
+        invokeAxisMethod(gizmo, "applyScale", axisClass, axisX, 10.0, false);
         assertEquals(1.1, target.getScaleX(), 0.0001); // 1 + (10 * 0.01)
 
         setDoubleField(gizmo, "startScaleX", 0.005);
-        invokeAxisMethod(gizmo, "applyScale", axisClass, axisX, -10.0);
+        invokeAxisMethod(gizmo, "applyScale", axisClass, axisX, -10.0, false);
         assertEquals(0.01, target.getScaleX(), 0.0001); // floor clamp
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void snappingRoundsTransformValues() throws Exception {
+        TransformGizmo3D gizmo = new TransformGizmo3D();
+        Box target = new Box(10, 10, 10);
+        gizmo.setTarget(target);
+        gizmo.setTranslationSnapIncrement(2.0);
+        gizmo.setRotationSnapIncrement(15.0);
+        gizmo.setScaleSnapIncrement(0.25);
+
+        Class<?> axisClass = Class.forName("org.fxyz3d.scene.selection.TransformGizmo3D$Axis");
+        Object axisX = Enum.valueOf((Class<Enum>) axisClass, "X");
+        Object axisY = Enum.valueOf((Class<Enum>) axisClass, "Y");
+
+        setDoubleField(gizmo, "startTranslateX", 0.0);
+        invokeAxisMethod(gizmo, "applyTranslate", axisClass, axisX, 3.1, 0.0, true);
+        assertEquals(4.0, target.getTranslateX(), 0.0001);
+
+        setDoubleField(gizmo, "startRotateY", 0.0);
+        invokeAxisMethod(gizmo, "applyRotate", axisClass, axisY, 43.0, true);
+        assertEquals(15.0, target.getRotate(), 0.0001);
+
+        setDoubleField(gizmo, "startScaleX", 1.0);
+        invokeAxisMethod(gizmo, "applyScale", axisClass, axisX, 12.0, true); // 1 + 0.12 -> 1.0 (snap 0.25)
+        assertEquals(1.0, target.getScaleX(), 0.0001);
     }
 
     private static void setDoubleField(Object target, String fieldName, double value) throws Exception {
@@ -126,7 +153,9 @@ class TransformGizmo3DTest {
         params[0] = axisValue;
         for (int i = 0; i < args.length; i++) {
             Object arg = args[i];
-            signature[i + 1] = arg instanceof Double ? double.class : arg.getClass();
+            signature[i + 1] = arg instanceof Double ? double.class
+                    : arg instanceof Boolean ? boolean.class
+                    : arg.getClass();
             params[i + 1] = arg;
         }
         Method m = target.getClass().getDeclaredMethod(methodName, signature);

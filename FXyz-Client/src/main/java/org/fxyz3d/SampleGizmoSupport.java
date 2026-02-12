@@ -44,5 +44,10 @@ public interface SampleGizmoSupport {
     void setEnabled(boolean enabled);
 
     void setMode(Mode mode);
-}
 
+    default void setSnapEnabled(boolean enabled) {
+    }
+
+    default void setSnapIncrements(double translationSnap, double rotationSnap, double scaleSnap) {
+    }
+}

@@ -31,8 +31,10 @@ package org.fxyz3d.scene.selection;
 
 import java.util.Objects;
 import javafx.beans.InvalidationListener;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.SetChangeListener;
@@ -86,6 +88,10 @@ public class TransformGizmo3D extends Group {
     private final DoubleProperty translateSensitivity = new SimpleDoubleProperty(1.0);
     private final DoubleProperty rotateSensitivity = new SimpleDoubleProperty(0.35);
     private final DoubleProperty scaleSensitivity = new SimpleDoubleProperty(0.01);
+    private final BooleanProperty snapEnabled = new SimpleBooleanProperty(false);
+    private final DoubleProperty translationSnapIncrement = new SimpleDoubleProperty(1.0);
+    private final DoubleProperty rotationSnapIncrement = new SimpleDoubleProperty(15.0);
+    private final DoubleProperty scaleSnapIncrement = new SimpleDoubleProperty(0.1);
 
     private SelectionModel3D selectionModel;
     private final InvalidationListener targetBoundsListener = obs -> syncToTarget();
@@ -175,6 +181,54 @@ public class TransformGizmo3D extends Group {
 
     public void setScaleSensitivity(double sensitivity) {
         scaleSensitivity.set(sensitivity);
+    }
+
+    public BooleanProperty snapEnabledProperty() {
+        return snapEnabled;
+    }
+
+    public boolean isSnapEnabled() {
+        return snapEnabled.get();
+    }
+
+    public void setSnapEnabled(boolean enabled) {
+        snapEnabled.set(enabled);
+    }
+
+    public DoubleProperty translationSnapIncrementProperty() {
+        return translationSnapIncrement;
+    }
+
+    public double getTranslationSnapIncrement() {
+        return translationSnapIncrement.get();
+    }
+
+    public void setTranslationSnapIncrement(double value) {
+        translationSnapIncrement.set(value);
+    }
+
+    public DoubleProperty rotationSnapIncrementProperty() {
+        return rotationSnapIncrement;
+    }
+
+    public double getRotationSnapIncrement() {
+        return rotationSnapIncrement.get();
+    }
+
+    public void setRotationSnapIncrement(double value) {
+        rotationSnapIncrement.set(value);
+    }
+
+    public DoubleProperty scaleSnapIncrementProperty() {
+        return scaleSnapIncrement;
+    }
+
+    public double getScaleSnapIncrement() {
+        return scaleSnapIncrement.get();
+    }
+
+    public void setScaleSnapIncrement(double value) {
+        scaleSnapIncrement.set(value);
     }
 
     public Node getTarget() {
@@ -293,11 +347,12 @@ public class TransformGizmo3D extends Group {
         final double dx = event.getSceneX() - dragStartSceneX;
         final double dy = event.getSceneY() - dragStartSceneY;
         final double delta = (dx - dy) * 0.5;
+        final boolean snap = isSnapRequested(event);
 
         switch (activeHandle.kind()) {
-            case TRANSLATE -> applyTranslate(activeHandle.axis(), dx, dy);
-            case ROTATE -> applyRotate(activeHandle.axis(), delta);
-            case SCALE -> applyScale(activeHandle.axis(), delta);
+            case TRANSLATE -> applyTranslate(activeHandle.axis(), dx, dy, snap);
+            case ROTATE -> applyRotate(activeHandle.axis(), delta, snap);
+            case SCALE -> applyScale(activeHandle.axis(), delta, snap);
             default -> {
             }
         }
@@ -310,46 +365,64 @@ public class TransformGizmo3D extends Group {
         event.consume();
     }
 
-    private void applyTranslate(Axis axis, double dx, double dy) {
+    private void applyTranslate(Axis axis, double dx, double dy, boolean snap) {
         double s = getTranslateSensitivity();
         switch (axis) {
-            case X -> target.setTranslateX(startTranslateX + (dx * s));
-            case Y -> target.setTranslateY(startTranslateY + (dy * s));
-            case Z -> target.setTranslateZ(startTranslateZ + ((dx - dy) * 0.5 * s));
+            case X -> target.setTranslateX(maybeSnap(startTranslateX + (dx * s), getTranslationSnapIncrement(), snap));
+            case Y -> target.setTranslateY(maybeSnap(startTranslateY + (dy * s), getTranslationSnapIncrement(), snap));
+            case Z -> target.setTranslateZ(maybeSnap(startTranslateZ + ((dx - dy) * 0.5 * s), getTranslationSnapIncrement(), snap));
             default -> {
             }
         }
     }
 
-    private void applyRotate(Axis axis, double delta) {
+    private void applyRotate(Axis axis, double delta, boolean snap) {
         double s = getRotateSensitivity();
         switch (axis) {
             case X -> {
                 target.setRotationAxis(Rotate.X_AXIS);
-                target.setRotate(startRotateX + (delta * s));
+                target.setRotate(maybeSnap(startRotateX + (delta * s), getRotationSnapIncrement(), snap));
             }
             case Y -> {
                 target.setRotationAxis(Rotate.Y_AXIS);
-                target.setRotate(startRotateY + (delta * s));
+                target.setRotate(maybeSnap(startRotateY + (delta * s), getRotationSnapIncrement(), snap));
             }
             case Z -> {
                 target.setRotationAxis(Rotate.Z_AXIS);
-                target.setRotate(startRotateZ + (delta * s));
+                target.setRotate(maybeSnap(startRotateZ + (delta * s), getRotationSnapIncrement(), snap));
             }
             default -> {
             }
         }
     }
 
-    private void applyScale(Axis axis, double delta) {
+    private void applyScale(Axis axis, double delta, boolean snap) {
         double s = getScaleSensitivity();
         switch (axis) {
-            case X -> target.setScaleX(Math.max(0.01, startScaleX + (delta * s)));
-            case Y -> target.setScaleY(Math.max(0.01, startScaleY + (delta * s)));
-            case Z -> target.setScaleZ(Math.max(0.01, startScaleZ + (delta * s)));
+            case X -> target.setScaleX(clampScale(maybeSnap(startScaleX + (delta * s), getScaleSnapIncrement(), snap)));
+            case Y -> target.setScaleY(clampScale(maybeSnap(startScaleY + (delta * s), getScaleSnapIncrement(), snap)));
+            case Z -> target.setScaleZ(clampScale(maybeSnap(startScaleZ + (delta * s), getScaleSnapIncrement(), snap)));
             default -> {
             }
         }
+    }
+
+    private double clampScale(double value) {
+        return Math.max(0.01, value);
+    }
+
+    private boolean isSnapRequested(MouseEvent event) {
+        if (event.isAltDown()) {
+            return false;
+        }
+        return isSnapEnabled() || event.isShiftDown();
+    }
+
+    private double maybeSnap(double value, double increment, boolean snapRequested) {
+        if (!snapRequested || increment <= 0) {
+            return value;
+        }
+        return Math.round(value / increment) * increment;
     }
 
     private void syncToTarget() {

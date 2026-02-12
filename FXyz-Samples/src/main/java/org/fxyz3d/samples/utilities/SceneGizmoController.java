@@ -83,6 +83,16 @@ public final class SceneGizmoController {
         gizmo.setMode(mode);
     }
 
+    public void setSnapEnabled(boolean enabled) {
+        gizmo.setSnapEnabled(enabled);
+    }
+
+    public void setSnapIncrements(double translationSnap, double rotationSnap, double scaleSnap) {
+        gizmo.setTranslationSnapIncrement(translationSnap);
+        gizmo.setRotationSnapIncrement(rotationSnap);
+        gizmo.setScaleSnapIncrement(scaleSnap);
+    }
+
     public void dispose() {
         subScene.removeEventHandler(MouseEvent.MOUSE_CLICKED, pickHandler);
         selectionModel.clearSelection();
@@ -90,4 +100,3 @@ public final class SceneGizmoController {
         gizmo.unbindSelectionModel();
     }
 }
-
