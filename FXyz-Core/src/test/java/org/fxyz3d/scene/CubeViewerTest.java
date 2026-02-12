@@ -54,6 +54,8 @@ public class CubeViewerTest {
     public void testSelfLitConstruction() {
         assertThat(viewer.isSelfLightEnabled(), is(true));
         assertThat(viewer.getScatterDataGroup(), is(notNullValue()));
+        assertThat(viewer.getSelectionModel(), is(notNullValue()));
+        assertThat(viewer.isSelectionEnabled(), is(true));
     }
 
     @Test
@@ -130,6 +132,15 @@ public class CubeViewerTest {
         viewer.setSelfLightEnabled(false);
 
         assertThat(viewer.isSelfLightEnabled(), is(false));
+    }
+
+    @Test
+    @DisplayName("Selection support can be toggled")
+    public void testSelectionEnabledToggle() {
+        viewer.setSelectionEnabled(false);
+        assertThat(viewer.isSelectionEnabled(), is(false));
+        viewer.setSelectionEnabled(true);
+        assertThat(viewer.isSelectionEnabled(), is(true));
     }
 
     @Test

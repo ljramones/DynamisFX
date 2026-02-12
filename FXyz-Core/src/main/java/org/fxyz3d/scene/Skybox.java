@@ -32,18 +32,18 @@ package org.fxyz3d.scene;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.Group;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.Rotate;
+import org.fxyz3d.scene.selection.SelectableGroup3D;
 
 /** 
  * 
  * @author Dub
  */
-public class Skybox extends Group{
+public class Skybox extends SelectableGroup3D{
         
     public enum SkyboxImageType{
         MULTIPLE, SINGLE

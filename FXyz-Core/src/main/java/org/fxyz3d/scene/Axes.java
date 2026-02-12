@@ -29,19 +29,19 @@
 
 package org.fxyz3d.scene;
 
-import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Cylinder;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
+import org.fxyz3d.scene.selection.SelectableGroup3D;
 
 /**
  *
  * @author jpereda
  */
-public class Axes extends Group {
+public class Axes extends SelectableGroup3D {
 
     private final Cylinder axisX;
     private final Cylinder axisY;

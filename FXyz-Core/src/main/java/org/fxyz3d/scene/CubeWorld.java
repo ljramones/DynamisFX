@@ -41,13 +41,14 @@ import javafx.scene.shape.Cylinder;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Rotate;
+import org.fxyz3d.scene.selection.SelectableGroup3D;
 
 /**
  * A 3D cube world with configurable axes, panels, and grid lines.
  *
  * @author SPhillips
  */
-public class CubeWorld extends Group {
+public class CubeWorld extends SelectableGroup3D {
 
     private static final double DEFAULT_SIZE = 1000;
     private static final double DEFAULT_SPACING = 100;

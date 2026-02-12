@@ -50,6 +50,8 @@ public class CubeWorldTest {
     public void testAmbientLightConstruction() {
         assertThat(cubeWorld.isSelfLightEnabled(), is(true));
         assertThat(cubeWorld.getContentGroup(), is(notNullValue()));
+        assertThat(cubeWorld.getSelectionModel(), is(notNullValue()));
+        assertThat(cubeWorld.isSelectionEnabled(), is(true));
     }
 
     @Test
@@ -87,6 +89,15 @@ public class CubeWorldTest {
         cubeWorld.setSelfLightEnabled(false);
 
         assertThat(cubeWorld.isSelfLightEnabled(), is(false));
+    }
+
+    @Test
+    @DisplayName("Selection support can be toggled")
+    public void testSelectionEnabledToggle() {
+        cubeWorld.setSelectionEnabled(false);
+        assertThat(cubeWorld.isSelectionEnabled(), is(false));
+        cubeWorld.setSelectionEnabled(true);
+        assertThat(cubeWorld.isSelectionEnabled(), is(true));
     }
 
     @Test

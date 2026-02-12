@@ -41,6 +41,7 @@ module org.fxyz3d.core {
     exports org.fxyz3d.io;
     exports org.fxyz3d.scene;
     exports org.fxyz3d.scene.paint;
+    exports org.fxyz3d.scene.selection;
     exports org.fxyz3d.shapes;
     exports org.fxyz3d.shapes.complex.cloth;
     exports org.fxyz3d.shapes.composites;

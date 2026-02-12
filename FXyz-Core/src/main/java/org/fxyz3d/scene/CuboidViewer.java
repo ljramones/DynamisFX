@@ -29,13 +29,13 @@
 package org.fxyz3d.scene;
 
 import javafx.scene.DepthTest;
-import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.CullFace;
 import javafx.scene.shape.DrawMode;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
+import org.fxyz3d.scene.selection.SelectableGroup3D;
 import org.fxyz3d.shapes.polygon.PolygonMesh;
 import org.fxyz3d.shapes.polygon.PolygonMeshView;
 import org.fxyz3d.utils.DataBox;
@@ -46,7 +46,7 @@ import java.util.logging.Logger;
  *
  * @author JosePereda
  */
-public class CuboidViewer extends Group {
+public class CuboidViewer extends SelectableGroup3D {
 
     private static final Logger LOG = Logger.getLogger(CuboidViewer.class.getName());
 

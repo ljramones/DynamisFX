@@ -31,16 +31,16 @@ package org.fxyz3d.scene;
 
 import java.util.ArrayList;
 import java.util.List;
-import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import org.fxyz3d.geometry.Point3D;
+import org.fxyz3d.scene.selection.SelectableGroup3D;
 import org.fxyz3d.shapes.composites.PolyLine3D;
 
 /**
  *
  * @author sphillips
  */
-public class Crosshair3D extends Group {
+public class Crosshair3D extends SelectableGroup3D {
     
     public double size;
     public Point3D centerPoint;

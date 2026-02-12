@@ -228,6 +228,53 @@ These changes include API modifications that may require updates to existing cod
 
 FXyz3D supports multiple 3D file formats through the FXyz-Importers module.
 
+## Generic Picking/Selection (2026)
+
+FXyz-Core now includes a reusable picking/selection system for 3D scene nodes.
+
+### Core API
+
+- `org.fxyz3d.scene.selection.SelectionModel3D`
+- `org.fxyz3d.scene.selection.PickSelectionHandler`
+- `org.fxyz3d.scene.selection.SelectableGroup3D`
+
+`SelectableGroup3D` installs click-based picking and selection by default and exposes:
+
+- `getSelectionModel()` for current selection state
+- `setSelectionEnabled(boolean)` to enable/disable selection handling
+- `selectionEnabledProperty()` for binding/observation
+
+### Where It Is Wired
+
+The following core scene components now inherit from `SelectableGroup3D`:
+
+- `CubeViewer`
+- `CubeWorld`
+- `CuboidViewer`
+- `Axes`
+- `Crosshair3D`
+- `Skybox`
+
+### Selection Behavior
+
+- Primary-click selects picked nodes.
+- `Shift`/platform shortcut key toggles selection in multi-select mode.
+- Selection state is also reflected via:
+  - node property key: `org.fxyz3d.scene.selection.selected`
+  - pseudo-class: `:selected`
+
+### Example
+
+```java
+CubeViewer viewer = new CubeViewer(true);
+viewer.getSelectionModel().setSelectionMode(SelectionModel3D.SelectionMode.MULTIPLE);
+viewer.setSelectionEnabled(true);
+
+viewer.getSelectionModel().getSelectedNodes().addListener((change) -> {
+    // react to selection updates
+});
+```
+
 ### Supported Formats
 
 | Format | Extension | Import | Export | Description |
