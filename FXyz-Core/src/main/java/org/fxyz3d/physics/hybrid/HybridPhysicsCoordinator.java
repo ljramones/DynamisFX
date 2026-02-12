@@ -18,16 +18,27 @@ public final class HybridPhysicsCoordinator {
 
     private final PhysicsWorld generalWorld;
     private final PhysicsWorld orbitalWorld;
+    private final HybridCapabilityReport capabilityReport;
     private final AtomicLong nextLinkId = new AtomicLong(1L);
     private final Map<Long, LinkRuntime> links = new LinkedHashMap<>();
     private final AtomicReference<HybridSnapshot> latestSnapshot = new AtomicReference<>();
+    private final AtomicReference<HybridStepTelemetry> latestTelemetry = new AtomicReference<>();
     private double simulationTimeSeconds;
     private double lastStepSeconds;
     private int lastRejectedHandoffs;
 
     public HybridPhysicsCoordinator(PhysicsWorld generalWorld, PhysicsWorld orbitalWorld) {
+        this(generalWorld, orbitalWorld, HybridCapabilityPolicy.LENIENT);
+    }
+
+    public HybridPhysicsCoordinator(
+            PhysicsWorld generalWorld,
+            PhysicsWorld orbitalWorld,
+            HybridCapabilityPolicy capabilityPolicy) {
         this.generalWorld = Objects.requireNonNull(generalWorld, "generalWorld must not be null");
         this.orbitalWorld = Objects.requireNonNull(orbitalWorld, "orbitalWorld must not be null");
+        Objects.requireNonNull(capabilityPolicy, "capabilityPolicy must not be null");
+        this.capabilityReport = validateCapabilities(capabilityPolicy, generalWorld, orbitalWorld);
     }
 
     public long registerLink(HybridBodyLink link) {
@@ -118,6 +129,14 @@ public final class HybridPhysicsCoordinator {
         return latestSnapshot.get();
     }
 
+    public HybridStepTelemetry latestTelemetry() {
+        return latestTelemetry.get();
+    }
+
+    public HybridCapabilityReport capabilityReport() {
+        return capabilityReport;
+    }
+
     public double simulationTimeSeconds() {
         return simulationTimeSeconds;
     }
@@ -132,21 +151,37 @@ public final class HybridPhysicsCoordinator {
         }
         validateRenderMetadata(interpolationAlpha, extrapolationSeconds);
 
+        long orbitalStart = System.nanoTime();
         orbitalWorld.step(dtSeconds);
+        long afterOrbital = System.nanoTime();
         generalWorld.step(dtSeconds);
+        long afterGeneral = System.nanoTime();
 
         lastRejectedHandoffs = 0;
+        int handoffCount = 0;
+        long handoffStart = System.nanoTime();
         for (LinkRuntime runtime : links.values()) {
             if (!runtime.enabled) {
                 continue;
             }
             applyHandoff(runtime);
+            handoffCount++;
         }
+        long afterHandoff = System.nanoTime();
 
         simulationTimeSeconds += dtSeconds;
         lastStepSeconds = dtSeconds;
         HybridSnapshot snapshot = captureSnapshot(interpolationAlpha, extrapolationSeconds);
         latestSnapshot.set(snapshot);
+        latestTelemetry.set(new HybridStepTelemetry(
+                simulationTimeSeconds,
+                dtSeconds,
+                afterOrbital - orbitalStart,
+                afterGeneral - afterOrbital,
+                afterHandoff - handoffStart,
+                links.size(),
+                handoffCount,
+                lastRejectedHandoffs));
         return snapshot;
     }
 
@@ -281,5 +316,26 @@ public final class HybridPhysicsCoordinator {
         private LinkRuntime(HybridBodyLink link) {
             this.link = link;
         }
+    }
+
+    private static HybridCapabilityReport validateCapabilities(
+            HybridCapabilityPolicy policy,
+            PhysicsWorld generalWorld,
+            PhysicsWorld orbitalWorld) {
+        boolean generalRigid = generalWorld.capabilities().supportsRigidBodies();
+        boolean orbitalNBody = orbitalWorld.capabilities().supportsNBody();
+        boolean passed = generalRigid && orbitalNBody;
+        String message = passed
+                ? "capability gate passed"
+                : "expected general world rigid-body support and orbital world n-body support";
+        if (policy == HybridCapabilityPolicy.STRICT && !passed) {
+            throw new IllegalStateException("hybrid strict capability gate failed: " + message);
+        }
+        return new HybridCapabilityReport(
+                policy,
+                generalRigid,
+                orbitalNBody,
+                passed,
+                message);
     }
 }

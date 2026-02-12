@@ -192,7 +192,7 @@ Current kickoff progress:
 
 ### Phase 5 - Hardening
 
-Status: `PENDING`
+Status: `IN PROGRESS`
 
 Deliverables:
 
@@ -204,6 +204,20 @@ Deliverables:
 Exit criteria:
 
 - Production-ready extension model.
+
+Current kickoff progress:
+
+- Runtime capability gating added for hybrid orchestration:
+  - strict and lenient policies
+  - structured capability report
+- Profiling hooks added:
+  - per-step timing telemetry for orbital/general/handoff stages
+  - handoff/rejection counters
+- Snapshot pipeline groundwork added:
+  - in-memory recorder/replay utility
+  - binary snapshot codec (`HybridSnapshotIO`) for serialization round-trips
+- Migration guide added:
+  - `docs/Physics_Migration_Guide.md`
 
 ## Immediate Execution Slice (Current)
 

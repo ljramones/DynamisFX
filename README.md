@@ -470,6 +470,21 @@ Sample wiring:
 
 - `org.fxyz3d.samples.utilities.HybridPhysicsCoordinatorSample`
 
+Phase 5 hardening progress (in core):
+
+- capability gating:
+  - `HybridCapabilityPolicy` (`LENIENT` / `STRICT`)
+  - `HybridCapabilityReport`
+- profiling telemetry:
+  - `HybridStepTelemetry` from `HybridPhysicsCoordinator.latestTelemetry()`
+- snapshot replay pipeline:
+  - `HybridSnapshotRecorder` (in-memory record/replay)
+  - `HybridSnapshotIO` (binary serialization/deserialization)
+
+Migration reference:
+
+- `docs/Physics_Migration_Guide.md`
+
 ### Supported Formats
 
 | Format | Extension | Import | Export | Description |

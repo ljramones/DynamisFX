@@ -28,8 +28,8 @@ class HybridPhysicsCoordinatorTest {
 
     @Test
     void validatesLinkBodiesExistInTheirWorlds() {
-        FakeWorld general = new FakeWorld();
-        FakeWorld orbital = new FakeWorld();
+        FakeWorld general = new FakeWorld(new org.fxyz3d.physics.api.PhysicsCapabilities(true, false, false, false, false));
+        FakeWorld orbital = new FakeWorld(new org.fxyz3d.physics.api.PhysicsCapabilities(false, true, false, false, false));
         HybridPhysicsCoordinator coordinator = new HybridPhysicsCoordinator(general, orbital);
 
         PhysicsBodyHandle generalBody = general.createBody(new PhysicsBodyDefinition(
@@ -47,8 +47,8 @@ class HybridPhysicsCoordinatorTest {
 
     @Test
     void appliesOrbitalOwnershipWithFullStateHandoff() {
-        FakeWorld general = new FakeWorld();
-        FakeWorld orbital = new FakeWorld();
+        FakeWorld general = new FakeWorld(new org.fxyz3d.physics.api.PhysicsCapabilities(true, false, false, false, false));
+        FakeWorld orbital = new FakeWorld(new org.fxyz3d.physics.api.PhysicsCapabilities(false, true, false, false, false));
         HybridPhysicsCoordinator coordinator = new HybridPhysicsCoordinator(general, orbital);
 
         PhysicsBodyHandle generalBody = general.createBody(new PhysicsBodyDefinition(
@@ -84,8 +84,8 @@ class HybridPhysicsCoordinatorTest {
 
     @Test
     void appliesPositionVelocityOnlyWithoutOverwritingFollowerOrientation() {
-        FakeWorld general = new FakeWorld();
-        FakeWorld orbital = new FakeWorld();
+        FakeWorld general = new FakeWorld(new org.fxyz3d.physics.api.PhysicsCapabilities(true, false, false, false, false));
+        FakeWorld orbital = new FakeWorld(new org.fxyz3d.physics.api.PhysicsCapabilities(false, true, false, false, false));
         HybridPhysicsCoordinator coordinator = new HybridPhysicsCoordinator(general, orbital);
 
         PhysicsBodyHandle generalBody = general.createBody(new PhysicsBodyDefinition(
@@ -120,8 +120,8 @@ class HybridPhysicsCoordinatorTest {
 
     @Test
     void publishesImmutableSnapshotPerStep() {
-        FakeWorld general = new FakeWorld();
-        FakeWorld orbital = new FakeWorld();
+        FakeWorld general = new FakeWorld(new org.fxyz3d.physics.api.PhysicsCapabilities(true, false, false, false, false));
+        FakeWorld orbital = new FakeWorld(new org.fxyz3d.physics.api.PhysicsCapabilities(false, true, false, false, false));
         HybridPhysicsCoordinator coordinator = new HybridPhysicsCoordinator(general, orbital);
 
         PhysicsBodyHandle generalBody = general.createBody(new PhysicsBodyDefinition(
@@ -143,8 +143,8 @@ class HybridPhysicsCoordinatorTest {
 
     @Test
     void rejectsDivergentHandoffWhenPolicyRequiresIt() {
-        FakeWorld general = new FakeWorld();
-        FakeWorld orbital = new FakeWorld();
+        FakeWorld general = new FakeWorld(new org.fxyz3d.physics.api.PhysicsCapabilities(true, false, false, false, false));
+        FakeWorld orbital = new FakeWorld(new org.fxyz3d.physics.api.PhysicsCapabilities(false, true, false, false, false));
         HybridPhysicsCoordinator coordinator = new HybridPhysicsCoordinator(general, orbital);
 
         PhysicsBodyHandle generalBody = general.createBody(new PhysicsBodyDefinition(
@@ -182,8 +182,8 @@ class HybridPhysicsCoordinatorTest {
 
     @Test
     void rejectsOnVelocityAndAngularDivergenceWhenConfigured() {
-        FakeWorld general = new FakeWorld();
-        FakeWorld orbital = new FakeWorld();
+        FakeWorld general = new FakeWorld(new org.fxyz3d.physics.api.PhysicsCapabilities(true, false, false, false, false));
+        FakeWorld orbital = new FakeWorld(new org.fxyz3d.physics.api.PhysicsCapabilities(false, true, false, false, false));
         HybridPhysicsCoordinator coordinator = new HybridPhysicsCoordinator(general, orbital);
 
         PhysicsBodyHandle generalBody = general.createBody(new PhysicsBodyDefinition(
@@ -223,8 +223,8 @@ class HybridPhysicsCoordinatorTest {
 
     @Test
     void supportsLinkLifecycleAndDiagnostics() {
-        FakeWorld general = new FakeWorld();
-        FakeWorld orbital = new FakeWorld();
+        FakeWorld general = new FakeWorld(new org.fxyz3d.physics.api.PhysicsCapabilities(true, false, false, false, false));
+        FakeWorld orbital = new FakeWorld(new org.fxyz3d.physics.api.PhysicsCapabilities(false, true, false, false, false));
         HybridPhysicsCoordinator coordinator = new HybridPhysicsCoordinator(general, orbital);
 
         PhysicsBodyHandle generalBody = general.createBody(new PhysicsBodyDefinition(
@@ -270,8 +270,8 @@ class HybridPhysicsCoordinatorTest {
 
     @Test
     void updatesRenderMetadataFromAccumulatorOutput() {
-        FakeWorld general = new FakeWorld();
-        FakeWorld orbital = new FakeWorld();
+        FakeWorld general = new FakeWorld(new org.fxyz3d.physics.api.PhysicsCapabilities(true, false, false, false, false));
+        FakeWorld orbital = new FakeWorld(new org.fxyz3d.physics.api.PhysicsCapabilities(false, true, false, false, false));
         HybridPhysicsCoordinator coordinator = new HybridPhysicsCoordinator(general, orbital);
 
         PhysicsBodyHandle generalBody = general.createBody(new PhysicsBodyDefinition(
@@ -286,17 +286,43 @@ class HybridPhysicsCoordinatorTest {
         assertNotNull(updated);
         assertEquals(0.4, updated.interpolationAlpha(), 1e-9);
         assertEquals(0.03, updated.extrapolationSeconds(), 1e-9);
+        assertNotNull(coordinator.latestTelemetry());
+        assertTrue(coordinator.latestTelemetry().orbitalStepNanos() >= 0L);
+    }
+
+    @Test
+    void enforcesStrictCapabilityGate() {
+        FakeWorld unsupportedGeneral = new FakeWorld(org.fxyz3d.physics.api.PhysicsCapabilities.EMPTY);
+        FakeWorld unsupportedOrbital = new FakeWorld(org.fxyz3d.physics.api.PhysicsCapabilities.EMPTY);
+        assertThrows(IllegalStateException.class, () -> new HybridPhysicsCoordinator(
+                unsupportedGeneral,
+                unsupportedOrbital,
+                HybridCapabilityPolicy.STRICT));
+
+        FakeWorld general = new FakeWorld(new org.fxyz3d.physics.api.PhysicsCapabilities(true, false, false, false, false));
+        FakeWorld orbital = new FakeWorld(new org.fxyz3d.physics.api.PhysicsCapabilities(false, true, false, false, false));
+        HybridPhysicsCoordinator coordinator = new HybridPhysicsCoordinator(
+                general,
+                orbital,
+                HybridCapabilityPolicy.STRICT);
+        assertTrue(coordinator.capabilityReport().passed());
+        assertEquals(HybridCapabilityPolicy.STRICT, coordinator.capabilityReport().policy());
     }
 
     private static final class FakeWorld implements PhysicsWorld {
 
+        private final org.fxyz3d.physics.api.PhysicsCapabilities capabilities;
         private final Map<PhysicsBodyHandle, PhysicsBodyState> states = new LinkedHashMap<>();
         private long nextHandle = 1L;
         private PhysicsRuntimeTuning tuning = new PhysicsRuntimeTuning(20, 1.0, 0.0, 1e-5, 0.1);
 
+        private FakeWorld(org.fxyz3d.physics.api.PhysicsCapabilities capabilities) {
+            this.capabilities = capabilities;
+        }
+
         @Override
         public org.fxyz3d.physics.api.PhysicsCapabilities capabilities() {
-            return org.fxyz3d.physics.api.PhysicsCapabilities.EMPTY;
+            return capabilities;
         }
 
         @Override
