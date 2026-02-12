@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Per-Particle Scale Tests" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-02-12T02:26:01.635Z" hostname="MacBook-Pro.local" time="0.0">
+  <properties/>
+  <testcase name="addMeshWithScale scales vertices around origin before translating" classname="org.fxyz3d.shapes.primitives.helper.MeshHelperTest$ScaleTests" time="0.0"/>
+  <testcase name="addMeshWithScale uses default scale for invalid values" classname="org.fxyz3d.shapes.primitives.helper.MeshHelperTest$ScaleTests" time="0.0"/>
+  <testcase name="addMeshWithScale applies scale to each particle" classname="org.fxyz3d.shapes.primitives.helper.MeshHelperTest$ScaleTests" time="0.0"/>
+  <testcase name="addMeshWithScale positions particles correctly" classname="org.fxyz3d.shapes.primitives.helper.MeshHelperTest$ScaleTests" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

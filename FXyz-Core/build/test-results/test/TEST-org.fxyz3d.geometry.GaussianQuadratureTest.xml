@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.fxyz3d.geometry.GaussianQuadratureTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-02-12T02:26:00.831Z" hostname="MacBook-Pro.local" time="0.005">
+  <properties/>
+  <testcase name="Integrate polynomial exactly" classname="org.fxyz3d.geometry.GaussianQuadratureTest" time="0.002"/>
+  <testcase name="Integrate sin(x) from 0 to PI" classname="org.fxyz3d.geometry.GaussianQuadratureTest" time="0.0"/>
+  <testcase name="6-point quadrature works" classname="org.fxyz3d.geometry.GaussianQuadratureTest" time="0.001"/>
+  <testcase name="Default constructor creates 5-point quadrature" classname="org.fxyz3d.geometry.GaussianQuadratureTest" time="0.0"/>
+  <testcase name="Integrate constant function" classname="org.fxyz3d.geometry.GaussianQuadratureTest" time="0.0"/>
+  <testcase name="4-point quadrature works" classname="org.fxyz3d.geometry.GaussianQuadratureTest" time="0.001"/>
+  <testcase name="Integrate linear function" classname="org.fxyz3d.geometry.GaussianQuadratureTest" time="0.0"/>
+  <testcase name="3-point quadrature works" classname="org.fxyz3d.geometry.GaussianQuadratureTest" time="0.0"/>
+  <testcase name="Custom range works" classname="org.fxyz3d.geometry.GaussianQuadratureTest" time="0.0"/>
+  <testcase name="2-point quadrature works" classname="org.fxyz3d.geometry.GaussianQuadratureTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

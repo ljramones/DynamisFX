@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.fxyz3d.shapes.polygon.PolygonMeshViewTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-02-12T02:26:00.943Z" hostname="MacBook-Pro.local" time="0.003">
+  <properties/>
+  <testcase name="Default cull face is BACK" classname="org.fxyz3d.shapes.polygon.PolygonMeshViewTest" time="0.001"/>
+  <testcase name="Subdivision level defaults to 0" classname="org.fxyz3d.shapes.polygon.PolygonMeshViewTest" time="0.0"/>
+  <testcase name="Default constructor creates view" classname="org.fxyz3d.shapes.polygon.PolygonMeshViewTest" time="0.0"/>
+  <testcase name="Draw mode can be changed" classname="org.fxyz3d.shapes.polygon.PolygonMeshViewTest" time="0.0"/>
+  <testcase name="Constructor with mesh sets mesh" classname="org.fxyz3d.shapes.polygon.PolygonMeshViewTest" time="0.0"/>
+  <testcase name="Default draw mode is FILL" classname="org.fxyz3d.shapes.polygon.PolygonMeshViewTest" time="0.001"/>
+  <testcase name="Cull face can be changed" classname="org.fxyz3d.shapes.polygon.PolygonMeshViewTest" time="0.0"/>
+  <testcase name="Property accessors work" classname="org.fxyz3d.shapes.polygon.PolygonMeshViewTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

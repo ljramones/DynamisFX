@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Basic Construction Tests" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-02-12T02:26:01.200Z" hostname="MacBook-Pro.local" time="0.002">
+  <properties/>
+  <testcase name="Constructor with scatter data creates mesh" classname="org.fxyz3d.shapes.primitives.ScatterMeshTest$ConstructionTests" time="0.001"/>
+  <testcase name="Constructor with height sets particle size" classname="org.fxyz3d.shapes.primitives.ScatterMeshTest$ConstructionTests" time="0.0"/>
+  <testcase name="setMarker changes marker type" classname="org.fxyz3d.shapes.primitives.ScatterMeshTest$ConstructionTests" time="0.0"/>
+  <testcase name="Default constructor creates mesh with default data" classname="org.fxyz3d.shapes.primitives.ScatterMeshTest$ConstructionTests" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.fxyz3d.shapes.primitives.OctahedronMeshTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-02-12T02:26:01.108Z" hostname="MacBook-Pro.local" time="0.002">
+  <properties/>
+  <testcase name="Octahedron has exactly 10 faces" classname="org.fxyz3d.shapes.primitives.OctahedronMeshTest" time="0.001"/>
+  <testcase name="Parameterized constructor sets values correctly" classname="org.fxyz3d.shapes.primitives.OctahedronMeshTest" time="0.0"/>
+  <testcase name="Octahedron has exactly 6 vertices" classname="org.fxyz3d.shapes.primitives.OctahedronMeshTest" time="0.0"/>
+  <testcase name="Default constructor uses correct default values" classname="org.fxyz3d.shapes.primitives.OctahedronMeshTest" time="0.0"/>
+  <testcase name="Mesh has vertices" classname="org.fxyz3d.shapes.primitives.OctahedronMeshTest" time="0.0"/>
+  <testcase name="Mesh has faces" classname="org.fxyz3d.shapes.primitives.OctahedronMeshTest" time="0.001"/>
+  <testcase name="Mesh is updated when height changes" classname="org.fxyz3d.shapes.primitives.OctahedronMeshTest" time="0.0"/>
+  <testcase name="Mesh is updated when hypotenuse changes" classname="org.fxyz3d.shapes.primitives.OctahedronMeshTest" time="0.0"/>
+  <testcase name="Property accessors work correctly" classname="org.fxyz3d.shapes.primitives.OctahedronMeshTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Billboard Use Case Tests" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-02-12T02:26:01.119Z" hostname="MacBook-Pro.local" time="0.001">
+  <properties/>
+  <testcase name="Quad is visible from both sides due to CullFace.NONE" classname="org.fxyz3d.shapes.primitives.QuadMeshTest$BillboardTests" time="0.001"/>
+  <testcase name="Quad faces +Z direction (normal is +Z)" classname="org.fxyz3d.shapes.primitives.QuadMeshTest$BillboardTests" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.fxyz3d.geometry.Vector3DTest" tests="20" skipped="0" failures="0" errors="0" timestamp="2026-02-12T02:26:00.858Z" hostname="MacBook-Pro.local" time="0.004">
+  <properties/>
+  <testcase name="Copy constructor copies values" classname="org.fxyz3d.geometry.Vector3DTest" time="0.0"/>
+  <testcase name="Magnitude calculates correctly" classname="org.fxyz3d.geometry.Vector3DTest" time="0.001"/>
+  <testcase name="Subtract works" classname="org.fxyz3d.geometry.Vector3DTest" time="0.0"/>
+  <testcase name="ToNormal creates unit vector" classname="org.fxyz3d.geometry.Vector3DTest" time="0.0"/>
+  <testcase name="Size returns 3" classname="org.fxyz3d.geometry.Vector3DTest" time="0.0"/>
+  <testcase name="Parameterized constructor sets values" classname="org.fxyz3d.geometry.Vector3DTest" time="0.0"/>
+  <testcase name="Array constructor sets values" classname="org.fxyz3d.geometry.Vector3DTest" time="0.001"/>
+  <testcase name="ToDoubleArray works" classname="org.fxyz3d.geometry.Vector3DTest" time="0.0"/>
+  <testcase name="Dot product calculates correctly" classname="org.fxyz3d.geometry.Vector3DTest" time="0.0"/>
+  <testcase name="GetProduct calculates correctly" classname="org.fxyz3d.geometry.Vector3DTest" time="0.0"/>
+  <testcase name="Cross product calculates correctly" classname="org.fxyz3d.geometry.Vector3DTest" time="0.0"/>
+  <testcase name="Add with vector works" classname="org.fxyz3d.geometry.Vector3DTest" time="0.0"/>
+  <testcase name="Distance calculates correctly" classname="org.fxyz3d.geometry.Vector3DTest" time="0.0"/>
+  <testcase name="MagnitudeSquared calculates correctly" classname="org.fxyz3d.geometry.Vector3DTest" time="0.001"/>
+  <testcase name="Multiply works" classname="org.fxyz3d.geometry.Vector3DTest" time="0.0"/>
+  <testcase name="GetSum calculates correctly" classname="org.fxyz3d.geometry.Vector3DTest" time="0.0"/>
+  <testcase name="Negate works" classname="org.fxyz3d.geometry.Vector3DTest" time="0.0"/>
+  <testcase name="Static constants are correct" classname="org.fxyz3d.geometry.Vector3DTest" time="0.0"/>
+  <testcase name="Default constructor creates zero vector" classname="org.fxyz3d.geometry.Vector3DTest" time="0.0"/>
+  <testcase name="Add with constant works" classname="org.fxyz3d.geometry.Vector3DTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

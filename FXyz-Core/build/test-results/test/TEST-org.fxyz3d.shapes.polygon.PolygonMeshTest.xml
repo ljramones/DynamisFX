@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.fxyz3d.shapes.polygon.PolygonMeshTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-02-12T02:26:00.942Z" hostname="MacBook-Pro.local" time="0.001">
+  <properties/>
+  <testcase name="getPointElementSize returns 3" classname="org.fxyz3d.shapes.polygon.PolygonMeshTest" time="0.0"/>
+  <testcase name="getTexCoordElementSize returns 2" classname="org.fxyz3d.shapes.polygon.PolygonMeshTest" time="0.0"/>
+  <testcase name="getNumEdgesInFaces calculates correctly" classname="org.fxyz3d.shapes.polygon.PolygonMeshTest" time="0.0"/>
+  <testcase name="Default constructor creates empty mesh" classname="org.fxyz3d.shapes.polygon.PolygonMeshTest" time="0.0"/>
+  <testcase name="getFaceElementSize returns 6" classname="org.fxyz3d.shapes.polygon.PolygonMeshTest" time="0.001"/>
+  <testcase name="getFaceSmoothingGroups returns observable array" classname="org.fxyz3d.shapes.polygon.PolygonMeshTest" time="0.0"/>
+  <testcase name="Constructor with arrays sets data" classname="org.fxyz3d.shapes.polygon.PolygonMeshTest" time="0.0"/>
+  <testcase name="setFaces updates faces" classname="org.fxyz3d.shapes.polygon.PolygonMeshTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

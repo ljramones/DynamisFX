@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Constructor Tests" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-02-12T02:26:00.851Z" hostname="MacBook-Pro.local" time="0.002">
+  <properties/>
+  <testcase name="Constructor with colorIndex and scale" classname="org.fxyz3d.geometry.Point3DTest$ConstructorTests" time="0.0"/>
+  <testcase name="Constructor with function value" classname="org.fxyz3d.geometry.Point3DTest$ConstructorTests" time="0.001"/>
+  <testcase name="Full constructor with all attributes" classname="org.fxyz3d.geometry.Point3DTest$ConstructorTests" time="0.0"/>
+  <testcase name="Double constructor converts to float" classname="org.fxyz3d.geometry.Point3DTest$ConstructorTests" time="0.0"/>
+  <testcase name="Constructor with colorIndex" classname="org.fxyz3d.geometry.Point3DTest$ConstructorTests" time="0.0"/>
+  <testcase name="Constructor with f and colorIndex" classname="org.fxyz3d.geometry.Point3DTest$ConstructorTests" time="0.0"/>
+  <testcase name="Constructor with f, colorIndex, and scale" classname="org.fxyz3d.geometry.Point3DTest$ConstructorTests" time="0.0"/>
+  <testcase name="Constructor with colorIndex, scale, and opacity" classname="org.fxyz3d.geometry.Point3DTest$ConstructorTests" time="0.0"/>
+  <testcase name="Basic float constructor sets x, y, z" classname="org.fxyz3d.geometry.Point3DTest$ConstructorTests" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

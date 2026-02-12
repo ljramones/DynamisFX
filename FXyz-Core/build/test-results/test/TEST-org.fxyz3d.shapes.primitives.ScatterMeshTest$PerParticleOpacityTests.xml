@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Per-Particle Opacity Tests" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-02-12T02:26:01.188Z" hostname="MacBook-Pro.local" time="0.007">
+  <properties/>
+  <testcase name="enableAllPerParticleAttributes enables color, scale, and opacity" classname="org.fxyz3d.shapes.primitives.ScatterMeshTest$PerParticleOpacityTests" time="0.002"/>
+  <testcase name="disablePerParticleAttributes disables all modes" classname="org.fxyz3d.shapes.primitives.ScatterMeshTest$PerParticleOpacityTests" time="0.001"/>
+  <testcase name="enableAllPerParticleAttributes throws for null palette" classname="org.fxyz3d.shapes.primitives.ScatterMeshTest$PerParticleOpacityTests" time="0.0"/>
+  <testcase name="Particles with different opacity render correctly" classname="org.fxyz3d.shapes.primitives.ScatterMeshTest$PerParticleOpacityTests" time="0.002"/>
+  <testcase name="enableAllPerParticleAttributes throws for empty palette" classname="org.fxyz3d.shapes.primitives.ScatterMeshTest$PerParticleOpacityTests" time="0.0"/>
+  <testcase name="Default perParticleOpacity is false" classname="org.fxyz3d.shapes.primitives.ScatterMeshTest$PerParticleOpacityTests" time="0.0"/>
+  <testcase name="setPerParticleOpacity enables opacity mode" classname="org.fxyz3d.shapes.primitives.ScatterMeshTest$PerParticleOpacityTests" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

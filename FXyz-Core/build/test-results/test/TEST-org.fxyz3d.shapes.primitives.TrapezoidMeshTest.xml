@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.fxyz3d.shapes.primitives.TrapezoidMeshTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-02-12T02:26:01.631Z" hostname="MacBook-Pro.local" time="0.001">
+  <properties/>
+  <testcase name="Trapezoid has exactly 8 vertices" classname="org.fxyz3d.shapes.primitives.TrapezoidMeshTest" time="0.001"/>
+  <testcase name="Parameterized constructor sets values correctly" classname="org.fxyz3d.shapes.primitives.TrapezoidMeshTest" time="0.0"/>
+  <testcase name="Mesh is updated when bigSize changes" classname="org.fxyz3d.shapes.primitives.TrapezoidMeshTest" time="0.0"/>
+  <testcase name="Mesh is updated when smallSize changes" classname="org.fxyz3d.shapes.primitives.TrapezoidMeshTest" time="0.0"/>
+  <testcase name="Trapezoid has exactly 12 faces" classname="org.fxyz3d.shapes.primitives.TrapezoidMeshTest" time="0.0"/>
+  <testcase name="Default constructor uses correct default values" classname="org.fxyz3d.shapes.primitives.TrapezoidMeshTest" time="0.0"/>
+  <testcase name="Mesh is updated when depth changes" classname="org.fxyz3d.shapes.primitives.TrapezoidMeshTest" time="0.0"/>
+  <testcase name="Mesh has vertices" classname="org.fxyz3d.shapes.primitives.TrapezoidMeshTest" time="0.0"/>
+  <testcase name="Mesh has faces" classname="org.fxyz3d.shapes.primitives.TrapezoidMeshTest" time="0.0"/>
+  <testcase name="Mesh is updated when height changes" classname="org.fxyz3d.shapes.primitives.TrapezoidMeshTest" time="0.0"/>
+  <testcase name="Property accessors work correctly" classname="org.fxyz3d.shapes.primitives.TrapezoidMeshTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

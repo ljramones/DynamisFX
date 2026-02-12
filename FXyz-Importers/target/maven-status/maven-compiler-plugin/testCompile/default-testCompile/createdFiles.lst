@@ -1,0 +1,5 @@
+org/fxyz3d/importers/obj/ObjImporterTest.class
+org/fxyz3d/importers/RunWithFX.class
+org/fxyz3d/importers/obj/MtlReaderTest.class
+org/fxyz3d/importers/fxml/FXMLImporterTest.class
+org/fxyz3d/importers/maya/MayaImporterTest.class

@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Built-By: larrymitchell
+Created-By: 25.0.1 (Eclipse Adoptium 25.0.1+8-LTS)
+Build-Date: 2026-02-11
+Build-Time: 21:28:34.569-0500
+Build-Revision: 
+Specification-Title: FXyz-Core
+Specification-Version: 0.6.1-SNAPSHOT
+Implementation-Title: FXyz-Core
+Implementation-Version: 0.6.1-SNAPSHOT
+

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Coordinate Conversion Tests" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-02-12T02:26:00.839Z" hostname="MacBook-Pro.local" time="0.004">
+  <properties/>
+  <testcase name="toCSV formats coordinates correctly" classname="org.fxyz3d.geometry.Point3DTest$ConversionTests" time="0.003"/>
+  <testcase name="convertToJavaFXPoint3D creates JavaFX point from Point3D" classname="org.fxyz3d.geometry.Point3DTest$ConversionTests" time="0.0"/>
+  <testcase name="getCoordinates returns stream of coordinates" classname="org.fxyz3d.geometry.Point3DTest$ConversionTests" time="0.0"/>
+  <testcase name="convertFromJavaFXPoint3D creates Point3D from JavaFX point" classname="org.fxyz3d.geometry.Point3DTest$ConversionTests" time="0.0"/>
+  <testcase name="getCoordinates with factor scales coordinates" classname="org.fxyz3d.geometry.Point3DTest$ConversionTests" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

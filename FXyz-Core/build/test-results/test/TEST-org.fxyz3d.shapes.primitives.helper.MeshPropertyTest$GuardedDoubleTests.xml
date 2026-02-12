@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Guarded DoubleProperty Tests" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-02-12T02:26:01.642Z" hostname="MacBook-Pro.local" time="0.001">
+  <properties/>
+  <testcase name="createDouble calls update multiple times for multiple changes when observed" classname="org.fxyz3d.shapes.primitives.helper.MeshPropertyTest$GuardedDoubleTests" time="0.0"/>
+  <testcase name="createDouble respects dynamic mesh state" classname="org.fxyz3d.shapes.primitives.helper.MeshPropertyTest$GuardedDoubleTests" time="0.001"/>
+  <testcase name="createDouble calls update when mesh is non-null" classname="org.fxyz3d.shapes.primitives.helper.MeshPropertyTest$GuardedDoubleTests" time="0.0"/>
+  <testcase name="createDouble returns property with initial value" classname="org.fxyz3d.shapes.primitives.helper.MeshPropertyTest$GuardedDoubleTests" time="0.0"/>
+  <testcase name="createDouble does not call update when mesh is null" classname="org.fxyz3d.shapes.primitives.helper.MeshPropertyTest$GuardedDoubleTests" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

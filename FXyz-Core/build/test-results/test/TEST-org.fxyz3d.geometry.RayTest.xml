@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.fxyz3d.geometry.RayTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-02-12T02:26:00.854Z" hostname="MacBook-Pro.local" time="0.004">
+  <properties/>
+  <testcase name="ToString returns non-null" classname="org.fxyz3d.geometry.RayTest" time="0.002"/>
+  <testcase name="Constructor sets origin and direction" classname="org.fxyz3d.geometry.RayTest" time="0.0"/>
+  <testcase name="Project with diagonal direction" classname="org.fxyz3d.geometry.RayTest" time="0.0"/>
+  <testcase name="Project moves position along direction" classname="org.fxyz3d.geometry.RayTest" time="0.0"/>
+  <testcase name="GetPosition returns origin when not projected" classname="org.fxyz3d.geometry.RayTest" time="0.0"/>
+  <testcase name="Project updates position" classname="org.fxyz3d.geometry.RayTest" time="0.0"/>
+  <testcase name="SetProject changes origin, direction and projects" classname="org.fxyz3d.geometry.RayTest" time="0.0"/>
+  <testcase name="ReProject changes origin and projects" classname="org.fxyz3d.geometry.RayTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

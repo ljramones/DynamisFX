@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Construction Tests" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-02-12T02:26:01.122Z" hostname="MacBook-Pro.local" time="0.0">
+  <properties/>
+  <testcase name="Default CullFace is NONE for billboard visibility" classname="org.fxyz3d.shapes.primitives.QuadMeshTest$ConstructionTests" time="0.0"/>
+  <testcase name="Constructor with size sets size" classname="org.fxyz3d.shapes.primitives.QuadMeshTest$ConstructionTests" time="0.0"/>
+  <testcase name="Constructor with size and center sets both" classname="org.fxyz3d.shapes.primitives.QuadMeshTest$ConstructionTests" time="0.0"/>
+  <testcase name="Default DrawMode is FILL" classname="org.fxyz3d.shapes.primitives.QuadMeshTest$ConstructionTests" time="0.0"/>
+  <testcase name="Default constructor creates mesh with size 1.0" classname="org.fxyz3d.shapes.primitives.QuadMeshTest$ConstructionTests" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

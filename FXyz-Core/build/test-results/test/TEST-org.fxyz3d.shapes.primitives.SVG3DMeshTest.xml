@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.fxyz3d.shapes.primitives.SVG3DMeshTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-02-12T02:26:01.123Z" hostname="MacBook-Pro.local" time="0.038">
+  <properties/>
+  <testcase name="Height can be changed" classname="org.fxyz3d.shapes.primitives.SVG3DMeshTest" time="0.017"/>
+  <testcase name="Group contains children" classname="org.fxyz3d.shapes.primitives.SVG3DMeshTest" time="0.002"/>
+  <testcase name="Content and height constructor sets values correctly" classname="org.fxyz3d.shapes.primitives.SVG3DMeshTest" time="0.002"/>
+  <testcase name="Default constructor uses correct default values" classname="org.fxyz3d.shapes.primitives.SVG3DMeshTest" time="0.001"/>
+  <testcase name="Level can be changed" classname="org.fxyz3d.shapes.primitives.SVG3DMeshTest" time="0.009"/>
+  <testcase name="Full constructor sets all values correctly" classname="org.fxyz3d.shapes.primitives.SVG3DMeshTest" time="0.002"/>
+  <testcase name="Content can be changed" classname="org.fxyz3d.shapes.primitives.SVG3DMeshTest" time="0.001"/>
+  <testcase name="JoinSegments can be changed" classname="org.fxyz3d.shapes.primitives.SVG3DMeshTest" time="0.002"/>
+  <testcase name="Content constructor sets content correctly" classname="org.fxyz3d.shapes.primitives.SVG3DMeshTest" time="0.0"/>
+  <testcase name="Property accessors work correctly" classname="org.fxyz3d.shapes.primitives.SVG3DMeshTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Construction Tests" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-02-12T02:26:01.107Z" hostname="MacBook-Pro.local" time="0.001">
+  <properties/>
+  <testcase name="Default CullFace is BACK" classname="org.fxyz3d.shapes.primitives.OctahedronMarkerMeshTest$ConstructionTests" time="0.0"/>
+  <testcase name="Constructor with radius and center sets both" classname="org.fxyz3d.shapes.primitives.OctahedronMarkerMeshTest$ConstructionTests" time="0.001"/>
+  <testcase name="Constructor with radius sets radius" classname="org.fxyz3d.shapes.primitives.OctahedronMarkerMeshTest$ConstructionTests" time="0.0"/>
+  <testcase name="Default DrawMode is FILL" classname="org.fxyz3d.shapes.primitives.OctahedronMarkerMeshTest$ConstructionTests" time="0.0"/>
+  <testcase name="Default constructor creates mesh with radius 1.0" classname="org.fxyz3d.shapes.primitives.OctahedronMarkerMeshTest$ConstructionTests" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

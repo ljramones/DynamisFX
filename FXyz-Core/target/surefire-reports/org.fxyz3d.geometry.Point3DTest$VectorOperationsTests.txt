@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: org.fxyz3d.geometry.Point3DTest$VectorOperationsTests
+-------------------------------------------------------------------------------
+Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in org.fxyz3d.geometry.Point3DTest$VectorOperationsTests

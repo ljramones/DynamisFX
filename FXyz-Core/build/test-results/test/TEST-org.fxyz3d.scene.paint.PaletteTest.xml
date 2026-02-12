@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.fxyz3d.scene.paint.PaletteTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-02-12T02:26:00.862Z" hostname="MacBook-Pro.local" time="0.007">
+  <properties/>
+  <testcase name="ListColorPalette returns correct colors" classname="org.fxyz3d.scene.paint.PaletteTest" time="0.003"/>
+  <testcase name="Palette constructor works" classname="org.fxyz3d.scene.paint.PaletteTest" time="0.002"/>
+  <testcase name="ListColorPalette clamps out of bounds index" classname="org.fxyz3d.scene.paint.PaletteTest" time="0.0"/>
+  <testcase name="Default palette is available" classname="org.fxyz3d.scene.paint.PaletteTest" time="0.0"/>
+  <testcase name="Palette with numColors works" classname="org.fxyz3d.scene.paint.PaletteTest" time="0.0"/>
+  <testcase name="FunctionColorPalette generates colors" classname="org.fxyz3d.scene.paint.PaletteTest" time="0.001"/>
+  <testcase name="ColorPalette getLinearGradient works" classname="org.fxyz3d.scene.paint.PaletteTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[SLF4J: No SLF4J providers were found.
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See https://www.slf4j.org/codes.html#noProviders for further details.
+]]></system-err>
+</testsuite>

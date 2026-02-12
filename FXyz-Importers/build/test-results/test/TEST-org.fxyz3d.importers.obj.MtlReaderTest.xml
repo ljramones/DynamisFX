@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.fxyz3d.importers.obj.MtlReaderTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-02-12T01:41:08.240Z" hostname="MacBook-Pro.local" time="0.026">
+  <properties/>
+  <testcase name="testReadMaterials()" classname="org.fxyz3d.importers.obj.MtlReaderTest" time="0.002"/>
+  <testcase name="[1] blue, 0, 0, 0.7, 1, 1, 1, 64" classname="org.fxyz3d.importers.obj.MtlReaderTest" time="0.005"/>
+  <testcase name="[2] red, 0.7, 0, 0.022779, 1, 1, 1, 80" classname="org.fxyz3d.importers.obj.MtlReaderTest" time="0.001"/>
+  <testcase name="[3] white, 1, 1, 1, 1, 1, 1, 80" classname="org.fxyz3d.importers.obj.MtlReaderTest" time="0.001"/>
+  <testcase name="[4] black, 0, 0, 0, 1, 1, 0.7, 33" classname="org.fxyz3d.importers.obj.MtlReaderTest" time="0.0"/>
+  <testcase name="[5] green, 0, 1, 0, 1, 0.9, 1, 62" classname="org.fxyz3d.importers.obj.MtlReaderTest" time="0.001"/>
+  <testcase name="[6] purple, 0.7, 0, 0.522779, 1, 1, 1, 80" classname="org.fxyz3d.importers.obj.MtlReaderTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
