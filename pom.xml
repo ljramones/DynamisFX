@@ -34,6 +34,7 @@
         <vvecmath.version>0.4.0</vvecmath.version>
         <poly2tri-core.version>0.1.2</poly2tri-core.version>
         <ode4j.version>0.5.3</ode4j.version>
+        <orekit.version>12.2</orekit.version>
 
         <slf4j.version>2.0.7</slf4j.version>
 
@@ -122,6 +123,11 @@
                 <groupId>org.ode4j</groupId>
                 <artifactId>core</artifactId>
                 <version>${ode4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.orekit</groupId>
+                <artifactId>orekit</artifactId>
+                <version>${orekit.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>

@@ -116,9 +116,12 @@ Current kickoff progress:
   - `OrekitBackendFactory`
   - `OrekitBackend`
   - `OrekitWorld`
-- Orbital stepping scaffold added for inertial-frame N-body style integration:
-  - static central bodies can influence dynamic body acceleration
-  - fixed-step state updates remain backend-neutral through `PhysicsWorld`
+- Orekit propagation internals are now wired using analytical propagators:
+  - dynamic bodies are advanced via `KeplerianPropagator`
+  - dominant non-dynamic attractor is selected as the current primary body
+- Frame bridge hooks added:
+  - `OrekitFrameBridge` maps `ReferenceFrame` to Orekit `Frame`
+  - state normalization can transform position/velocity into the world frame
 - Time-scale controls added on the Orekit world scaffold:
   - `setTimeScale(...)`
   - `timeScale()`

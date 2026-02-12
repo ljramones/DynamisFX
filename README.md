@@ -439,10 +439,11 @@ Phase 3 kickoff is also now in progress with:
 Current Orekit module scope/shortcomings:
 
 - It is an astrodynamics-oriented scaffold through the shared `PhysicsWorld` SPI.
-- It currently provides deterministic inertial-frame N-body style stepping for orbital experiments.
+- It currently advances orbital bodies with Orekit analytical propagation (`KeplerianPropagator`) around a dominant primary attractor.
+- It includes a frame bridge hook (`OrekitFrameBridge`) for `ReferenceFrame` to Orekit `Frame` mapping and state normalization.
 - Time scaling is available on `OrekitWorld` via `setTimeScale(...)` / `timeScale()`.
 - Constraint creation is intentionally unsupported in this backend.
-- Full Orekit propagator/frame transform binding is planned next in Phase 3.
+- Higher-fidelity multi-body and full frame/time-scale integration are still planned next in Phase 3.
 
 ### Supported Formats
 
