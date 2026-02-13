@@ -16,7 +16,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
-import org.dynamisfx.physics.model.PhysicsBodyState;
 import org.dynamisfx.physics.model.PhysicsVector3;
 import org.dynamisfx.physics.model.ReferenceFrame;
 import org.dynamisfx.simulation.ObjectSimulationMode;
@@ -35,6 +34,7 @@ import org.dynamisfx.simulation.entity.SimulationEntityRegistry;
 import org.dynamisfx.simulation.orbital.OrbitalState;
 import org.dynamisfx.simulation.orbital.ScriptedOrbitalDynamicsEngine;
 import org.dynamisfx.simulation.rigid.RigidBodyWorld;
+import org.dynamisfx.simulation.rigid.RigidStateBuffer;
 import org.dynamisfx.simulation.runtime.SimulationOrchestrator;
 import org.dynamisfx.samples.shapes.ShapeBaseSample;
 
@@ -57,7 +57,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
             new SimulationTransformBridge(entityRegistry, transformStore);
     private final ScriptedOrbitalDynamicsEngine orbitalEngine = new ScriptedOrbitalDynamicsEngine();
     private final Map<String, OrbitalState> latestOrbitalStates = new ConcurrentHashMap<>();
-    private final Map<String, PhysicsBodyState> latestRigidStates = new ConcurrentHashMap<>();
+    private final RigidStateBuffer rigidStateBuffer = new RigidStateBuffer();
     private CouplingStateReconciler stateReconciler;
     private SimulationOrchestrator orchestrator;
 
@@ -93,10 +93,10 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 time));
         stateReconciler = new CouplingStateReconciler(
                 objectId -> Optional.ofNullable(latestOrbitalStates.get(objectId)),
-                objectId -> Optional.ofNullable(latestRigidStates.get(objectId)),
-                latestRigidStates::put,
+                rigidStateBuffer::get,
+                rigidStateBuffer::put,
                 this::seedOrbitalFromPhysics,
-                latestRigidStates::remove,
+                rigidStateBuffer::remove,
                 objectId -> {
                 },
                 (objectId, zones) -> zones.isEmpty() ? Optional.empty() : Optional.of(zones.get(0)));
@@ -111,7 +111,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 couplingManager,
                 this::stepRigidDemo,
                 transformBridge,
-                () -> Map.copyOf(latestRigidStates),
+                rigidStateBuffer::snapshot,
                 () -> List.of(OBJECT_ID),
                 ReferenceFrame.WORLD);
     }
@@ -224,23 +224,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         if (mode != ObjectSimulationMode.PHYSICS_ACTIVE) {
             return;
         }
-        PhysicsBodyState current = latestRigidStates.get(OBJECT_ID);
-        if (current == null) {
-            return;
-        }
-        PhysicsVector3 p = current.position();
-        PhysicsVector3 v = current.linearVelocity();
-        PhysicsVector3 nextPosition = new PhysicsVector3(
-                p.x() + (v.x() * dtSeconds),
-                p.y() + (v.y() * dtSeconds),
-                p.z() + (v.z() * dtSeconds));
-        latestRigidStates.put(OBJECT_ID, new PhysicsBodyState(
-                nextPosition,
-                current.orientation(),
-                v,
-                current.angularVelocity(),
-                current.referenceFrame(),
-                clock.simulationTimeSeconds() + dtSeconds));
+        rigidStateBuffer.advanceLinear(OBJECT_ID, dtSeconds, clock.simulationTimeSeconds() + dtSeconds);
     }
 
     private void seedOrbitalFromPhysics(String objectId, OrbitalState seededState) {
