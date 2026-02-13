@@ -38,8 +38,35 @@ public final class StateHandoffDiagnostics {
                 snapshot.localVelocity().z());
     }
 
+    public static String toJson(StateHandoffSnapshot snapshot) {
+        Objects.requireNonNull(snapshot, "snapshot must not be null");
+        return "{"
+                + "\"direction\":\"" + escapeJson(snapshot.direction().name()) + "\","
+                + "\"simulationTimeSeconds\":" + snapshot.simulationTimeSeconds() + ","
+                + "\"objectId\":\"" + escapeJson(snapshot.objectId()) + "\","
+                + "\"zoneId\":\"" + escapeJson(snapshot.zoneId().value()) + "\","
+                + "\"zoneAnchorPosition\":" + vectorToJson(snapshot.zoneAnchorPosition()) + ","
+                + "\"globalPosition\":" + vectorToJson(snapshot.globalPosition()) + ","
+                + "\"globalVelocity\":" + vectorToJson(snapshot.globalVelocity()) + ","
+                + "\"localPosition\":" + vectorToJson(snapshot.localPosition()) + ","
+                + "\"localVelocity\":" + vectorToJson(snapshot.localVelocity())
+                + "}";
+    }
+
     public static Consumer<StateHandoffSnapshot> loggingSink(Logger logger) {
         Objects.requireNonNull(logger, "logger must not be null");
         return snapshot -> logger.info(format(snapshot));
+    }
+
+    private static String vectorToJson(org.dynamisfx.physics.model.PhysicsVector3 v) {
+        return "{"
+                + "\"x\":" + v.x() + ","
+                + "\"y\":" + v.y() + ","
+                + "\"z\":" + v.z()
+                + "}";
+    }
+
+    private static String escapeJson(String value) {
+        return value.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }

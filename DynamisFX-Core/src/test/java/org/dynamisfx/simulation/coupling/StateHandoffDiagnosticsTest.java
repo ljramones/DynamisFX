@@ -35,6 +35,27 @@ class StateHandoffDiagnosticsTest {
     }
 
     @Test
+    void serializesSnapshotAsJson() {
+        StateHandoffSnapshot snapshot = new StateHandoffSnapshot(
+                StateHandoffDirection.DEMOTE_TO_ORBITAL,
+                2.5,
+                "lander-1",
+                new ZoneId("zone-a"),
+                new PhysicsVector3(100.0, 0.0, 0.0),
+                new PhysicsVector3(105.0, 1.0, 2.0),
+                new PhysicsVector3(3.0, 4.0, 5.0),
+                new PhysicsVector3(5.0, 1.0, 2.0),
+                new PhysicsVector3(3.0, 4.0, 5.0));
+
+        String json = StateHandoffDiagnostics.toJson(snapshot);
+
+        assertTrue(json.contains("\"direction\":\"DEMOTE_TO_ORBITAL\""));
+        assertTrue(json.contains("\"objectId\":\"lander-1\""));
+        assertTrue(json.contains("\"zoneId\":\"zone-a\""));
+        assertTrue(json.contains("\"globalPosition\":{\"x\":105.0,\"y\":1.0,\"z\":2.0}"));
+    }
+
+    @Test
     void writesFormattedSnapshotToLogger() {
         Logger logger = Logger.getLogger("StateHandoffDiagnosticsTest");
         logger.setUseParentHandlers(false);

@@ -82,6 +82,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private Label handoffGlobalLabel;
     private Label handoffLocalLabel;
     private Button copyHandoffButton;
+    private Button copyHandoffJsonButton;
     private boolean handoffDiagnosticsEnabled = true;
 
     public static void main(String[] args) {
@@ -176,6 +177,9 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         copyHandoffButton = new Button("Copy Handoff Line");
         copyHandoffButton.setOnAction(event -> copyLatestHandoffToClipboard());
         copyHandoffButton.setDisable(true);
+        copyHandoffJsonButton = new Button("Copy JSON");
+        copyHandoffJsonButton.setOnAction(event -> copyLatestHandoffJsonToClipboard());
+        copyHandoffJsonButton.setDisable(true);
 
         distanceSlider = new Slider(0, 3000, 2000);
         distanceSlider.valueProperty().addListener((obs, oldValue, newValue) -> updateDistanceLabel(newValue.doubleValue()));
@@ -204,6 +208,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 handoffGlobalLabel,
                 handoffLocalLabel,
                 copyHandoffButton,
+                copyHandoffJsonButton,
                 new Label("Distance To Zone (m)"),
                 distanceSlider,
                 contactCheck,
@@ -314,6 +319,9 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
             if (copyHandoffButton != null) {
                 copyHandoffButton.setDisable(true);
             }
+            if (copyHandoffJsonButton != null) {
+                copyHandoffJsonButton.setDisable(true);
+            }
             return;
         }
         handoffDirectionLabel.setText(String.format(
@@ -335,6 +343,9 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         if (copyHandoffButton != null) {
             copyHandoffButton.setDisable(false);
         }
+        if (copyHandoffJsonButton != null) {
+            copyHandoffJsonButton.setDisable(false);
+        }
     }
 
     private static String formatVector(PhysicsVector3 v) {
@@ -347,6 +358,15 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         }
         ClipboardContent content = new ClipboardContent();
         content.putString(StateHandoffDiagnostics.format(latestHandoff));
+        Clipboard.getSystemClipboard().setContent(content);
+    }
+
+    private void copyLatestHandoffJsonToClipboard() {
+        if (latestHandoff == null) {
+            return;
+        }
+        ClipboardContent content = new ClipboardContent();
+        content.putString(StateHandoffDiagnostics.toJson(latestHandoff));
         Clipboard.getSystemClipboard().setContent(content);
     }
 
