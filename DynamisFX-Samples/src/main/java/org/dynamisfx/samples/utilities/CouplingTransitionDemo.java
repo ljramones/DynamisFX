@@ -88,6 +88,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private ComboBox<String> handoffHistoryBox;
     private Button copyHandoffButton;
     private Button copyHandoffJsonButton;
+    private Button clearHandoffHistoryButton;
     private boolean handoffDiagnosticsEnabled = true;
 
     public static void main(String[] args) {
@@ -188,6 +189,8 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         copyHandoffJsonButton = new Button("Copy JSON");
         copyHandoffJsonButton.setOnAction(event -> copyLatestHandoffJsonToClipboard());
         copyHandoffJsonButton.setDisable(true);
+        clearHandoffHistoryButton = new Button("Clear History");
+        clearHandoffHistoryButton.setOnAction(event -> clearHandoffHistory());
 
         distanceSlider = new Slider(0, 3000, 2000);
         distanceSlider.valueProperty().addListener((obs, oldValue, newValue) -> updateDistanceLabel(newValue.doubleValue()));
@@ -220,6 +223,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 handoffHistoryBox,
                 copyHandoffButton,
                 copyHandoffJsonButton,
+                clearHandoffHistoryButton,
                 new Label("Distance To Zone (m)"),
                 distanceSlider,
                 contactCheck,
@@ -422,6 +426,13 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
             }
         }
         return latestHandoff;
+    }
+
+    private void clearHandoffHistory() {
+        latestHandoff = null;
+        handoffHistory.clear();
+        refreshHandoffHistoryControl();
+        updateHandoffDebugLabels();
     }
 
     private static PhongMaterial materialForMode(ObjectSimulationMode mode) {
