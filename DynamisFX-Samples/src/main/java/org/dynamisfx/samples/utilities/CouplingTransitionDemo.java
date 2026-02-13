@@ -1,7 +1,6 @@
 package org.dynamisfx.samples.utilities;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Logger;
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Insets;
@@ -28,6 +27,7 @@ import org.dynamisfx.simulation.coupling.DefaultCouplingManager;
 import org.dynamisfx.simulation.coupling.MutableCouplingObservationProvider;
 import org.dynamisfx.simulation.coupling.Phase1CouplingBootstrap;
 import org.dynamisfx.simulation.coupling.PhysicsZone;
+import org.dynamisfx.simulation.coupling.SimulationStateReconcilerFactory;
 import org.dynamisfx.simulation.coupling.ZoneId;
 import org.dynamisfx.simulation.entity.SimulationEntityRegistry;
 import org.dynamisfx.simulation.orbital.OrbitalState;
@@ -88,15 +88,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 org.dynamisfx.physics.model.PhysicsQuaternion.IDENTITY,
                 frame,
                 time));
-        stateReconciler = new CouplingStateReconciler(
-                stateBuffers.orbital()::get,
-                stateBuffers.rigid()::get,
-                stateBuffers.rigid()::put,
-                this::seedOrbitalFromPhysics,
-                stateBuffers.rigid()::remove,
-                objectId -> {
-                },
-                (objectId, zones) -> zones.isEmpty() ? Optional.empty() : Optional.of(zones.get(0)));
+        stateReconciler = SimulationStateReconcilerFactory.create(stateBuffers, this::seedOrbitalFromPhysics);
 
         couplingManager.registerZone(new DemoZone());
         couplingManager.setMode(OBJECT_ID, lastMode);
