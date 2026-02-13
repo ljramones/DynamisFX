@@ -60,7 +60,68 @@ class ZoneFrameTransformTest {
         assertThrows(IllegalArgumentException.class, () -> ZoneFrameTransform.localRigidToOrbital(local, 2.0, zone));
     }
 
+    @Test
+    void appliesAnchorOrientationForPositionVelocityAndOrientation() {
+        // 90 deg around +Z: local +X maps to global +Y.
+        PhysicsQuaternion z90 = new PhysicsQuaternion(0.0, 0.0, Math.sqrt(0.5), Math.sqrt(0.5));
+        PhysicsZone zone = new RotatedZone(new ZoneId("zone-r"), new PhysicsVector3(10.0, 20.0, 0.0), z90);
+        OrbitalState orbital = new OrbitalState(
+                new PhysicsVector3(10.0, 21.0, 0.0),
+                new PhysicsVector3(0.0, 2.0, 0.0),
+                z90,
+                ReferenceFrame.WORLD,
+                1.0);
+
+        PhysicsBodyState local = ZoneFrameTransform.orbitalToLocalRigid(orbital, 2.0, zone);
+        assertEquals(1.0, local.position().x(), 1e-9);
+        assertEquals(0.0, local.position().y(), 1e-9);
+        assertEquals(2.0, local.linearVelocity().x(), 1e-9);
+        assertEquals(0.0, local.linearVelocity().y(), 1e-9);
+        assertEquals(PhysicsQuaternion.IDENTITY.x(), local.orientation().x(), 1e-9);
+        assertEquals(PhysicsQuaternion.IDENTITY.y(), local.orientation().y(), 1e-9);
+        assertEquals(PhysicsQuaternion.IDENTITY.z(), local.orientation().z(), 1e-9);
+        assertEquals(PhysicsQuaternion.IDENTITY.w(), local.orientation().w(), 1e-9);
+
+        OrbitalState restored = ZoneFrameTransform.localRigidToOrbital(local, 3.0, zone);
+        assertEquals(orbital.position().x(), restored.position().x(), 1e-9);
+        assertEquals(orbital.position().y(), restored.position().y(), 1e-9);
+        assertEquals(orbital.linearVelocity().x(), restored.linearVelocity().x(), 1e-9);
+        assertEquals(orbital.linearVelocity().y(), restored.linearVelocity().y(), 1e-9);
+        assertEquals(orbital.orientation().x(), restored.orientation().x(), 1e-9);
+        assertEquals(orbital.orientation().y(), restored.orientation().y(), 1e-9);
+        assertEquals(orbital.orientation().z(), restored.orientation().z(), 1e-9);
+        assertEquals(orbital.orientation().w(), restored.orientation().w(), 1e-9);
+    }
+
+    @Test
+    void rejectsZeroNormAnchorOrientation() {
+        PhysicsZone zone = new RotatedZone(
+                new ZoneId("zone-zero"),
+                PhysicsVector3.ZERO,
+                new PhysicsQuaternion(0.0, 0.0, 0.0, 0.0));
+        assertThrows(IllegalArgumentException.class, () -> ZoneFrameTransform.globalToLocalPosition(PhysicsVector3.ZERO, zone));
+    }
+
     private record StubZone(ZoneId zoneId, PhysicsVector3 anchorPosition, ReferenceFrame anchorFrame) implements PhysicsZone {
+
+        @Override
+        public double radiusMeters() {
+            return 1000.0;
+        }
+
+        @Override
+        public RigidBodyWorld world() {
+            return null;
+        }
+    }
+
+    private record RotatedZone(ZoneId zoneId, PhysicsVector3 anchorPosition, PhysicsQuaternion anchorOrientation)
+            implements PhysicsZone {
+
+        @Override
+        public ReferenceFrame anchorFrame() {
+            return ReferenceFrame.WORLD;
+        }
 
         @Override
         public double radiusMeters() {

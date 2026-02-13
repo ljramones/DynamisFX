@@ -40,9 +40,9 @@ import org.dynamisfx.simulation.coupling.CouplingTelemetryEvent;
 import org.dynamisfx.simulation.coupling.CouplingTransitionApplier;
 import org.dynamisfx.simulation.coupling.DeterministicZoneSelector;
 import org.dynamisfx.simulation.coupling.DefaultCouplingManager;
+import org.dynamisfx.simulation.coupling.MutablePhysicsZone;
 import org.dynamisfx.simulation.coupling.MutableCouplingObservationProvider;
 import org.dynamisfx.simulation.coupling.Phase1CouplingBootstrap;
-import org.dynamisfx.simulation.coupling.PhysicsZone;
 import org.dynamisfx.simulation.coupling.SimulationStateReconcilerFactory;
 import org.dynamisfx.simulation.coupling.StateHandoffDiagnostics;
 import org.dynamisfx.simulation.coupling.StateHandoffSnapshot;
@@ -51,7 +51,6 @@ import org.dynamisfx.simulation.coupling.ZoneId;
 import org.dynamisfx.simulation.entity.SimulationEntityRegistry;
 import org.dynamisfx.simulation.orbital.OrbitalState;
 import org.dynamisfx.simulation.orbital.ScriptedOrbitalDynamicsEngine;
-import org.dynamisfx.simulation.rigid.RigidBodyWorld;
 import org.dynamisfx.simulation.runtime.SimulationOrchestrator;
 import org.dynamisfx.samples.shapes.ShapeBaseSample;
 
@@ -88,7 +87,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private CouplingTransitionApplier transitionApplier;
     private CouplingStateReconciler stateReconciler;
     private SimulationOrchestrator orchestrator;
-    private DemoZone demoZone;
+    private MutablePhysicsZone demoZone;
 
     private final Box lander = new Box(LANDER_WIDTH, LANDER_HEIGHT, LANDER_DEPTH);
     private AnimationTimer timer;
@@ -161,7 +160,16 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 stateBuffers,
                 zoneBodyRegistry,
                 bodyDefinitionProvider());
-        demoZone = new DemoZone();
+        demoZone = new MutablePhysicsZone(
+                new ZoneId("demo-zone"),
+                ReferenceFrame.WORLD,
+                PhysicsVector3.ZERO,
+                org.dynamisfx.physics.model.PhysicsQuaternion.IDENTITY,
+                2_000.0,
+                new Ode4jRigidBodyWorldAdapter(new PhysicsWorldConfiguration(
+                        ReferenceFrame.WORLD,
+                        new PhysicsVector3(0.0, -1.62, 0.0),
+                        1.0 / 120.0)));
         couplingManager.registerZone(demoZone);
         couplingManager.setMode(OBJECT_ID, lastMode);
         couplingManager.addTelemetryListener(this::onTelemetry);
@@ -204,8 +212,8 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
             if (newScene == null && timer != null) {
                 timer.stop();
                 timer = null;
-                if (demoZone != null) {
-                    demoZone.close();
+                if (demoZone != null && demoZone.world() != null) {
+                    demoZone.world().close();
                 }
             }
         });
@@ -311,6 +319,11 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 ReferenceFrame.WORLD).get(OBJECT_ID);
         if (state != null) {
             stateBuffers.orbital().put(OBJECT_ID, state);
+            if (lastMode != ObjectSimulationMode.PHYSICS_ACTIVE && demoZone != null) {
+                demoZone.updateAnchorPose(
+                        state.position(),
+                        org.dynamisfx.physics.model.PhysicsQuaternion.IDENTITY);
+            }
         }
         if (autoScenarioCheck != null && autoScenarioCheck.isSelected()) {
             boolean contact = simulationTimeSeconds >= 6.0 && simulationTimeSeconds < 7.5;
@@ -648,43 +661,5 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 1.0,
                 new BoxShape(LANDER_WIDTH, LANDER_HEIGHT, LANDER_DEPTH),
                 seedState);
-    }
-
-    private static final class DemoZone implements PhysicsZone, AutoCloseable {
-        private final ZoneId zoneId = new ZoneId("demo-zone");
-        private final RigidBodyWorld world = new Ode4jRigidBodyWorldAdapter(new PhysicsWorldConfiguration(
-                ReferenceFrame.WORLD,
-                new PhysicsVector3(0.0, -1.62, 0.0),
-                1.0 / 120.0));
-
-        @Override
-        public ZoneId zoneId() {
-            return zoneId;
-        }
-
-        @Override
-        public ReferenceFrame anchorFrame() {
-            return ReferenceFrame.WORLD;
-        }
-
-        @Override
-        public PhysicsVector3 anchorPosition() {
-            return PhysicsVector3.ZERO;
-        }
-
-        @Override
-        public double radiusMeters() {
-            return 2_000.0;
-        }
-
-        @Override
-        public RigidBodyWorld world() {
-            return world;
-        }
-
-        @Override
-        public void close() {
-            world.close();
-        }
     }
 }
