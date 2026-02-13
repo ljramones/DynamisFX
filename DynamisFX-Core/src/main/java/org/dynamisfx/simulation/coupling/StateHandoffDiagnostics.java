@@ -16,7 +16,10 @@ public final class StateHandoffDiagnostics {
         Objects.requireNonNull(snapshot, "snapshot must not be null");
         return String.format(
                 "handoff[%s] t=%.3f object=%s zone=%s anchor=(%.3f, %.3f, %.3f) globalPos=(%.3f, %.3f, %.3f) "
-                        + "globalVel=(%.3f, %.3f, %.3f) localPos=(%.3f, %.3f, %.3f) localVel=(%.3f, %.3f, %.3f)",
+                        + "globalVel=(%.3f, %.3f, %.3f) globalAngVel=(%.3f, %.3f, %.3f) "
+                        + "globalOri=(%.3f, %.3f, %.3f, %.3f) "
+                        + "localPos=(%.3f, %.3f, %.3f) localVel=(%.3f, %.3f, %.3f) "
+                        + "localAngVel=(%.3f, %.3f, %.3f) localOri=(%.3f, %.3f, %.3f, %.3f)",
                 snapshot.direction(),
                 snapshot.simulationTimeSeconds(),
                 snapshot.objectId(),
@@ -30,12 +33,26 @@ public final class StateHandoffDiagnostics {
                 snapshot.globalVelocity().x(),
                 snapshot.globalVelocity().y(),
                 snapshot.globalVelocity().z(),
+                snapshot.globalAngularVelocity().x(),
+                snapshot.globalAngularVelocity().y(),
+                snapshot.globalAngularVelocity().z(),
+                snapshot.globalOrientation().x(),
+                snapshot.globalOrientation().y(),
+                snapshot.globalOrientation().z(),
+                snapshot.globalOrientation().w(),
                 snapshot.localPosition().x(),
                 snapshot.localPosition().y(),
                 snapshot.localPosition().z(),
                 snapshot.localVelocity().x(),
                 snapshot.localVelocity().y(),
-                snapshot.localVelocity().z());
+                snapshot.localVelocity().z(),
+                snapshot.localAngularVelocity().x(),
+                snapshot.localAngularVelocity().y(),
+                snapshot.localAngularVelocity().z(),
+                snapshot.localOrientation().x(),
+                snapshot.localOrientation().y(),
+                snapshot.localOrientation().z(),
+                snapshot.localOrientation().w());
     }
 
     public static String toJson(StateHandoffSnapshot snapshot) {
@@ -48,8 +65,12 @@ public final class StateHandoffDiagnostics {
                 + "\"zoneAnchorPosition\":" + vectorToJson(snapshot.zoneAnchorPosition()) + ","
                 + "\"globalPosition\":" + vectorToJson(snapshot.globalPosition()) + ","
                 + "\"globalVelocity\":" + vectorToJson(snapshot.globalVelocity()) + ","
+                + "\"globalAngularVelocity\":" + vectorToJson(snapshot.globalAngularVelocity()) + ","
+                + "\"globalOrientation\":" + quaternionToJson(snapshot.globalOrientation()) + ","
                 + "\"localPosition\":" + vectorToJson(snapshot.localPosition()) + ","
-                + "\"localVelocity\":" + vectorToJson(snapshot.localVelocity())
+                + "\"localVelocity\":" + vectorToJson(snapshot.localVelocity()) + ","
+                + "\"localAngularVelocity\":" + vectorToJson(snapshot.localAngularVelocity()) + ","
+                + "\"localOrientation\":" + quaternionToJson(snapshot.localOrientation())
                 + "}";
     }
 
@@ -63,6 +84,15 @@ public final class StateHandoffDiagnostics {
                 + "\"x\":" + v.x() + ","
                 + "\"y\":" + v.y() + ","
                 + "\"z\":" + v.z()
+                + "}";
+    }
+
+    private static String quaternionToJson(org.dynamisfx.physics.model.PhysicsQuaternion q) {
+        return "{"
+                + "\"x\":" + q.x() + ","
+                + "\"y\":" + q.y() + ","
+                + "\"z\":" + q.z() + ","
+                + "\"w\":" + q.w()
                 + "}";
     }
 

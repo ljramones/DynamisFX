@@ -41,7 +41,7 @@ public final class ZoneFrameTransform {
                 globalToLocalPosition(orbitalState.position(), zone),
                 multiply(inverseAnchor, orbitalState.orientation()),
                 rotate(inverseAnchor, orbitalState.linearVelocity()),
-                PhysicsVector3.ZERO,
+                rotate(inverseAnchor, orbitalState.angularVelocity()),
                 zone.anchorFrame(),
                 simulationTimeSeconds);
     }
@@ -57,6 +57,7 @@ public final class ZoneFrameTransform {
         return new OrbitalState(
                 localToGlobalPosition(localRigidState.position(), zone),
                 rotate(anchor, localRigidState.linearVelocity()),
+                rotate(anchor, localRigidState.angularVelocity()),
                 multiply(anchor, localRigidState.orientation()),
                 zone.anchorFrame(),
                 simulationTimeSeconds);

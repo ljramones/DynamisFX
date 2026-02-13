@@ -118,8 +118,12 @@ public final class CouplingStateReconciler implements CouplingTransitionListener
                 zone.anchorPosition(),
                 orbitalState.position(),
                 orbitalState.linearVelocity(),
+                orbitalState.angularVelocity(),
+                orbitalState.orientation(),
                 seeded.position(),
-                seeded.linearVelocity()));
+                seeded.linearVelocity(),
+                seeded.angularVelocity(),
+                seeded.orientation()));
         rigidStateSink.accept(objectId, seeded);
         orbitalStateClearer.accept(objectId);
     }
@@ -139,8 +143,12 @@ public final class CouplingStateReconciler implements CouplingTransitionListener
                 zone.anchorPosition(),
                 seeded.position(),
                 seeded.linearVelocity(),
+                seeded.angularVelocity(),
+                seeded.orientation(),
                 rigidState.position(),
-                rigidState.linearVelocity()));
+                rigidState.linearVelocity(),
+                rigidState.angularVelocity(),
+                rigidState.orientation()));
         orbitalStateSink.accept(objectId, seeded);
         rigidStateClearer.accept(objectId);
     }

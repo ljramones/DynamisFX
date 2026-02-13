@@ -67,6 +67,7 @@ public final class OrekitOrbitalDynamicsAdapter implements OrbitalDynamicsEngine
             result.put(objectId, new OrbitalState(
                     converted.position(),
                     converted.linearVelocity(),
+                    converted.angularVelocity(),
                     converted.orientation(),
                     converted.referenceFrame(),
                     simulationTimeSeconds));

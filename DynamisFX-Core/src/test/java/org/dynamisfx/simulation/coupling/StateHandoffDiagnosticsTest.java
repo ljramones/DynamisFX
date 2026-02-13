@@ -9,6 +9,7 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+import org.dynamisfx.physics.model.PhysicsQuaternion;
 import org.dynamisfx.physics.model.PhysicsVector3;
 import org.junit.jupiter.api.Test;
 
@@ -24,8 +25,12 @@ class StateHandoffDiagnosticsTest {
                 new PhysicsVector3(100.0, 0.0, 0.0),
                 new PhysicsVector3(110.0, 1.0, 2.0),
                 new PhysicsVector3(3.0, 4.0, 5.0),
+                new PhysicsVector3(0.1, 0.2, 0.3),
+                PhysicsQuaternion.IDENTITY,
                 new PhysicsVector3(10.0, 1.0, 2.0),
-                new PhysicsVector3(3.0, 4.0, 5.0));
+                new PhysicsVector3(3.0, 4.0, 5.0),
+                new PhysicsVector3(0.1, 0.2, 0.3),
+                PhysicsQuaternion.IDENTITY);
 
         String formatted = StateHandoffDiagnostics.format(snapshot);
 
@@ -44,8 +49,12 @@ class StateHandoffDiagnosticsTest {
                 new PhysicsVector3(100.0, 0.0, 0.0),
                 new PhysicsVector3(105.0, 1.0, 2.0),
                 new PhysicsVector3(3.0, 4.0, 5.0),
+                new PhysicsVector3(0.3, 0.2, 0.1),
+                PhysicsQuaternion.IDENTITY,
                 new PhysicsVector3(5.0, 1.0, 2.0),
-                new PhysicsVector3(3.0, 4.0, 5.0));
+                new PhysicsVector3(3.0, 4.0, 5.0),
+                new PhysicsVector3(0.3, 0.2, 0.1),
+                PhysicsQuaternion.IDENTITY);
 
         String json = StateHandoffDiagnostics.toJson(snapshot);
 
@@ -85,8 +94,12 @@ class StateHandoffDiagnosticsTest {
                 PhysicsVector3.ZERO,
                 new PhysicsVector3(10.0, 0.0, 0.0),
                 PhysicsVector3.ZERO,
+                PhysicsVector3.ZERO,
+                PhysicsQuaternion.IDENTITY,
                 new PhysicsVector3(10.0, 0.0, 0.0),
-                PhysicsVector3.ZERO));
+                PhysicsVector3.ZERO,
+                PhysicsVector3.ZERO,
+                PhysicsQuaternion.IDENTITY));
 
         assertTrue(messages.stream().anyMatch(m -> m.contains("DEMOTE_TO_ORBITAL")));
         logger.removeHandler(capture);

@@ -1,6 +1,7 @@
 package org.dynamisfx.simulation.coupling;
 
 import java.util.Objects;
+import org.dynamisfx.physics.model.PhysicsQuaternion;
 import org.dynamisfx.physics.model.PhysicsVector3;
 
 /**
@@ -14,8 +15,12 @@ public record StateHandoffSnapshot(
         PhysicsVector3 zoneAnchorPosition,
         PhysicsVector3 globalPosition,
         PhysicsVector3 globalVelocity,
+        PhysicsVector3 globalAngularVelocity,
+        PhysicsQuaternion globalOrientation,
         PhysicsVector3 localPosition,
-        PhysicsVector3 localVelocity) {
+        PhysicsVector3 localVelocity,
+        PhysicsVector3 localAngularVelocity,
+        PhysicsQuaternion localOrientation) {
 
     public StateHandoffSnapshot {
         Objects.requireNonNull(direction, "direction must not be null");
@@ -29,7 +34,11 @@ public record StateHandoffSnapshot(
         Objects.requireNonNull(zoneAnchorPosition, "zoneAnchorPosition must not be null");
         Objects.requireNonNull(globalPosition, "globalPosition must not be null");
         Objects.requireNonNull(globalVelocity, "globalVelocity must not be null");
+        Objects.requireNonNull(globalAngularVelocity, "globalAngularVelocity must not be null");
+        Objects.requireNonNull(globalOrientation, "globalOrientation must not be null");
         Objects.requireNonNull(localPosition, "localPosition must not be null");
         Objects.requireNonNull(localVelocity, "localVelocity must not be null");
+        Objects.requireNonNull(localAngularVelocity, "localAngularVelocity must not be null");
+        Objects.requireNonNull(localOrientation, "localOrientation must not be null");
     }
 }
