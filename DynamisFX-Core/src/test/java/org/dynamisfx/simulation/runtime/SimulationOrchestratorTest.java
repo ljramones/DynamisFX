@@ -4,9 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import org.dynamisfx.physics.model.PhysicsBodyState;
 import org.dynamisfx.physics.model.PhysicsQuaternion;
 import org.dynamisfx.physics.model.PhysicsVector3;
 import org.dynamisfx.physics.model.ReferenceFrame;
@@ -53,6 +53,13 @@ class SimulationOrchestratorTest {
                 coupling,
                 dt -> order.add("step"),
                 bridge,
+                () -> Map.of("lander-1", new PhysicsBodyState(
+                        new PhysicsVector3(9.0, 0.0, 0.0),
+                        PhysicsQuaternion.IDENTITY,
+                        PhysicsVector3.ZERO,
+                        PhysicsVector3.ZERO,
+                        ReferenceFrame.WORLD,
+                        0.0)),
                 () -> List.of("lander-1"),
                 ReferenceFrame.WORLD);
         orchestrator.addListener((phase, t) -> order.add(phase.name().toLowerCase()));
@@ -64,6 +71,6 @@ class SimulationOrchestratorTest {
         assertEquals(1, couplingEvents.size());
         assertEquals(CouplingDecisionReason.NO_CHANGE, couplingEvents.get(0).reason());
         assertTrue(couplingEvents.get(0).objectId().equals("lander-1"));
-        assertEquals(0.5, store.sample(0).posX(), 1e-9);
+        assertEquals(9.0, store.sample(0).posX(), 1e-9);
     }
 }

@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.DoubleConsumer;
 import java.util.function.Supplier;
+import org.dynamisfx.physics.model.PhysicsBodyState;
 import org.dynamisfx.physics.model.ReferenceFrame;
 import org.dynamisfx.simulation.SimulationClock;
 import org.dynamisfx.simulation.SimulationTransformBridge;
@@ -24,6 +25,7 @@ public final class SimulationOrchestrator {
     private final CouplingManager couplingManager;
     private final DoubleConsumer rigidStep;
     private final SimulationTransformBridge transformBridge;
+    private final Supplier<Map<String, PhysicsBodyState>> rigidStatesSupplier;
     private final Supplier<Collection<String>> objectIdsSupplier;
     private final ReferenceFrame orbitalOutputFrame;
     private final Set<SimulationOrchestratorListener> listeners = new LinkedHashSet<>();
@@ -36,11 +38,32 @@ public final class SimulationOrchestrator {
             SimulationTransformBridge transformBridge,
             Supplier<Collection<String>> objectIdsSupplier,
             ReferenceFrame orbitalOutputFrame) {
+        this(
+                clock,
+                orbitalEngine,
+                couplingManager,
+                rigidStep,
+                transformBridge,
+                Map::of,
+                objectIdsSupplier,
+                orbitalOutputFrame);
+    }
+
+    public SimulationOrchestrator(
+            SimulationClock clock,
+            OrbitalDynamicsEngine orbitalEngine,
+            CouplingManager couplingManager,
+            DoubleConsumer rigidStep,
+            SimulationTransformBridge transformBridge,
+            Supplier<Map<String, PhysicsBodyState>> rigidStatesSupplier,
+            Supplier<Collection<String>> objectIdsSupplier,
+            ReferenceFrame orbitalOutputFrame) {
         this.clock = Objects.requireNonNull(clock, "clock must not be null");
         this.orbitalEngine = Objects.requireNonNull(orbitalEngine, "orbitalEngine must not be null");
         this.couplingManager = Objects.requireNonNull(couplingManager, "couplingManager must not be null");
         this.rigidStep = Objects.requireNonNull(rigidStep, "rigidStep must not be null");
         this.transformBridge = Objects.requireNonNull(transformBridge, "transformBridge must not be null");
+        this.rigidStatesSupplier = Objects.requireNonNull(rigidStatesSupplier, "rigidStatesSupplier must not be null");
         this.objectIdsSupplier = Objects.requireNonNull(objectIdsSupplier, "objectIdsSupplier must not be null");
         this.orbitalOutputFrame = Objects.requireNonNull(orbitalOutputFrame, "orbitalOutputFrame must not be null");
     }
@@ -60,6 +83,7 @@ public final class SimulationOrchestrator {
 
         firePhase(OrchestratorPhase.RIGID, simulationTimeSeconds);
         rigidStep.accept(realDeltaSeconds);
+        transformBridge.writeRigidStates(rigidStatesSupplier.get());
 
         firePhase(OrchestratorPhase.PUBLISH, simulationTimeSeconds);
         transformBridge.publish(simulationTimeSeconds);
