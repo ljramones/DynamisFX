@@ -78,6 +78,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private CheckBox contactCheck;
     private CheckBox autoScenarioCheck;
     private CheckBox handoffDiagnosticsCheck;
+    private CheckBox freezeHandoffSelectionCheck;
     private Label modeLabel;
     private Label distanceLabel;
     private Label telemetryLabel;
@@ -90,6 +91,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private Button copyHandoffJsonButton;
     private Button clearHandoffHistoryButton;
     private boolean handoffDiagnosticsEnabled = true;
+    private boolean freezeHandoffSelection;
 
     public static void main(String[] args) {
         launch(args);
@@ -209,6 +211,11 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
             refreshHandoffHistoryControl();
             updateHandoffDebugLabels();
         });
+        freezeHandoffSelectionCheck = new CheckBox("Freeze Selection");
+        freezeHandoffSelectionCheck.setSelected(false);
+        freezeHandoffSelectionCheck.selectedProperty().addListener((obs, oldValue, newValue) -> {
+            freezeHandoffSelection = newValue;
+        });
 
         root.getChildren().addAll(
                 new Label("Coupling Transition Demo"),
@@ -228,6 +235,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 distanceSlider,
                 contactCheck,
                 handoffDiagnosticsCheck,
+                freezeHandoffSelectionCheck,
                 autoScenarioCheck);
         return root;
     }
@@ -402,6 +410,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         if (handoffHistoryBox == null) {
             return;
         }
+        int previousSelection = handoffHistoryBox.getSelectionModel().getSelectedIndex();
         List<String> labels = new ArrayList<>(handoffHistory.size());
         for (StateHandoffSnapshot snapshot : handoffHistory) {
             labels.add(String.format(
@@ -413,7 +422,12 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         handoffHistoryBox.getItems().setAll(labels);
         if (labels.isEmpty()) {
             handoffHistoryBox.getSelectionModel().clearSelection();
+        } else if (freezeHandoffSelection) {
+            int boundedSelection = Math.min(Math.max(previousSelection, 0), labels.size() - 1);
+            handoffHistoryBox.getSelectionModel().select(boundedSelection);
         } else if (handoffHistoryBox.getSelectionModel().getSelectedIndex() < 0) {
+            handoffHistoryBox.getSelectionModel().select(0);
+        } else {
             handoffHistoryBox.getSelectionModel().select(0);
         }
     }
