@@ -7,9 +7,12 @@ import javafx.animation.AnimationTimer;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
@@ -78,6 +81,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private Label handoffZoneLabel;
     private Label handoffGlobalLabel;
     private Label handoffLocalLabel;
+    private Button copyHandoffButton;
     private boolean handoffDiagnosticsEnabled = true;
 
     public static void main(String[] args) {
@@ -169,6 +173,9 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         handoffZoneLabel = new Label("Zone: n/a");
         handoffGlobalLabel = new Label("Global: n/a");
         handoffLocalLabel = new Label("Local: n/a");
+        copyHandoffButton = new Button("Copy Handoff Line");
+        copyHandoffButton.setOnAction(event -> copyLatestHandoffToClipboard());
+        copyHandoffButton.setDisable(true);
 
         distanceSlider = new Slider(0, 3000, 2000);
         distanceSlider.valueProperty().addListener((obs, oldValue, newValue) -> updateDistanceLabel(newValue.doubleValue()));
@@ -196,6 +203,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 handoffZoneLabel,
                 handoffGlobalLabel,
                 handoffLocalLabel,
+                copyHandoffButton,
                 new Label("Distance To Zone (m)"),
                 distanceSlider,
                 contactCheck,
@@ -303,6 +311,9 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
             handoffZoneLabel.setText("Zone: n/a");
             handoffGlobalLabel.setText("Global: n/a");
             handoffLocalLabel.setText("Local: n/a");
+            if (copyHandoffButton != null) {
+                copyHandoffButton.setDisable(true);
+            }
             return;
         }
         handoffDirectionLabel.setText(String.format(
@@ -321,10 +332,22 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 "Local: pos=%s vel=%s",
                 formatVector(latestHandoff.localPosition()),
                 formatVector(latestHandoff.localVelocity())));
+        if (copyHandoffButton != null) {
+            copyHandoffButton.setDisable(false);
+        }
     }
 
     private static String formatVector(PhysicsVector3 v) {
         return String.format("(%.1f, %.1f, %.1f)", v.x(), v.y(), v.z());
+    }
+
+    private void copyLatestHandoffToClipboard() {
+        if (latestHandoff == null) {
+            return;
+        }
+        ClipboardContent content = new ClipboardContent();
+        content.putString(StateHandoffDiagnostics.format(latestHandoff));
+        Clipboard.getSystemClipboard().setContent(content);
     }
 
     private static PhongMaterial materialForMode(ObjectSimulationMode mode) {
