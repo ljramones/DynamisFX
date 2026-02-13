@@ -1,8 +1,10 @@
 package org.dynamisfx.samples.utilities;
 
 import org.dynamisfx.physics.api.PhysicsBackend;
+import org.dynamisfx.physics.model.PhysicsWorldConfiguration;
 import org.dynamisfx.physics.jolt.JoltBackendFactory;
 import org.dynamisfx.physics.ode4j.Ode4jBackendFactory;
+import org.dynamisfx.simulation.rigid.RigidBodyWorld;
 
 /**
  * Selects rigid-body backend for samples using a simple runtime property.
@@ -24,5 +26,9 @@ final class RigidBodyBackendSelector {
             default -> throw new IllegalArgumentException(
                     "Unsupported backend '" + configured + "'. Use '" + BACKEND_ODE4J + "' or '" + BACKEND_JOLT + "'.");
         };
+    }
+
+    static RigidBodyWorld createRigidWorld(PhysicsWorldConfiguration configuration) {
+        return new BackendRigidBodyWorldAdapter(createBackend(), configuration);
     }
 }

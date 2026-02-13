@@ -30,7 +30,6 @@ import org.dynamisfx.physics.model.PhysicsQuaternion;
 import org.dynamisfx.physics.model.PhysicsVector3;
 import org.dynamisfx.physics.model.PhysicsWorldConfiguration;
 import org.dynamisfx.physics.model.ReferenceFrame;
-import org.dynamisfx.physics.ode4j.Ode4jRigidBodyWorldAdapter;
 import org.dynamisfx.simulation.ObjectSimulationMode;
 import org.dynamisfx.simulation.SimulationClock;
 import org.dynamisfx.simulation.SimulationStateBuffers;
@@ -68,7 +67,8 @@ import org.dynamisfx.simulation.runtime.SimulationOrchestrator;
 import org.dynamisfx.samples.shapes.ShapeBaseSample;
 
 /**
- * Phase-1 sample demonstrating coupling mode transitions using threshold policy scaffolding.
+ * End-to-end sample for Physics Zone promote/demote lifecycle.
+ * Set {@code -Ddynamisfx.samples.physics.backend=ode4j|jolt} to choose rigid backend.
  */
 public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
 
@@ -213,7 +213,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 PhysicsVector3.ZERO,
                 PhysicsQuaternion.IDENTITY,
                 2_000.0,
-                new Ode4jRigidBodyWorldAdapter(new PhysicsWorldConfiguration(
+                RigidBodyBackendSelector.createRigidWorld(new PhysicsWorldConfiguration(
                         ReferenceFrame.WORLD,
                         PhysicsVector3.ZERO,
                         1.0 / 120.0)));
