@@ -64,6 +64,8 @@ class DefaultCouplingManagerTest {
         assertThrows(IllegalArgumentException.class, () -> manager.setMode("", ObjectSimulationMode.ORBITAL_ONLY));
         assertThrows(NullPointerException.class, () -> manager.setMode("id", null));
         assertThrows(IllegalArgumentException.class, () -> manager.lastTransitionTimeSeconds(""));
+        assertThrows(NullPointerException.class, () -> manager.addTransitionListener(null));
+        assertThrows(NullPointerException.class, () -> manager.removeTransitionListener(null));
         assertThrows(IllegalArgumentException.class, () -> manager.update(Double.NaN));
     }
 
@@ -146,6 +148,45 @@ class DefaultCouplingManagerTest {
         assertEquals(CouplingDecisionReason.PROMOTE_DISTANCE_THRESHOLD, event.reason());
         assertEquals(ObjectSimulationMode.ORBITAL_ONLY, event.fromMode());
         assertEquals(ObjectSimulationMode.PHYSICS_ACTIVE, event.toMode());
+    }
+
+    @Test
+    void emitsTransitionEventsOnlyWhenModeChanges() {
+        DefaultCouplingManager manager = new DefaultCouplingManager(context ->
+                CouplingTransitionDecision.transitionTo(
+                        ObjectSimulationMode.PHYSICS_ACTIVE,
+                        CouplingDecisionReason.PROMOTE_DISTANCE_THRESHOLD));
+        manager.registerZone(new StubZone(new ZoneId("zone-a")));
+        manager.setMode("lander-1", ObjectSimulationMode.ORBITAL_ONLY);
+        List<CouplingModeTransitionEvent> events = new ArrayList<>();
+        manager.addTransitionListener(events::add);
+
+        manager.update(3.0);
+
+        assertEquals(1, events.size());
+        CouplingModeTransitionEvent event = events.get(0);
+        assertEquals("lander-1", event.objectId());
+        assertEquals(ObjectSimulationMode.ORBITAL_ONLY, event.fromMode());
+        assertEquals(ObjectSimulationMode.PHYSICS_ACTIVE, event.toMode());
+        assertEquals(CouplingDecisionReason.PROMOTE_DISTANCE_THRESHOLD, event.reason());
+        assertEquals(1, event.zones().size());
+    }
+
+    @Test
+    void doesNotEmitTransitionEventWhenListenerRemoved() {
+        DefaultCouplingManager manager = new DefaultCouplingManager(context ->
+                CouplingTransitionDecision.transitionTo(
+                        ObjectSimulationMode.PHYSICS_ACTIVE,
+                        CouplingDecisionReason.PROMOTE_DISTANCE_THRESHOLD));
+        manager.setMode("lander-1", ObjectSimulationMode.ORBITAL_ONLY);
+        List<CouplingModeTransitionEvent> events = new ArrayList<>();
+        CouplingTransitionListener listener = events::add;
+        manager.addTransitionListener(listener);
+        assertTrue(manager.removeTransitionListener(listener));
+
+        manager.update(1.0);
+
+        assertEquals(0, events.size());
     }
 
     private record StubZone(ZoneId zoneId) implements PhysicsZone {

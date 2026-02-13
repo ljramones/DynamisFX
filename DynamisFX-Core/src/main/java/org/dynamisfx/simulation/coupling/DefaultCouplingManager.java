@@ -20,6 +20,7 @@ public final class DefaultCouplingManager implements CouplingManager {
     private final Map<String, ObjectSimulationMode> modesByObjectId = new LinkedHashMap<>();
     private final Map<String, Double> lastTransitionTimeByObjectId = new LinkedHashMap<>();
     private final Set<CouplingTelemetryListener> telemetryListeners = new LinkedHashSet<>();
+    private final Set<CouplingTransitionListener> transitionListeners = new LinkedHashSet<>();
     private final CouplingTransitionPolicy transitionPolicy;
     private final CouplingObservationProvider observationProvider;
 
@@ -94,6 +95,16 @@ public final class DefaultCouplingManager implements CouplingManager {
         return telemetryListeners.remove(listener);
     }
 
+    public synchronized void addTransitionListener(CouplingTransitionListener listener) {
+        Objects.requireNonNull(listener, "listener must not be null");
+        transitionListeners.add(listener);
+    }
+
+    public synchronized boolean removeTransitionListener(CouplingTransitionListener listener) {
+        Objects.requireNonNull(listener, "listener must not be null");
+        return transitionListeners.remove(listener);
+    }
+
     @Override
     public synchronized void update(double simulationTimeSeconds) {
         if (!Double.isFinite(simulationTimeSeconds)) {
@@ -117,6 +128,13 @@ public final class DefaultCouplingManager implements CouplingManager {
             if (transitioned) {
                 entry.setValue(resolvedMode);
                 lastTransitionTimeByObjectId.put(objectId, simulationTimeSeconds);
+                emitTransition(new CouplingModeTransitionEvent(
+                        simulationTimeSeconds,
+                        objectId,
+                        currentMode,
+                        resolvedMode,
+                        decision.reason(),
+                        new ArrayList<>(zoneSnapshot)));
             }
             emitTelemetry(new CouplingTelemetryEvent(
                     simulationTimeSeconds,
@@ -134,6 +152,15 @@ public final class DefaultCouplingManager implements CouplingManager {
         }
         for (CouplingTelemetryListener listener : telemetryListeners) {
             listener.onTelemetry(event);
+        }
+    }
+
+    private void emitTransition(CouplingModeTransitionEvent event) {
+        if (transitionListeners.isEmpty()) {
+            return;
+        }
+        for (CouplingTransitionListener listener : transitionListeners) {
+            listener.onTransition(event);
         }
     }
 
