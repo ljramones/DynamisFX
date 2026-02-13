@@ -1,9 +1,7 @@
 package org.dynamisfx.samples.utilities;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Insets;
@@ -32,6 +30,7 @@ import org.dynamisfx.simulation.coupling.PhysicsZone;
 import org.dynamisfx.simulation.coupling.ZoneId;
 import org.dynamisfx.simulation.entity.SimulationEntityRegistry;
 import org.dynamisfx.simulation.orbital.OrbitalState;
+import org.dynamisfx.simulation.orbital.OrbitalStateBuffer;
 import org.dynamisfx.simulation.orbital.ScriptedOrbitalDynamicsEngine;
 import org.dynamisfx.simulation.rigid.RigidBodyWorld;
 import org.dynamisfx.simulation.rigid.RigidStateBuffer;
@@ -56,7 +55,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private final SimulationTransformBridge transformBridge =
             new SimulationTransformBridge(entityRegistry, transformStore);
     private final ScriptedOrbitalDynamicsEngine orbitalEngine = new ScriptedOrbitalDynamicsEngine();
-    private final Map<String, OrbitalState> latestOrbitalStates = new ConcurrentHashMap<>();
+    private final OrbitalStateBuffer orbitalStateBuffer = new OrbitalStateBuffer();
     private final RigidStateBuffer rigidStateBuffer = new RigidStateBuffer();
     private CouplingStateReconciler stateReconciler;
     private SimulationOrchestrator orchestrator;
@@ -92,7 +91,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 frame,
                 time));
         stateReconciler = new CouplingStateReconciler(
-                objectId -> Optional.ofNullable(latestOrbitalStates.get(objectId)),
+                orbitalStateBuffer::get,
                 rigidStateBuffer::get,
                 rigidStateBuffer::put,
                 this::seedOrbitalFromPhysics,
@@ -180,7 +179,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 simulationTimeSeconds,
                 ReferenceFrame.WORLD).get(OBJECT_ID);
         if (state != null) {
-            latestOrbitalStates.put(OBJECT_ID, state);
+            orbitalStateBuffer.put(OBJECT_ID, state);
         }
         if (autoScenarioCheck != null && autoScenarioCheck.isSelected()) {
             boolean contact = simulationTimeSeconds >= 6.0 && simulationTimeSeconds < 7.5;
@@ -228,7 +227,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     }
 
     private void seedOrbitalFromPhysics(String objectId, OrbitalState seededState) {
-        latestOrbitalStates.put(objectId, seededState);
+        orbitalStateBuffer.put(objectId, seededState);
         orbitalEngine.setTrajectory(objectId, (time, frame) -> new OrbitalState(
                 seededState.position(),
                 seededState.linearVelocity(),
