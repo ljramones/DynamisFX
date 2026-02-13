@@ -9,8 +9,11 @@ add_library(dynamisfx_jolt_cshim SHARED
     src/jolt_c_api.cpp
 )
 
+find_package(JNI REQUIRED)
+
 target_include_directories(dynamisfx_jolt_cshim
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+    PRIVATE ${JNI_INCLUDE_DIRS}
 )
 
 if(APPLE)

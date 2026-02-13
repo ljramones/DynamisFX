@@ -21,3 +21,5 @@ cmake --build build --config Release
 ```
 
 The current implementation is a deterministic in-memory shim (no Jolt dependency yet) used to validate ABI and Java integration plumbing.
+
+The shared library also exports JNI symbols consumed by `JoltNativeBridge`.
