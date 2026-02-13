@@ -67,7 +67,7 @@ public class ScriptFunction3DControl extends ControlBase<Property<Function<Point
     private BooleanProperty error=new SimpleBooleanProperty();
     
     public ScriptFunction3DControl(Property<Function<Point3D,Number>> prop, final Collection<String> items, boolean subControl) {
-        super("/org/fxyz3d/controls/ScriptFunction3DControl.fxml", prop);
+        super("/org/dynamisfx/controls/ScriptFunction3DControl.fxml", prop);
 
         Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
         bindings.put("polyglot.js.allowAllAccess", true);

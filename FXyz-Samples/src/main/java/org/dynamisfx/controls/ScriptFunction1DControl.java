@@ -66,7 +66,7 @@ public class ScriptFunction1DControl extends ControlBase<Property<Function<Numbe
     private BooleanProperty error=new SimpleBooleanProperty();
     
     public ScriptFunction1DControl(Property<Function<Number,Number>> prop, final Collection<String> items, boolean subControl) {
-        super("/org/fxyz3d/controls/ScriptFunction1DControl.fxml", prop);
+        super("/org/dynamisfx/controls/ScriptFunction1DControl.fxml", prop);
 
         Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
         bindings.put("polyglot.js.allowAllAccess", true);

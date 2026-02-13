@@ -52,7 +52,7 @@ public class HierarchyControl extends ControlBase<Property<Node>> {
     @FXML private TreeTableColumn<Node, Boolean> visibilityColumn;
 
     public HierarchyControl(Property<Node> prop) {
-        super("/org/fxyz3d/controls/HierarchyControl.fxml", prop);
+        super("/org/dynamisfx/controls/HierarchyControl.fxml", prop);
         nodeColumn.setCellValueFactory(p -> p.getValue().valueProperty().asString());
         idColumn.setCellValueFactory(p -> p.getValue().getValue().idProperty());
         visibilityColumn.setCellValueFactory(p -> p.getValue().getValue().visibleProperty());

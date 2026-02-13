@@ -57,7 +57,7 @@ public class CameraViewControl extends ControlBase<BooleanProperty>{
     private final CameraView view;
 
     public CameraViewControl(BooleanProperty enabled, SubScene subScene, StackPane parentPane) {
-        super("/org/fxyz3d/controls/CameraViewControl.fxml", enabled);
+        super("/org/dynamisfx/controls/CameraViewControl.fxml", enabled);
         
         this.view = new CameraView(subScene);
         this.view.setFitWidth(200);

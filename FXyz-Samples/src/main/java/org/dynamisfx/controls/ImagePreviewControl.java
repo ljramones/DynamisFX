@@ -52,7 +52,7 @@ public class ImagePreviewControl extends ControlBase<Property<TextureImage>> {
     
 
     public ImagePreviewControl(final Property<TextureImage> img, String name, final Collection<TextureImage> items) {
-        super("/org/fxyz3d/controls/ImageMapPreview.fxml", img);
+        super("/org/dynamisfx/controls/ImageMapPreview.fxml", img);
        
         imageSelector.getItems().addAll(items);
         imageSelector.getSelectionModel().selectedItemProperty().addListener((obs,t,t1)->{

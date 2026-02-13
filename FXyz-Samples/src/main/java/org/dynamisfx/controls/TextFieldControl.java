@@ -42,7 +42,7 @@ import javafx.scene.control.TextField;
 public class TextFieldControl extends ControlBase<StringProperty> {
 
     public TextFieldControl(final String lbl, final StringProperty p) {
-        super("/org/fxyz3d/controls/TextFieldControl.fxml", p);
+        super("/org/dynamisfx/controls/TextFieldControl.fxml", p);
         title.setText(lbl);
         selection.setText(p.getValue());
         controlledProperty.bind(selection.textProperty());

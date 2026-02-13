@@ -111,7 +111,7 @@ public class TimelineControl extends ControlBase<Property<Timeline>> {
     };
 
     public TimelineControl(Property<Timeline> prop, String name) {
-        super("/org/fxyz3d/controls/TimelineControl.fxml", prop);
+        super("/org/dynamisfx/controls/TimelineControl.fxml", prop);
         timeline.bindBidirectional(prop);
         controls.disableProperty().bind(timeline.isNull());
         timelineDisplay.visibleProperty().bind(timeline.isNotNull());

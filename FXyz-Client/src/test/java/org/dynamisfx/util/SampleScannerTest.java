@@ -33,7 +33,7 @@ class SampleScannerTest {
         Method isScannable = SampleScanner.class.getDeclaredMethod("isScannableClass", String.class, Set.class);
         isScannable.setAccessible(true);
 
-        boolean allowed = (boolean) isScannable.invoke(scanner, "org/fxyz3d/samples/Demo.class", prefixes);
+        boolean allowed = (boolean) isScannable.invoke(scanner, "org/dynamisfx/samples/Demo.class", prefixes);
         boolean illegal = (boolean) isScannable.invoke(scanner, "module-info.class", prefixes);
         boolean wrongPackage = (boolean) isScannable.invoke(scanner, "org/example/Other.class", prefixes);
 

@@ -75,7 +75,7 @@ import org.dynamisfx.client.ModelInfoTracker;
 import org.dynamisfx.controls.ControlPanel;
 import org.dynamisfx.controls.factory.ControlFactory;
 import org.dynamisfx.SampleGizmoSupport;
-import org.dynamisfx.samples.FXyzSample;
+import org.dynamisfx.samples.DynamisFXSample;
 import org.dynamisfx.samples.utilities.SceneGizmoController;
 import org.dynamisfx.scene.selection.TransformGizmo3D;
 import org.dynamisfx.scene.Skybox;
@@ -91,7 +91,7 @@ import org.dynamisfx.utils.geom.Vec3d;
  * @author jpereda
  * @param <T>
  */
-public abstract class ShapeBaseSample<T extends Node> extends FXyzSample {
+public abstract class ShapeBaseSample<T extends Node> extends DynamisFXSample {
 
     protected abstract void createMesh();
 

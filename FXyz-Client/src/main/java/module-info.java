@@ -36,7 +36,7 @@ module org.dynamisfx.client {
     opens org.dynamisfx to javafx.fxml;
     opens org.dynamisfx.client to javafx.fxml;
     
-    uses org.dynamisfx.FXyzSamplerProject;
+    uses org.dynamisfx.DynamisFXSamplerProject;
     
     exports org.dynamisfx;
     exports org.dynamisfx.client;

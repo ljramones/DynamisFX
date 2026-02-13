@@ -28,7 +28,7 @@
  */ 
 package org.dynamisfx.samples;
 
-import org.dynamisfx.client.FXyzClient;
+import org.dynamisfx.client.DynamisFXClient;
 
 /**
  *
@@ -37,6 +37,6 @@ import org.dynamisfx.client.FXyzClient;
 public class Launcher {
     
     public static void main(String[] args) {
-        FXyzClient.main(args);
+        DynamisFXClient.main(args);
     }
 }

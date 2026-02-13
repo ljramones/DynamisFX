@@ -74,7 +74,7 @@ public class ModelInfoTracker extends StackPane {
     private HiddenSidesPane parentPane;
     public ModelInfoTracker(HiddenSidesPane parent) {
         try {
-            FXMLLoader loader = new FXMLLoader(this.getClass().getResource("/org/fxyz3d/client/ModelInfo.fxml"));
+            FXMLLoader loader = new FXMLLoader(this.getClass().getResource("/org/dynamisfx/client/ModelInfo.fxml"));
             loader.setController(ModelInfoTracker.this);
             loader.setRoot(ModelInfoTracker.this);
 

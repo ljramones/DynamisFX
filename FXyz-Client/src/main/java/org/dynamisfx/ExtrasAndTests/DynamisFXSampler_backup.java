@@ -1,5 +1,5 @@
 /**
- * FXyzSampler_backup.java
+ * DynamisFXSampler_backup.java
  *
  * Copyright (c) 2013-2016, F(X)yz
  * All rights reserved.
@@ -29,8 +29,8 @@
 
 package org.dynamisfx.ExtrasAndTests;
 
-import org.dynamisfx.FXyzSampleBase;
-import org.dynamisfx.FXyzSample;
+import org.dynamisfx.DynamisFXSampleBase;
+import org.dynamisfx.DynamisFXSample;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -74,10 +74,10 @@ import org.dynamisfx.model.SampleTree.TreeNode;
 import org.dynamisfx.model.WelcomePage;
 import org.dynamisfx.util.SampleScanner;
 
-public class FXyzSampler_backup extends Application {
+public class DynamisFXSampler_backup extends Application {
 
     public static final String 
-            GLASS_BLACK_SMOKE = FXyzSampler_backup.class.getResource("cyanBlackGlass.css").toExternalForm();
+            GLASS_BLACK_SMOKE = DynamisFXSampler_backup.class.getResource("cyanBlackGlass.css").toExternalForm();
             ;
     private Map<String, Project> projectsMap;
 
@@ -89,10 +89,10 @@ public class FXyzSampler_backup extends Application {
     private VBox rightContainer;
     
 
-    private FXyzSample selectedSample;
+    private DynamisFXSample selectedSample;
 
-    private TreeView<FXyzSample> samplesTreeView;
-    private TreeItem<FXyzSample> root;
+    private TreeView<DynamisFXSample> samplesTreeView;
+    private TreeItem<DynamisFXSample> root;
 
     public static void main(String[] args) {
         launch(args);        
@@ -127,12 +127,12 @@ public class FXyzSampler_backup extends Application {
         samplesTreeView.getStyleClass().add("samples-tree");
         samplesTreeView.setMinWidth(USE_PREF_SIZE);
         samplesTreeView.setMaxWidth(Double.MAX_VALUE);
-        samplesTreeView.setCellFactory(new Callback<TreeView<FXyzSample>, TreeCell<FXyzSample>>() {
+        samplesTreeView.setCellFactory(new Callback<TreeView<DynamisFXSample>, TreeCell<DynamisFXSample>>() {
             @Override
-            public TreeCell<FXyzSample> call(TreeView<FXyzSample> param) {
-                return new TreeCell<FXyzSample>() {
+            public TreeCell<DynamisFXSample> call(TreeView<DynamisFXSample> param) {
+                return new TreeCell<DynamisFXSample>() {
                     @Override
-                    protected void updateItem(FXyzSample item, boolean empty) {
+                    protected void updateItem(DynamisFXSample item, boolean empty) {
                         super.updateItem(item, empty);
 
                         if (empty) {
@@ -144,14 +144,14 @@ public class FXyzSampler_backup extends Application {
                 };
             }
         });
-        samplesTreeView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<FXyzSample>>() {
+        samplesTreeView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<DynamisFXSample>>() {
             @Override
-            public void changed(ObservableValue<? extends TreeItem<FXyzSample>> observable, TreeItem<FXyzSample> oldValue, TreeItem<FXyzSample> newSample) {
+            public void changed(ObservableValue<? extends TreeItem<DynamisFXSample>> observable, TreeItem<DynamisFXSample> oldValue, TreeItem<DynamisFXSample> newSample) {
                
                 if (newSample == null) {
                     return;
                 } else if (newSample.getValue() instanceof EmptySample) {
-                    FXyzSample selectedSample = newSample.getValue();
+                    DynamisFXSample selectedSample = newSample.getValue();
                     Project selectedProject = projectsMap.get(selectedSample.getSampleName());
                     System.out.println(selectedProject);
                     if (selectedProject != null) {
@@ -179,9 +179,9 @@ public class FXyzSampler_backup extends Application {
         HBox.setHgrow(centerContainer, Priority.ALWAYS);
         // by default we'll show the welcome message of first project in the tree
         // if no projects are available, we'll show the default page
-        List<TreeItem<FXyzSample>> projects = samplesTreeView.getRoot().getChildren();
+        List<TreeItem<DynamisFXSample>> projects = samplesTreeView.getRoot().getChildren();
         if (!projects.isEmpty()) {
-            TreeItem<FXyzSample> firstProject = projects.get(0);
+            TreeItem<DynamisFXSample> firstProject = projects.get(0);
             samplesTreeView.getSelectionModel().select(firstProject);
         } else {
             changeToWelcomeTab(null);
@@ -260,15 +260,15 @@ public class FXyzSampler_backup extends Application {
         sort(root, (o1, o2) -> o1.getValue().getSampleName().compareTo(o2.getValue().getSampleName()));
     }
 
-    private void sort(TreeItem<FXyzSample> node, Comparator<TreeItem<FXyzSample>> comparator) {
+    private void sort(TreeItem<DynamisFXSample> node, Comparator<TreeItem<DynamisFXSample>> comparator) {
         node.getChildren().sort(comparator);
-        for (TreeItem<FXyzSample> child : node.getChildren()) {
+        for (TreeItem<DynamisFXSample> child : node.getChildren()) {
             sort(child, comparator);
         }
     }
 
     // true == keep, false == delete
-    private boolean pruneSampleTree(TreeItem<FXyzSample> treeItem, String searchText) {
+    private boolean pruneSampleTree(TreeItem<DynamisFXSample> treeItem, String searchText) {
         // we go all the way down to the leaf nodes, and check if they match
         // the search text. If they do, they stay. If they don't, we remove them.
         // As we pop back up we check if the branch nodes still have children,
@@ -283,9 +283,9 @@ public class FXyzSampler_backup extends Application {
             return treeItem.getValue().getSampleName().toUpperCase().contains(searchText.toUpperCase());
         } else {
             // go down the tree...
-            List<TreeItem<FXyzSample>> toRemove = new ArrayList<>();
+            List<TreeItem<DynamisFXSample>> toRemove = new ArrayList<>();
 
-            for (TreeItem<FXyzSample> child : treeItem.getChildren()) {
+            for (TreeItem<DynamisFXSample> child : treeItem.getChildren()) {
                 boolean keep = pruneSampleTree(child, searchText);
                 if (!keep) {
                     toRemove.add(child);
@@ -372,7 +372,7 @@ public class FXyzSampler_backup extends Application {
         }
     }
 
-    private String getSourceCode(FXyzSample sample) {
+    private String getSourceCode(DynamisFXSample sample) {
         String sourceURL = sample.getSampleSourceURL();
 
         try {
@@ -387,7 +387,7 @@ public class FXyzSampler_backup extends Application {
         return getResource(sourceURL, sample.getClass());
     }
 
-    private String formatSourceCode(FXyzSample sample) {
+    private String formatSourceCode(DynamisFXSample sample) {
         String sourceURL = sample.getSampleSourceURL();
         String src;
         if (sourceURL == null) {
@@ -408,7 +408,7 @@ public class FXyzSampler_backup extends Application {
         return template.replace("<source/>", src);
     }
 
-    private String formatCss(FXyzSample sample) {
+    private String formatCss(DynamisFXSample sample) {
         String cssUrl = sample.getControlStylesheetURL();
         String src;
         if (cssUrl == null) {
@@ -433,8 +433,8 @@ public class FXyzSampler_backup extends Application {
     
     
 
-    private Node buildSampleTabContent(FXyzSample sample) {
-        return FXyzSampleBase.buildSample(sample, stage);
+    private Node buildSampleTabContent(DynamisFXSample sample) {
+        return DynamisFXSampleBase.buildSample(sample, stage);
     }    
 
     

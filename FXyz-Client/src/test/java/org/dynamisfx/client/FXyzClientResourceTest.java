@@ -8,15 +8,15 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import javafx.scene.Node;
 import javafx.stage.Stage;
-import org.dynamisfx.FXyzSample;
+import org.dynamisfx.DynamisFXSample;
 import org.junit.jupiter.api.Test;
 
-class FXyzClientResourceTest {
+class DynamisFXClientResourceTest {
 
     @Test
     void getResourceReturnsEmptyStringForNullStream() throws Exception {
-        FXyzClient client = new FXyzClient();
-        Method method = FXyzClient.class.getDeclaredMethod("getResource", InputStream.class);
+        DynamisFXClient client = new DynamisFXClient();
+        Method method = DynamisFXClient.class.getDeclaredMethod("getResource", InputStream.class);
         method.setAccessible(true);
 
         String result = (String) method.invoke(client, new Object[] {null});
@@ -25,14 +25,14 @@ class FXyzClientResourceTest {
 
     @Test
     void formatMethodsResolveBundledTemplates() throws Exception {
-        FXyzClient client = new FXyzClient();
-        FXyzSample sample = new StubSample();
+        DynamisFXClient client = new DynamisFXClient();
+        DynamisFXSample sample = new StubSample();
 
-        Method formatSource = FXyzClient.class.getDeclaredMethod("formatSourceCode", org.dynamisfx.FXyzSample.class);
+        Method formatSource = DynamisFXClient.class.getDeclaredMethod("formatSourceCode", org.dynamisfx.DynamisFXSample.class);
         formatSource.setAccessible(true);
         String sourceHtml = (String) formatSource.invoke(client, sample);
 
-        Method formatCss = FXyzClient.class.getDeclaredMethod("formatCss", org.dynamisfx.FXyzSample.class);
+        Method formatCss = DynamisFXClient.class.getDeclaredMethod("formatCss", org.dynamisfx.DynamisFXSample.class);
         formatCss.setAccessible(true);
         String cssHtml = (String) formatCss.invoke(client, sample);
 
@@ -44,7 +44,7 @@ class FXyzClientResourceTest {
         assertTrue(cssHtml.contains("<pre class=\"brush: css\">"));
     }
 
-    private static final class StubSample implements FXyzSample {
+    private static final class StubSample implements DynamisFXSample {
         @Override public String getSampleName() { return "Stub"; }
         @Override public String getSampleDescription() { return ""; }
         @Override public String getProjectName() { return "Test"; }

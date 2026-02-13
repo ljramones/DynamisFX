@@ -43,7 +43,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.dynamisfx.geometry.Point3D;
-import org.dynamisfx.samples.FXyzSample;
+import org.dynamisfx.samples.DynamisFXSample;
 import org.dynamisfx.shapes.composites.PolyLine3D;
 import org.dynamisfx.shapes.composites.PolyLine3D.LineType;
 import org.dynamisfx.utils.CameraTransformer;
@@ -52,7 +52,7 @@ import org.dynamisfx.utils.CameraTransformer;
  *
  * @author Sean
  */
-public class PolyLines3D extends FXyzSample {
+public class PolyLines3D extends DynamisFXSample {
 
     @Override
     public Node getSample() {

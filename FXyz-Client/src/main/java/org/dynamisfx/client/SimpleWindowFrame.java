@@ -104,7 +104,7 @@ public class SimpleWindowFrame extends AnchorPane {
 
     public SimpleWindowFrame(Stage stage, double minWidth, double minHeight) {
         try {
-            FXMLLoader loader = new FXMLLoader(this.getClass().getResource("/org/fxyz3d/client/SimpleFrame.fxml"));
+            FXMLLoader loader = new FXMLLoader(this.getClass().getResource("/org/dynamisfx/client/SimpleFrame.fxml"));
             loader.setController(SimpleWindowFrame.this);
             loader.setRoot(SimpleWindowFrame.this);
 

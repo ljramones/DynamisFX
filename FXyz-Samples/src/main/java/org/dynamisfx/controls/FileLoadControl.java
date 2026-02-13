@@ -53,7 +53,7 @@ public class FileLoadControl extends ControlBase<Property<URL>> {
     @FXML private TextField filePathTf;
 
     public FileLoadControl(Property<URL> prop) {
-        super("/org/fxyz3d/controls/FileLoadControl.fxml", prop);
+        super("/org/dynamisfx/controls/FileLoadControl.fxml", prop);
         filePathTf.setEditable(false);
     }
 

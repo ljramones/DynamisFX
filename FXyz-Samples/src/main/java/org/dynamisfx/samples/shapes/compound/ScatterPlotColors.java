@@ -44,7 +44,7 @@ import javafx.scene.layout.Background;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import org.dynamisfx.samples.FXyzSample;
+import org.dynamisfx.samples.DynamisFXSample;
 import org.dynamisfx.shapes.composites.ScatterPlot;
 import org.dynamisfx.utils.CameraTransformer;
 
@@ -52,7 +52,7 @@ import org.dynamisfx.utils.CameraTransformer;
  *
  * @author Sean
  */
-public class ScatterPlotColors extends FXyzSample {
+public class ScatterPlotColors extends DynamisFXSample {
 
     @Override
     public Node getSample() {

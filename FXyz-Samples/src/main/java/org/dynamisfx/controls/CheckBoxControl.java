@@ -42,7 +42,7 @@ public class CheckBoxControl extends ControlBase<Property<Boolean>>{
 
     
     public CheckBoxControl(Property<Boolean> prop) {
-        super("/org/fxyz3d/controls/CheckBoxControl.fxml", prop);
+        super("/org/dynamisfx/controls/CheckBoxControl.fxml", prop);
         loadBindings();
     }
 

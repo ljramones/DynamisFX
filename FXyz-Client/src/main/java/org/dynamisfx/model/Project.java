@@ -31,7 +31,7 @@ package org.dynamisfx.model;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.dynamisfx.FXyzSample;
+import org.dynamisfx.DynamisFXSample;
 
 /**
  * Represents a project such as ControlsFX or JFXtras
@@ -55,7 +55,7 @@ public class Project {
         this.sampleTree = new SampleTree(new EmptySample(name));
     }
 
-    public void addSample(String packagePath, FXyzSample sample) {
+    public void addSample(String packagePath, DynamisFXSample sample) {
         // convert something like 'org.controlsfx.samples.actions' to 'samples.actions'
         String packagesWithoutBase = "";
         try {

@@ -32,7 +32,7 @@ package org.dynamisfx.model;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.control.TreeItem;
-import org.dynamisfx.FXyzSample;
+import org.dynamisfx.DynamisFXSample;
 
 public class SampleTree {
 
@@ -40,7 +40,7 @@ public class SampleTree {
 
     private int count = 0;
 
-    public SampleTree(FXyzSample rootSample) {
+    public SampleTree(DynamisFXSample rootSample) {
         root = new TreeNode(null, null, rootSample);
     }
 
@@ -52,7 +52,7 @@ public class SampleTree {
         return count;
     }
 
-    public void addSample(String[] packages, FXyzSample sample) {
+    public void addSample(String[] packages, DynamisFXSample sample) {
         if (packages.length == 0) {
             root.addSample(sample);
             return;
@@ -82,7 +82,7 @@ public class SampleTree {
 
     public static class TreeNode {
 
-        private final FXyzSample sample;
+        private final DynamisFXSample sample;
         private final String packageName;
 
         private final TreeNode parent;
@@ -96,7 +96,7 @@ public class SampleTree {
             this(null, packageName, null);
         }
 
-        public TreeNode(TreeNode parent, String packageName, FXyzSample sample) {
+        public TreeNode(TreeNode parent, String packageName, DynamisFXSample sample) {
             this.children = new ArrayList<>();
             this.sample = sample;
             this.parent = parent;
@@ -124,7 +124,7 @@ public class SampleTree {
             return null;
         }
 
-        public void addSample(FXyzSample sample) {
+        public void addSample(DynamisFXSample sample) {
             children.add(new TreeNode(this, null, sample));
         }
 
@@ -132,7 +132,7 @@ public class SampleTree {
             children.add(n);
         }
 
-        public FXyzSample getSample() {
+        public DynamisFXSample getSample() {
             return sample;
         }
 
@@ -140,8 +140,8 @@ public class SampleTree {
             return packageName;
         }
 
-        public TreeItem<FXyzSample> createTreeItem() {
-            TreeItem<FXyzSample> treeItem = null;
+        public TreeItem<DynamisFXSample> createTreeItem() {
+            TreeItem<DynamisFXSample> treeItem = null;
 
             if (sample != null) {
                 treeItem = new TreeItem<>(sample);

@@ -47,8 +47,8 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import org.dynamisfx.FXyzSample;
-import org.dynamisfx.FXyzSampleBase;
+import org.dynamisfx.DynamisFXSample;
+import org.dynamisfx.DynamisFXSampleBase;
 import org.dynamisfx.model.EmptySample;
 import org.dynamisfx.model.Project;
 import org.dynamisfx.model.SampleTree;
@@ -61,10 +61,10 @@ import org.dynamisfx.util.SampleScanner;
  */
 public class SimpleSliderClient extends AbstractPopoutClient {
 
-    private TreeItem<FXyzSample> root;
+    private TreeItem<DynamisFXSample> root;
     private final Map<String, Project> projectsMap;
-    private FXyzSample selectedSample;
-    private TreeView<FXyzSample> contentTree;
+    private DynamisFXSample selectedSample;
+    private TreeView<DynamisFXSample> contentTree;
     private TextField searchBar;
 
     public SimpleSliderClient(Stage stage, boolean popsEnabled) {
@@ -98,12 +98,12 @@ public class SimpleSliderClient extends AbstractPopoutClient {
         contentTree.getStyleClass().add("samples-tree");
         contentTree.setMinWidth(USE_PREF_SIZE);
         contentTree.setMaxWidth(Double.MAX_VALUE);
-        contentTree.setCellFactory(new Callback<TreeView<FXyzSample>, TreeCell<FXyzSample>>() {
+        contentTree.setCellFactory(new Callback<TreeView<DynamisFXSample>, TreeCell<DynamisFXSample>>() {
             @Override
-            public TreeCell<FXyzSample> call(TreeView<FXyzSample> param) {
-                return new TreeCell<FXyzSample>() {
+            public TreeCell<DynamisFXSample> call(TreeView<DynamisFXSample> param) {
+                return new TreeCell<DynamisFXSample>() {
                     @Override
-                    protected void updateItem(FXyzSample item, boolean empty) {
+                    protected void updateItem(DynamisFXSample item, boolean empty) {
                         super.updateItem(item, empty);
 
                         if (empty) {
@@ -115,14 +115,14 @@ public class SimpleSliderClient extends AbstractPopoutClient {
                 };
             }
         });
-        contentTree.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<FXyzSample>>() {
+        contentTree.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<DynamisFXSample>>() {
             @Override
-            public void changed(ObservableValue<? extends TreeItem<FXyzSample>> observable, TreeItem<FXyzSample> oldValue, TreeItem<FXyzSample> newSample) {
+            public void changed(ObservableValue<? extends TreeItem<DynamisFXSample>> observable, TreeItem<DynamisFXSample> oldValue, TreeItem<DynamisFXSample> newSample) {
 
                 if (newSample == null) {
                     return;
                 } else if (newSample.getValue() instanceof EmptySample) {
-                    FXyzSample selectedSample = newSample.getValue();
+                    DynamisFXSample selectedSample = newSample.getValue();
                     Project selectedProject = projectsMap.get(selectedSample.getSampleName());
                     System.out.println(selectedProject);
                     if (selectedProject != null) {
@@ -135,9 +135,9 @@ public class SimpleSliderClient extends AbstractPopoutClient {
             }
         });
 
-        List<TreeItem<FXyzSample>> projects = contentTree.getRoot().getChildren();
+        List<TreeItem<DynamisFXSample>> projects = contentTree.getRoot().getChildren();
         if (!projects.isEmpty()) {
-            TreeItem<FXyzSample> firstProject = projects.get(0);
+            TreeItem<DynamisFXSample> firstProject = projects.get(0);
             contentTree.getSelectionModel().select(firstProject);
         } else {
             changeToWelcomePage(null);
@@ -183,15 +183,15 @@ public class SimpleSliderClient extends AbstractPopoutClient {
         sort(root, (o1, o2) -> o1.getValue().getSampleName().compareTo(o2.getValue().getSampleName()));
     }
 
-    private void sort(TreeItem<FXyzSample> node, Comparator<TreeItem<FXyzSample>> comparator) {
+    private void sort(TreeItem<DynamisFXSample> node, Comparator<TreeItem<DynamisFXSample>> comparator) {
         node.getChildren().sort(comparator);
-        for (TreeItem<FXyzSample> child : node.getChildren()) {
+        for (TreeItem<DynamisFXSample> child : node.getChildren()) {
             sort(child, comparator);
         }
     }
 
     // true == keep, false == delete
-    private boolean pruneSampleTree(TreeItem<FXyzSample> treeItem, String searchText) {
+    private boolean pruneSampleTree(TreeItem<DynamisFXSample> treeItem, String searchText) {
         // we go all the way down to the leaf nodes, and check if they match
         // the search text. If they do, they stay. If they don't, we remove them.
         // As we pop back up we check if the branch nodes still have children,
@@ -206,9 +206,9 @@ public class SimpleSliderClient extends AbstractPopoutClient {
             return treeItem.getValue().getSampleName().toUpperCase().contains(searchText.toUpperCase());
         } else {
             // go down the tree...
-            List<TreeItem<FXyzSample>> toRemove = new ArrayList<>();
+            List<TreeItem<DynamisFXSample>> toRemove = new ArrayList<>();
 
-            for (TreeItem<FXyzSample> child : treeItem.getChildren()) {
+            for (TreeItem<DynamisFXSample> child : treeItem.getChildren()) {
                 boolean keep = pruneSampleTree(child, searchText);
                 if (!keep) {
                     toRemove.add(child);
@@ -278,15 +278,15 @@ public class SimpleSliderClient extends AbstractPopoutClient {
 
     }
 
-    private Node buildSampleTabContent(FXyzSample sample) {
-        return FXyzSampleBase.buildSample(sample, stage);
+    private Node buildSampleTabContent(DynamisFXSample sample) {
+        return DynamisFXSampleBase.buildSample(sample, stage);
     }
 
     public Map<String, Project> getProjectsMap() {
         return projectsMap;
     }
 
-    public FXyzSample getSelectedSample() {
+    public DynamisFXSample getSelectedSample() {
         return selectedSample;
     }
 

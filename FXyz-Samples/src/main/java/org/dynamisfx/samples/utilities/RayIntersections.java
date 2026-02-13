@@ -56,7 +56,7 @@ import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
-import org.dynamisfx.samples.FXyzSample;
+import org.dynamisfx.samples.DynamisFXSample;
 import org.dynamisfx.scene.Axes;
 import org.dynamisfx.shapes.primitives.CurvedSpringMesh;
 import org.dynamisfx.shapes.primitives.KnotMesh;
@@ -67,7 +67,7 @@ import org.dynamisfx.utils.CameraTransformer;
  *
  * @author jpereda
  */
-public class RayIntersections extends FXyzSample {
+public class RayIntersections extends DynamisFXSample {
 
     public static void main(String[] args){
         launch(args);

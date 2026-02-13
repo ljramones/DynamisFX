@@ -54,13 +54,13 @@ import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.dynamisfx.geometry.MathUtils;
-import org.dynamisfx.samples.FXyzSample;
+import org.dynamisfx.samples.DynamisFXSample;
 
 /**
  *
  * @author sphillips
  */
-public class FloatingLabels extends FXyzSample {
+public class FloatingLabels extends DynamisFXSample {
 
     public static void main(String[] args){
         launch(args);

@@ -8,6 +8,12 @@ Execute the breaking rename from `org.fxyz3d` to `org.dynamisfx` with controlled
 
 - Active branch: `refactor-dynamisfx-namespace`
 
+## Progress
+
+- Completed: Step 1 (package/root migration to `org.dynamisfx`)
+- Completed: Step 2 (JPMS module references updated to `org.dynamisfx.*`)
+- In progress: Step 3 (public `FXyz*` type rename with compatibility shims)
+
 ## Pre-flight
 
 1. Confirm clean baseline:

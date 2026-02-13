@@ -48,12 +48,12 @@ import org.dynamisfx.shapes.primitives.helper.TriangleMeshHelper.TextureType;
 public class TextureTypeControl extends ComboBoxControl<TextureType>{
 
     private static final TextureImage 
-            //animatedWater = new Image(TextureTypeControl.class.getResource("/org/fxyz3d/images/anim.gif").toExternalForm()),
-            texture01 = new TextureImage(TextureTypeControl.class.getResource("/org/fxyz3d/images/textures/texture002.jpg").toExternalForm(),"Sand"),
-            texture02 = new TextureImage(TextureTypeControl.class.getResource("/org/fxyz3d/images/textures/diamondPlate.jpg").toExternalForm(),"Diamond Plate"),
-            texture03 = new TextureImage(TextureTypeControl.class.getResource("/org/fxyz3d/images/textures/tiled.jpg").toExternalForm(),"Tiled"),
-            texture04 = new TextureImage(TextureTypeControl.class.getResource("/org/fxyz3d/images/textures/water.jpg").toExternalForm(),"Water"),
-            texture05 = new TextureImage(TextureTypeControl.class.getResource("/org/fxyz3d/images/textures/metal-scale-tile.jpg").toExternalForm(),"Metal Tile");
+            //animatedWater = new Image(TextureTypeControl.class.getResource("/org/dynamisfx/images/anim.gif").toExternalForm()),
+            texture01 = new TextureImage(TextureTypeControl.class.getResource("/org/dynamisfx/images/textures/texture002.jpg").toExternalForm(),"Sand"),
+            texture02 = new TextureImage(TextureTypeControl.class.getResource("/org/dynamisfx/images/textures/diamondPlate.jpg").toExternalForm(),"Diamond Plate"),
+            texture03 = new TextureImage(TextureTypeControl.class.getResource("/org/dynamisfx/images/textures/tiled.jpg").toExternalForm(),"Tiled"),
+            texture04 = new TextureImage(TextureTypeControl.class.getResource("/org/dynamisfx/images/textures/water.jpg").toExternalForm(),"Water"),
+            texture05 = new TextureImage(TextureTypeControl.class.getResource("/org/dynamisfx/images/textures/metal-scale-tile.jpg").toExternalForm(),"Metal Tile");
     protected final ObservableList<TextureImage> textures;
     
     protected ColorSliderControl colorSlider;

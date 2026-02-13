@@ -48,7 +48,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import static org.dynamisfx.client.FXyzClient.BACKGROUNDS;
+import static org.dynamisfx.client.DynamisFXClient.BACKGROUNDS;
 
 /**
  *

@@ -44,8 +44,8 @@ import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.dynamisfx.FXyzSample;
-import org.dynamisfx.FXyzSamplerProject;
+import org.dynamisfx.DynamisFXSample;
+import org.dynamisfx.DynamisFXSamplerProject;
 import org.dynamisfx.model.EmptySample;
 import org.dynamisfx.model.Project;
 
@@ -62,13 +62,13 @@ public class SampleScanner {
         ILLEGAL_CLASS_NAMES.add("module-info.class");
     }
     
-    private static final Map<String, FXyzSamplerProject> packageToProjectMap = new HashMap<>();
+    private static final Map<String, DynamisFXSamplerProject> packageToProjectMap = new HashMap<>();
     static {
         LOG.fine("Initialising DynamisFX Sampler sample scanner...");
-        // find all projects on the classpath that expose a FXyzSamplerProject
+        // find all projects on the classpath that expose a DynamisFXSamplerProject
         // service. These guys are our friends....
-        ServiceLoader<FXyzSamplerProject> loader = ServiceLoader.load(FXyzSamplerProject.class);
-        for (FXyzSamplerProject project : loader) {
+        ServiceLoader<DynamisFXSamplerProject> loader = ServiceLoader.load(DynamisFXSamplerProject.class);
+        for (DynamisFXSamplerProject project : loader) {
             final String projectName = project.getProjectName();
             final String basePackage = project.getSampleBasePackage();
             packageToProjectMap.put(basePackage, project);
@@ -77,7 +77,7 @@ public class SampleScanner {
         }
         
         if (packageToProjectMap.isEmpty()) {
-            LOG.warning("Did not find any FXyzSamplerProject services");
+            LOG.warning("Did not find any DynamisFXSamplerProject services");
         }
     }
     
@@ -95,15 +95,15 @@ public class SampleScanner {
         Class<?>[] results = loadFromPathScanning();
         
         for (Class<?> sampleClass : results) {
-            if (! FXyzSample.class.isAssignableFrom(sampleClass)) continue;
+            if (! DynamisFXSample.class.isAssignableFrom(sampleClass)) continue;
             if (sampleClass.isInterface()) continue;
             if (Modifier.isAbstract(sampleClass.getModifiers())) continue;
-//            if (FXyzSample.class.isAssignableFrom(EmptySample.class)) continue;
+//            if (DynamisFXSample.class.isAssignableFrom(EmptySample.class)) continue;
             if (sampleClass == EmptySample.class) continue;
             
-            FXyzSample sample = null;
+            DynamisFXSample sample = null;
             try {
-                sample = (FXyzSample)sampleClass.getDeclaredConstructor().newInstance();
+                sample = (DynamisFXSample)sampleClass.getDeclaredConstructor().newInstance();
             } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
                 LOG.log(Level.FINE, "Failed to instantiate sample class " + sampleClass.getName(), e);
             }

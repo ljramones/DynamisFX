@@ -1,5 +1,5 @@
 /**
- * EmptySample.java
+ * DynamisFXSampleBase.java
  *
  * Copyright (c) 2013-2016, F(X)yz
  * All rights reserved.
@@ -27,63 +27,71 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */ 
 
-package org.dynamisfx.model;
+package org.dynamisfx;
 
+import javafx.application.Application;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.dynamisfx.DynamisFXSample;
 
-public class EmptySample implements DynamisFXSample {
-    private final String name;
-
-    public EmptySample(String name) {
-        this.name = name;
-    }
-
-    @Override public String getSampleName() {
-        return name;
-    }
-
-    @Override public String getSampleDescription() {
-        return null;
+/**
+ * A base class for samples - it is recommended that they extend this class
+ * rather than Application, as then the samples can be run either standalone
+ * or within FXSampler. 
+ */
+public abstract class DynamisFXSampleBase extends Application implements DynamisFXSample {
+    
+    /** {@inheritDoc}
+     * @throws java.lang.Exception */
+    @Override public void start(Stage primaryStage) throws Exception {
+        primaryStage.setTitle(getSampleName());
+        
+        Scene scene = new Scene((Parent)buildSample(this, primaryStage), 800, 800);
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
     
-    @Override public String getProjectName() {
-        return null;
-    }
-
-	@Override
-	public String getProjectVersion() {
-		return null;
-	}
-	
-    @Override public Node getPanel(Stage stage) {
-        return null;
-    }
-
-    @Override public String getJavaDocURL() {
-        return null;
-    }
-    
-    @Override public String getSampleSourceURL() {
-        return null;
-    }
-
+    /** {@inheritDoc}
+     * @return  */
     @Override public boolean isVisible() {
         return true;
     }
-
+    
+    /** {@inheritDoc}
+     * @return  */
     @Override public Node getControlPanel() {
         return null;
     }
     
+    /**
+     * @return  */
     public double getControlPanelDividerPosition() {
     	return 0.6;
     }
-
-	@Override
-	public String getControlStylesheetURL() {
-		return null;
-	}
-
+    
+    /** {@inheritDoc}
+     * @return  */
+    @Override public String getSampleDescription() {
+        return "";
+    }
+    
+    /** {@inheritDoc}
+     * @return  */
+    @Override public String getProjectName() {
+        return "DynamisFX-Samples";
+    }
+    
+    /**
+     * Utility method to create the default look for samples.
+     * 
+     * This is also where the service should be ran from or the changeSample method in DynamisFXSampler
+     * 
+     * @param sample
+     * @param stage
+     * @return 
+     */
+    public static Node buildSample(DynamisFXSample sample, Stage stage) {                
+        return sample.getPanel(stage);
+    }
 }

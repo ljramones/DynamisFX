@@ -1,5 +1,5 @@
 /**
- * CullFaceControl.java
+ * DynamisFXSamplerProject.java
  *
  * Copyright (c) 2013-2016, F(X)yz
  * All rights reserved.
@@ -27,28 +27,28 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */ 
 
-package org.dynamisfx.controls;
+package org.dynamisfx;
 
-import javafx.beans.property.Property;
-import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.shape.CullFace;
+import org.dynamisfx.model.WelcomePage;
 
-/**
- * FXML Controller class
- *
- * @author Jason Pollastrini aka jdub1581
- */
-public class CullFaceControl extends ControlBase{
-    @FXML
-    private ComboBox<CullFace> selection;
+public interface DynamisFXSamplerProject {
 
-    public CullFaceControl(final Property<CullFace> prop) {        
-        super("/org/dynamisfx/controls/CullFaceControl.fxml", prop);
-        prop.bind(selection.getSelectionModel().selectedItemProperty());
-        selection.getSelectionModel().select(0);
-    }
-
-       
+    /**
+     * @return 
+     */
+    public String getProjectName();
     
+    /**
+     * 
+     * @return 
+     */
+    public String getSampleBasePackage();
+    
+    /**
+     * Node that will be displayed in welcome tab, when project's root is
+     * selected in the tree. If this method returns null, default page will 
+     * be used
+     * @return 
+     */
+    public WelcomePage getWelcomePage();
 }

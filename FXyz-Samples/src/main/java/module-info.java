@@ -43,7 +43,7 @@ module org.dynamisfx.samples {
     requires java.scripting;
 
     opens org.dynamisfx.controls to javafx.fxml;
-    provides org.dynamisfx.FXyzSamplerProject with org.dynamisfx.samples.FXyzProject;
+    provides org.dynamisfx.DynamisFXSamplerProject with org.dynamisfx.samples.DynamisFXProject;
     
     exports org.dynamisfx.samples.importers to org.dynamisfx.client, org.dynamisfx.importers;
     exports org.dynamisfx.samples.shapes.compound to org.dynamisfx.client;

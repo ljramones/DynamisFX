@@ -46,7 +46,7 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
-import org.dynamisfx.samples.FXyzSample;
+import org.dynamisfx.samples.DynamisFXSample;
 import org.dynamisfx.shapes.primitives.SegmentedDomeMesh;
 import org.dynamisfx.utils.CameraTransformer;
 
@@ -54,7 +54,7 @@ import org.dynamisfx.utils.CameraTransformer;
  *
  * @author Sean
  */
-public class RandomSegmentedDomes extends FXyzSample {
+public class RandomSegmentedDomes extends DynamisFXSample {
 
     @Override
     public Node getSample() {

@@ -41,7 +41,7 @@ import javafx.scene.layout.Background;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import org.dynamisfx.samples.FXyzSample;
+import org.dynamisfx.samples.DynamisFXSample;
 import org.dynamisfx.shapes.composites.Histogram;
 import org.dynamisfx.utils.CameraTransformer;
 
@@ -49,7 +49,7 @@ import org.dynamisfx.utils.CameraTransformer;
  *
  * @author Sean
  */
-public class Histograms extends FXyzSample {
+public class Histograms extends DynamisFXSample {
 
     @Override
     public Node getSample() {
