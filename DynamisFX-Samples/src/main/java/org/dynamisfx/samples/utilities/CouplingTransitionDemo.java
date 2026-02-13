@@ -70,6 +70,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private Slider distanceSlider;
     private CheckBox contactCheck;
     private CheckBox autoScenarioCheck;
+    private CheckBox handoffDiagnosticsCheck;
     private Label modeLabel;
     private Label distanceLabel;
     private Label telemetryLabel;
@@ -77,6 +78,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private Label handoffZoneLabel;
     private Label handoffGlobalLabel;
     private Label handoffLocalLabel;
+    private boolean handoffDiagnosticsEnabled = true;
 
     public static void main(String[] args) {
         launch(args);
@@ -103,6 +105,9 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 },
                 (objectId, zones) -> zones.isEmpty() ? Optional.empty() : Optional.of(zones.get(0)),
                 snapshot -> {
+                    if (!handoffDiagnosticsEnabled) {
+                        return;
+                    }
                     latestHandoff = snapshot;
                     StateHandoffDiagnostics.loggingSink(LOG).accept(snapshot);
                 });
@@ -171,6 +176,15 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         contactCheck = new CheckBox("Active Contact");
         autoScenarioCheck = new CheckBox("Auto Scenario");
         autoScenarioCheck.setSelected(true);
+        handoffDiagnosticsCheck = new CheckBox("Handoff Diagnostics");
+        handoffDiagnosticsCheck.setSelected(true);
+        handoffDiagnosticsCheck.selectedProperty().addListener((obs, oldValue, newValue) -> {
+            handoffDiagnosticsEnabled = newValue;
+            if (!newValue) {
+                latestHandoff = null;
+            }
+            updateHandoffDebugLabels();
+        });
 
         root.getChildren().addAll(
                 new Label("Coupling Transition Demo"),
@@ -185,6 +199,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 new Label("Distance To Zone (m)"),
                 distanceSlider,
                 contactCheck,
+                handoffDiagnosticsCheck,
                 autoScenarioCheck);
         return root;
     }
