@@ -12,3 +12,12 @@ Planned artifact name:
 
 Header contract:
 - `jolt_c_api.h`
+
+Build locally with CMake:
+```bash
+cd DynamisFX-Physics-Jolt/native
+cmake -S . -B build
+cmake --build build --config Release
+```
+
+The current implementation is a deterministic in-memory shim (no Jolt dependency yet) used to validate ABI and Java integration plumbing.

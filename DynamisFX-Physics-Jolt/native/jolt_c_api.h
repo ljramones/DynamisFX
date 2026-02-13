@@ -88,6 +88,8 @@ typedef struct {
     double penetration_depth;
 } dfx_jolt_contact_row;
 
+uint32_t dfx_jolt_api_version(void);
+
 dfx_jolt_world* dfx_jolt_world_create(const dfx_jolt_world_config* config);
 void dfx_jolt_world_destroy(dfx_jolt_world* world);
 

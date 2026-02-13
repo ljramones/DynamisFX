@@ -116,6 +116,14 @@ public final class JoltWorld implements PhysicsWorld {
                 "Jolt native backend unavailable for operation "
                         + operation
                         + "; expected native library "
-                        + JoltNativeBridge.LIBRARY_NAME);
+                        + JoltNativeBridge.LIBRARY_NAME
+                        + " ("
+                        + JoltNativeBridge.expectedLibraryFileName()
+                        + "), load-status="
+                        + bridge.loadDescription()
+                        + ", configured path property="
+                        + JoltNativeBridge.NATIVE_PATH_PROPERTY
+                        + ", env="
+                        + JoltNativeBridge.NATIVE_PATH_ENV);
     }
 }

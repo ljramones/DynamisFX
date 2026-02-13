@@ -5,7 +5,11 @@ Optional Jolt backend module for DynamisFX rigid-body simulation.
 Current state:
 - Java backend/factory scaffolding is in place.
 - Runtime expects a native C-shim library named `dynamisfx_jolt_cshim`.
-- World creation fails fast when the native shim is not present.
+  - system property override: `dynamisfx.jolt.native.path`
+  - environment override: `DYNAMISFX_JOLT_NATIVE_PATH`
+- World creation fails fast when the native shim is not present and reports load diagnostics.
+- Native shim source and build files live in `native/`.
+- Optional Panama probe source is available under `src/panama/java` (JDK 22+ profile).
 
 Planned integration layers:
 1. Java backend API (`org.dynamisfx.physics.jolt`)
