@@ -32,7 +32,9 @@ class JoltNativeShimIntegrationTest {
         String oldPath = System.getProperty(JoltNativeBridge.NATIVE_PATH_PROPERTY);
         System.setProperty(JoltNativeBridge.NATIVE_PATH_PROPERTY, libPath.toString());
         try {
-            JoltBackend backend = new JoltBackend();
+            JoltNativeBridge bridge = new JoltNativeBridge();
+            assertEquals(JoltNativeBridge.BACKEND_MODE_STUB, bridge.backendMode());
+            JoltBackend backend = new JoltBackend(bridge);
             PhysicsWorld world = backend.createWorld(new PhysicsWorldConfiguration(
                     ReferenceFrame.WORLD,
                     new PhysicsVector3(0.0, -9.81, 0.0),

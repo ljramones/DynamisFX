@@ -20,6 +20,15 @@ cmake -S . -B build
 cmake --build build --config Release
 ```
 
-The current implementation is a deterministic in-memory shim (no Jolt dependency yet) used to validate ABI and Java integration plumbing.
+Default build (`DYNAMISFX_JOLT_BACKEND=stub`) is a deterministic in-memory shim used to validate ABI and Java integration plumbing.
+
+To validate local Jolt SDK wiring, configure `real` mode:
+```bash
+cd DynamisFX-Physics-Jolt/native
+cmake -S . -B build-real -DDYNAMISFX_JOLT_BACKEND=real -DJOLT_SDK_DIR=/path/to/jolt
+cmake --build build-real --config Release
+```
+
+`real` mode currently verifies Jolt headers are available and preserves the existing C ABI/JNI contract while the full Jolt world/body mapping is implemented incrementally.
 
 The shared library also exports JNI symbols consumed by `JoltNativeBridge`.

@@ -11,6 +11,10 @@
 #include <new>
 #include <unordered_map>
 
+#ifndef DFX_JOLT_BACKEND_MODE
+#define DFX_JOLT_BACKEND_MODE 0
+#endif
+
 namespace {
 
 struct body_record {
@@ -90,6 +94,10 @@ extern "C" {
 
 uint32_t dfx_jolt_api_version(void) {
     return 1;
+}
+
+uint32_t dfx_jolt_backend_mode(void) {
+    return DFX_JOLT_BACKEND_MODE;
 }
 
 dfx_jolt_world* dfx_jolt_world_create(const dfx_jolt_world_config* config) {
@@ -278,6 +286,12 @@ JNIEXPORT jint JNICALL Java_org_dynamisfx_physics_jolt_JoltNativeBridge_nativeAp
         JNIEnv*,
         jclass) {
     return static_cast<jint>(dfx_jolt_api_version());
+}
+
+JNIEXPORT jint JNICALL Java_org_dynamisfx_physics_jolt_JoltNativeBridge_nativeBackendMode(
+        JNIEnv*,
+        jclass) {
+    return static_cast<jint>(dfx_jolt_backend_mode());
 }
 
 JNIEXPORT jlong JNICALL Java_org_dynamisfx_physics_jolt_JoltNativeBridge_nativeWorldCreate(

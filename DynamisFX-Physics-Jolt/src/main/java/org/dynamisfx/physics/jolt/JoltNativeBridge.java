@@ -31,6 +31,8 @@ final class JoltNativeBridge {
     static final int BODY_KINEMATIC = 1;
     static final int BODY_DYNAMIC = 2;
     static final int API_VERSION = 1;
+    static final int BACKEND_MODE_STUB = 0;
+    static final int BACKEND_MODE_REAL = 1;
 
     private final boolean available;
     private final String loadDescription;
@@ -62,6 +64,13 @@ final class JoltNativeBridge {
             return -1;
         }
         return nativeApiVersion();
+    }
+
+    int backendMode() {
+        if (!available) {
+            return -1;
+        }
+        return nativeBackendMode();
     }
 
     long worldCreate(PhysicsWorldConfiguration configuration) {
@@ -243,6 +252,7 @@ final class JoltNativeBridge {
     }
 
     private static native int nativeApiVersion();
+    private static native int nativeBackendMode();
 
     private static native long nativeWorldCreate(
             double gx,
