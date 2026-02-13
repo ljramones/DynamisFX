@@ -9,7 +9,7 @@ This is a multi-module Maven build for the DynamisFX JavaFX library. Main module
 Parent and module build configuration is defined in `pom.xml` files. Images and docs live under `resources/`.
 
 ## Build, Test, and Development Commands
-Use JDK 17 with Maven:
+Use JDK 25 with Maven:
 - `mvn clean install`: build all modules.
 - `mvn -pl DynamisFX-Samples -DskipTests javafx:run`: launch the DynamisFX sampler.
 - `mvn -pl DynamisFX-Samples -DskipTests clean package javafx:jlink`: produce a custom runtime image.
@@ -25,4 +25,4 @@ No Git history is available in this workspace, so commit message conventions can
 For PRs, include a short summary, note impacted modules (e.g., `DynamisFX-Core`), and attach screenshots when UI behavior changes (FXyz sampler or sample apps).
 
 ## Configuration Notes
-This repo targets Java 17 and JavaFX. If you add new samples or resources, place them in the module-specific `src/main/resources` directories and register any new samples with the sampler when applicable.
+This repo targets Java 25 and JavaFX 21. If you add new samples or resources, place them in the module-specific `src/main/resources` directories and register any new samples with the sampler when applicable.

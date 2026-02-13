@@ -17,7 +17,7 @@ A JavaFX 3D Visualization and Component Library
 
 ## How to build
 
-The project is managed by Maven. To build with JDK 17, type:
+The project is managed by Maven. To build with JDK 25, type:
 
 	mvn clean install
 
@@ -57,7 +57,7 @@ If you have a Maven project, edit the `pom.xml` file and add:
     <version>1.0-SNAPSHOT</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>17</maven.compiler.release>
+        <maven.compiler.release>25</maven.compiler.release>
         <javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
     </properties>
     <dependencies>
@@ -173,7 +173,7 @@ You can create a custom image for your platform running:
 
     mvn -pl DynamisFX-Samples -DskipTests clean package javafx:jlink
 
-And you can run it with Java 17 on your platform:
+And you can run it with Java 25 on your platform:
 
     DynamisFX-Samples/build/FXyz/bin/FXyzSamples
 

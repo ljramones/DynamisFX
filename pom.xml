@@ -23,9 +23,9 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>17</maven.compiler.release>
+        <maven.compiler.release>25</maven.compiler.release>
 
-        <javafx.version>17.0.15</javafx.version>
+        <javafx.version>21</javafx.version>
         <controlsfx.version>11.1.2</controlsfx.version>
         <reactfx.version>2.0-M5</reactfx.version>
         <easybind.version>1.0.3</easybind.version>

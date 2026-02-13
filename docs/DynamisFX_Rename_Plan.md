@@ -149,7 +149,7 @@ Recommendation:
 
 Add/ensure:
 
-- matrix build for JDK 17+
+- matrix build for JDK 25+
 - module-path compile checks
 - sample launcher smoke test
 - importer/exporter integration tests with fixture assets
