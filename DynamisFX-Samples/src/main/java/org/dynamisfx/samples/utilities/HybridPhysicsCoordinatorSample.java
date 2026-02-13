@@ -24,7 +24,6 @@ import org.dynamisfx.physics.model.PhysicsVector3;
 import org.dynamisfx.physics.model.PhysicsWorldConfiguration;
 import org.dynamisfx.physics.model.ReferenceFrame;
 import org.dynamisfx.physics.model.SphereShape;
-import org.dynamisfx.physics.ode4j.Ode4jBackendFactory;
 import org.dynamisfx.physics.orekit.OrekitBackendFactory;
 import org.dynamisfx.physics.orekit.OrekitWorld;
 import org.dynamisfx.physics.step.FixedStepAccumulator;
@@ -32,7 +31,8 @@ import org.dynamisfx.physics.step.FixedStepResult;
 import org.dynamisfx.samples.shapes.ShapeBaseSample;
 
 /**
- * Demonstrates a shared-timeline hybrid run with ODE4j (general) and Orekit (orbital).
+ * Demonstrates a shared-timeline hybrid run with selectable rigid-body backend and Orekit.
+ * Set {@code -Ddynamisfx.samples.physics.backend=ode4j|jolt} to choose provider.
  */
 public class HybridPhysicsCoordinatorSample extends ShapeBaseSample<Group> {
 
@@ -54,7 +54,7 @@ public class HybridPhysicsCoordinatorSample extends ShapeBaseSample<Group> {
     protected void createMesh() {
         camera.setTranslateZ(-1800);
 
-        generalBackend = new Ode4jBackendFactory().createBackend();
+        generalBackend = RigidBodyBackendSelector.createBackend();
         generalWorld = generalBackend.createWorld(new PhysicsWorldConfiguration(
                 ReferenceFrame.WORLD,
                 PhysicsVector3.ZERO,

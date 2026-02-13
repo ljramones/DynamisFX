@@ -16,6 +16,8 @@ Current state:
   - environment override: `DYNAMISFX_JOLTJNI_NATIVE_PATH`
 - Native integration test is opt-in:
   - `-Ddynamisfx.joltjni.integration=true`
+- Self-check command (native load/bootstrap only, no simulation):
+  - `mvn -pl DynamisFX-Physics-Jolt -DskipTests exec:java -Dexec.mainClass=org.dynamisfx.physics.jolt.JoltSelfCheck`
 - JNI bridge now calls shim functions for world create/destroy, body create/get/set/remove, and step.
 - Native bridge exposes backend mode (`stub` vs `real`) for diagnostics/tests.
 - Native C shim now has two build modes:

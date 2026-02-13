@@ -24,13 +24,13 @@ import org.dynamisfx.physics.model.PhysicsRuntimeTuning;
 import org.dynamisfx.physics.model.PhysicsVector3;
 import org.dynamisfx.physics.model.PhysicsWorldConfiguration;
 import org.dynamisfx.physics.model.ReferenceFrame;
-import org.dynamisfx.physics.ode4j.Ode4jBackendFactory;
 import org.dynamisfx.physics.step.FixedStepAccumulator;
 import org.dynamisfx.physics.sync.PhysicsSceneSync;
 import org.dynamisfx.samples.shapes.ShapeBaseSample;
 
 /**
- * Demonstrates ODE4j-backed physics with SPI scene synchronization.
+ * Demonstrates rigid-body physics scene synchronization using a selectable backend.
+ * Set {@code -Ddynamisfx.samples.physics.backend=ode4j|jolt} to choose provider.
  */
 public class Ode4jPhysicsSyncSample extends ShapeBaseSample<Group> {
 
@@ -55,7 +55,7 @@ public class Ode4jPhysicsSyncSample extends ShapeBaseSample<Group> {
     protected void createMesh() {
         camera.setTranslateZ(-1100);
 
-        backend = new Ode4jBackendFactory().createBackend();
+        backend = RigidBodyBackendSelector.createBackend();
         world = backend.createWorld(new PhysicsWorldConfiguration(
                 ReferenceFrame.WORLD,
                 new PhysicsVector3(0, -9.81, 0),
@@ -117,7 +117,7 @@ public class Ode4jPhysicsSyncSample extends ShapeBaseSample<Group> {
     protected Node buildControlPanel() {
         VBox root = new VBox(8);
         root.setPadding(new Insets(8));
-        root.getChildren().add(new Label("ODE4j Runtime Tuning"));
+        root.getChildren().add(new Label("Runtime Tuning (" + backend.id() + ")"));
 
         GridPane grid = new GridPane();
         grid.setHgap(8);

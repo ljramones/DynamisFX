@@ -38,6 +38,10 @@
             <groupId>org.dynamisfx</groupId>
             <artifactId>dynamisfx-physics-orekit</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.dynamisfx</groupId>
+            <artifactId>dynamisfx-physics-jolt</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.openjfx</groupId>
