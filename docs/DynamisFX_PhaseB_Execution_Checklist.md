@@ -15,6 +15,7 @@ Execute the breaking rename from `org.fxyz3d` to `org.dynamisfx` with controlled
 - Completed: Step 3 (public `FXyz*` type rename with compatibility shims)
 - Completed: Step 4 (resource/service wiring + legacy string cleanup)
 - Completed: Step 5 (migration documentation)
+- Completed: Step 6 (dedicated `dynamisfx-compat` module)
 
 ## Pre-flight
 

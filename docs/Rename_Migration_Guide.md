@@ -86,6 +86,10 @@ Legacy `FXyz*` types still exist as deprecated shims and forward to `DynamisFX*`
 
 These are transitional and should be removed in a later major release.
 
+For consumers that still compile against `org.fxyz3d.*`, use the dedicated compatibility artifact:
+
+- `org.dynamisfx:dynamisfx-compat`
+
 ## ServiceLoader Migration
 
 Old service descriptor:
@@ -118,6 +122,16 @@ After:
 <dependency>
   <groupId>org.dynamisfx</groupId>
   <artifactId>dynamisfx-core</artifactId>
+  <version>${dynamisfx.version}</version>
+</dependency>
+```
+
+Optional compatibility dependency (temporary):
+
+```xml
+<dependency>
+  <groupId>org.dynamisfx</groupId>
+  <artifactId>dynamisfx-compat</artifactId>
   <version>${dynamisfx.version}</version>
 </dependency>
 ```

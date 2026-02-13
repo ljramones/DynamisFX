@@ -16,6 +16,7 @@
         <module>FXyz-Physics-Orekit</module>
         <module>FXyz-Importers</module>
         <module>FXyz-Client</module>
+        <module>FXyz-Compat</module>
         <module>FXyz-Samples</module>
     </modules>
 
@@ -171,6 +172,11 @@
             <dependency>
                 <groupId>org.dynamisfx</groupId>
                 <artifactId>dynamisfx-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.dynamisfx</groupId>
+                <artifactId>dynamisfx-compat</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
