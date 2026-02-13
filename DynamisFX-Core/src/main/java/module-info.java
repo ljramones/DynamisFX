@@ -48,6 +48,10 @@ module org.dynamisfx.core {
     exports org.dynamisfx.scene;
     exports org.dynamisfx.scene.paint;
     exports org.dynamisfx.scene.selection;
+    exports org.dynamisfx.simulation;
+    exports org.dynamisfx.simulation.coupling;
+    exports org.dynamisfx.simulation.orbital;
+    exports org.dynamisfx.simulation.rigid;
     exports org.dynamisfx.shapes;
     exports org.dynamisfx.shapes.complex.cloth;
     exports org.dynamisfx.shapes.composites;
