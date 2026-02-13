@@ -92,16 +92,24 @@ public final class SimulationOrchestrator {
 
     public void addListener(SimulationOrchestratorListener listener) {
         Objects.requireNonNull(listener, "listener must not be null");
-        listeners.add(listener);
+        synchronized (listeners) {
+            listeners.add(listener);
+        }
     }
 
     public boolean removeListener(SimulationOrchestratorListener listener) {
         Objects.requireNonNull(listener, "listener must not be null");
-        return listeners.remove(listener);
+        synchronized (listeners) {
+            return listeners.remove(listener);
+        }
     }
 
     private void firePhase(OrchestratorPhase phase, double simulationTimeSeconds) {
-        for (SimulationOrchestratorListener listener : listeners) {
+        Set<SimulationOrchestratorListener> snapshot;
+        synchronized (listeners) {
+            snapshot = new LinkedHashSet<>(listeners);
+        }
+        for (SimulationOrchestratorListener listener : snapshot) {
             listener.onPhase(phase, simulationTimeSeconds);
         }
     }

@@ -30,7 +30,7 @@ public final class CouplingTransitionApplier implements CouplingTransitionListen
                 stateBuffers,
                 registry,
                 bodyDefinitionProvider,
-                CouplingTransitionApplier::selectBoundOrFirstZone);
+                (event, bodyRegistry) -> selectBoundOrDeterministicZone(event, bodyRegistry, stateBuffers));
     }
 
     public CouplingTransitionApplier(
@@ -124,20 +124,16 @@ public final class CouplingTransitionApplier implements CouplingTransitionListen
             return null;
         }
         OrbitalState state = orbitalState.get();
-        return new PhysicsBodyState(
-                subtract(state.position(), zone.anchorPosition()),
-                state.orientation(),
-                state.linearVelocity(),
-                PhysicsVector3.ZERO,
-                zone.anchorFrame(),
-                simulationTimeSeconds);
+        return ZoneFrameTransform.orbitalToLocalRigid(state, simulationTimeSeconds, zone);
     }
 
-    private static Optional<PhysicsZone> selectBoundOrFirstZone(
+    private static Optional<PhysicsZone> selectBoundOrDeterministicZone(
             CouplingModeTransitionEvent event,
-            ZoneBodyRegistry registry) {
+            ZoneBodyRegistry registry,
+            SimulationStateBuffers stateBuffers) {
         Objects.requireNonNull(event, "event must not be null");
         Objects.requireNonNull(registry, "registry must not be null");
+        Objects.requireNonNull(stateBuffers, "stateBuffers must not be null");
         ZoneId boundZoneId = registry.bindingForObject(event.objectId())
                 .map(ZoneBodyRegistry.ZoneBodyBinding::zoneId)
                 .orElse(null);
@@ -147,8 +143,10 @@ public final class CouplingTransitionApplier implements CouplingTransitionListen
                 return bound;
             }
         }
-        List<PhysicsZone> zones = event.zones();
-        return zones.isEmpty() ? Optional.empty() : Optional.of(zones.get(0));
+        PhysicsVector3 positionHint = stateBuffers.orbital().get(event.objectId())
+                .map(OrbitalState::position)
+                .orElse(null);
+        return DeterministicZoneSelector.select(event.zones(), null, positionHint);
     }
 
     private static Optional<PhysicsZone> findZoneById(ZoneId zoneId, List<PhysicsZone> zones) {
@@ -161,9 +159,5 @@ public final class CouplingTransitionApplier implements CouplingTransitionListen
             }
         }
         return Optional.empty();
-    }
-
-    private static PhysicsVector3 subtract(PhysicsVector3 a, PhysicsVector3 b) {
-        return new PhysicsVector3(a.x() - b.x(), a.y() - b.y(), a.z() - b.z());
     }
 }

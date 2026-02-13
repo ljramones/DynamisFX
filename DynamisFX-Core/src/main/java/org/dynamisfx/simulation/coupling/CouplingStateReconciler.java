@@ -8,7 +8,6 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import org.dynamisfx.physics.model.PhysicsBodyState;
-import org.dynamisfx.physics.model.PhysicsVector3;
 import org.dynamisfx.simulation.ObjectSimulationMode;
 import org.dynamisfx.simulation.orbital.OrbitalState;
 
@@ -40,7 +39,7 @@ public final class CouplingStateReconciler implements CouplingTransitionListener
                 },
                 objectId -> {
                 },
-                (objectId, zones) -> zones.isEmpty() ? Optional.empty() : Optional.of(zones.get(0)),
+                (objectId, zones) -> DeterministicZoneSelector.select(zones, null, null),
                 snapshot -> {
                 });
     }
@@ -110,13 +109,7 @@ public final class CouplingStateReconciler implements CouplingTransitionListener
             return;
         }
         OrbitalState orbitalState = orbitalStateOptional.get();
-        PhysicsBodyState seeded = new PhysicsBodyState(
-                subtract(orbitalState.position(), zone.anchorPosition()),
-                orbitalState.orientation(),
-                orbitalState.linearVelocity(),
-                PhysicsVector3.ZERO,
-                zone.anchorFrame(),
-                simulationTimeSeconds);
+        PhysicsBodyState seeded = ZoneFrameTransform.orbitalToLocalRigid(orbitalState, simulationTimeSeconds, zone);
         diagnosticsSink.accept(new StateHandoffSnapshot(
                 StateHandoffDirection.PROMOTE_TO_PHYSICS,
                 simulationTimeSeconds,
@@ -137,12 +130,7 @@ public final class CouplingStateReconciler implements CouplingTransitionListener
             return;
         }
         PhysicsBodyState rigidState = rigidStateOptional.get();
-        OrbitalState seeded = new OrbitalState(
-                add(rigidState.position(), zone.anchorPosition()),
-                rigidState.linearVelocity(),
-                rigidState.orientation(),
-                zone.anchorFrame(),
-                simulationTimeSeconds);
+        OrbitalState seeded = ZoneFrameTransform.localRigidToOrbital(rigidState, simulationTimeSeconds, zone);
         diagnosticsSink.accept(new StateHandoffSnapshot(
                 StateHandoffDirection.DEMOTE_TO_ORBITAL,
                 simulationTimeSeconds,
@@ -155,13 +143,5 @@ public final class CouplingStateReconciler implements CouplingTransitionListener
                 rigidState.linearVelocity()));
         orbitalStateSink.accept(objectId, seeded);
         rigidStateClearer.accept(objectId);
-    }
-
-    private static PhysicsVector3 add(PhysicsVector3 a, PhysicsVector3 b) {
-        return new PhysicsVector3(a.x() + b.x(), a.y() + b.y(), a.z() + b.z());
-    }
-
-    private static PhysicsVector3 subtract(PhysicsVector3 a, PhysicsVector3 b) {
-        return new PhysicsVector3(a.x() - b.x(), a.y() - b.y(), a.z() - b.z());
     }
 }

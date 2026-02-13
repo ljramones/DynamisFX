@@ -25,7 +25,7 @@ public final class SimulationStateReconcilerFactory {
                 orbitalStateSink,
                 objectId -> {
                 },
-                (objectId, zones) -> zones.isEmpty() ? Optional.empty() : Optional.of(zones.get(0)),
+                (objectId, zones) -> DeterministicZoneSelector.select(zones, null, null),
                 snapshot -> {
                 });
     }

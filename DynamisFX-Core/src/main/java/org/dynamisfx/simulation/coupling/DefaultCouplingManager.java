@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -106,61 +107,65 @@ public final class DefaultCouplingManager implements CouplingManager {
     }
 
     @Override
-    public synchronized void update(double simulationTimeSeconds) {
+    public void update(double simulationTimeSeconds) {
         if (!Double.isFinite(simulationTimeSeconds)) {
             throw new IllegalArgumentException("simulationTimeSeconds must be finite");
         }
-        Collection<PhysicsZone> zoneSnapshot = new ArrayList<>(zones.values());
-        for (Map.Entry<String, ObjectSimulationMode> entry : modesByObjectId.entrySet()) {
-            String objectId = entry.getKey();
-            ObjectSimulationMode currentMode = entry.getValue();
-            double lastTransitionTime = lastTransitionTimeByObjectId.getOrDefault(objectId, -1.0);
-            CouplingTransitionContext context = new CouplingTransitionContext(
-                    objectId,
-                    currentMode,
-                    simulationTimeSeconds,
-                    lastTransitionTime,
-                    observationProvider.predictedInterceptSeconds(objectId, zoneSnapshot),
-                    zoneSnapshot);
-            CouplingTransitionDecision decision = transitionPolicy.evaluate(context);
-            ObjectSimulationMode resolvedMode = decision.nextMode().orElse(currentMode);
-            boolean transitioned = resolvedMode != currentMode;
-            if (transitioned) {
-                entry.setValue(resolvedMode);
-                lastTransitionTimeByObjectId.put(objectId, simulationTimeSeconds);
-                emitTransition(new CouplingModeTransitionEvent(
+        List<CouplingModeTransitionEvent> transitionEvents = new ArrayList<>();
+        List<CouplingTelemetryEvent> telemetryEvents = new ArrayList<>();
+        List<CouplingTransitionListener> transitionListenerSnapshot;
+        List<CouplingTelemetryListener> telemetryListenerSnapshot;
+        synchronized (this) {
+            Collection<PhysicsZone> zoneSnapshot = new ArrayList<>(zones.values());
+            for (Map.Entry<String, ObjectSimulationMode> entry : modesByObjectId.entrySet()) {
+                String objectId = entry.getKey();
+                ObjectSimulationMode currentMode = entry.getValue();
+                double lastTransitionTime = lastTransitionTimeByObjectId.getOrDefault(objectId, -1.0);
+                CouplingTransitionContext context = new CouplingTransitionContext(
+                        objectId,
+                        currentMode,
+                        simulationTimeSeconds,
+                        lastTransitionTime,
+                        observationProvider.predictedInterceptSeconds(objectId, zoneSnapshot),
+                        zoneSnapshot);
+                CouplingTransitionDecision decision = transitionPolicy.evaluate(context);
+                ObjectSimulationMode resolvedMode = decision.nextMode().orElse(currentMode);
+                boolean transitioned = resolvedMode != currentMode;
+                if (transitioned) {
+                    entry.setValue(resolvedMode);
+                    lastTransitionTimeByObjectId.put(objectId, simulationTimeSeconds);
+                    transitionEvents.add(new CouplingModeTransitionEvent(
+                            simulationTimeSeconds,
+                            objectId,
+                            currentMode,
+                            resolvedMode,
+                            decision.reason(),
+                            new ArrayList<>(zoneSnapshot)));
+                }
+                telemetryEvents.add(new CouplingTelemetryEvent(
                         simulationTimeSeconds,
                         objectId,
                         currentMode,
                         resolvedMode,
-                        decision.reason(),
-                        new ArrayList<>(zoneSnapshot)));
+                        transitioned,
+                        decision.reason()));
             }
-            emitTelemetry(new CouplingTelemetryEvent(
-                    simulationTimeSeconds,
-                    objectId,
-                    currentMode,
-                    resolvedMode,
-                    transitioned,
-                    decision.reason()));
+            transitionListenerSnapshot = new ArrayList<>(transitionListeners);
+            telemetryListenerSnapshot = new ArrayList<>(telemetryListeners);
         }
-    }
-
-    private void emitTelemetry(CouplingTelemetryEvent event) {
-        if (telemetryListeners.isEmpty()) {
-            return;
+        if (!transitionEvents.isEmpty()) {
+            for (CouplingModeTransitionEvent event : transitionEvents) {
+                for (CouplingTransitionListener listener : transitionListenerSnapshot) {
+                    listener.onTransition(event);
+                }
+            }
         }
-        for (CouplingTelemetryListener listener : telemetryListeners) {
-            listener.onTelemetry(event);
-        }
-    }
-
-    private void emitTransition(CouplingModeTransitionEvent event) {
-        if (transitionListeners.isEmpty()) {
-            return;
-        }
-        for (CouplingTransitionListener listener : transitionListeners) {
-            listener.onTransition(event);
+        if (!telemetryEvents.isEmpty()) {
+            for (CouplingTelemetryEvent event : telemetryEvents) {
+                for (CouplingTelemetryListener listener : telemetryListenerSnapshot) {
+                    listener.onTelemetry(event);
+                }
+            }
         }
     }
 

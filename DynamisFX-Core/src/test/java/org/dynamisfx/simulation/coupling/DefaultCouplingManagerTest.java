@@ -189,6 +189,27 @@ class DefaultCouplingManagerTest {
         assertEquals(0, events.size());
     }
 
+    @Test
+    void supportsListenerRemovalInsideCallback() {
+        DefaultCouplingManager manager = new DefaultCouplingManager(context ->
+                CouplingTransitionDecision.transitionTo(
+                        ObjectSimulationMode.PHYSICS_ACTIVE,
+                        CouplingDecisionReason.PROMOTE_DISTANCE_THRESHOLD));
+        manager.registerZone(new StubZone(new ZoneId("zone-a")));
+        manager.setMode("lander-1", ObjectSimulationMode.ORBITAL_ONLY);
+        CouplingTransitionListener[] transitionRef = new CouplingTransitionListener[1];
+        transitionRef[0] = event -> manager.removeTransitionListener(transitionRef[0]);
+        CouplingTelemetryListener[] telemetryRef = new CouplingTelemetryListener[1];
+        telemetryRef[0] = event -> manager.removeTelemetryListener(telemetryRef[0]);
+        manager.addTransitionListener(transitionRef[0]);
+        manager.addTelemetryListener(telemetryRef[0]);
+
+        manager.update(1.0);
+        manager.update(2.0);
+
+        assertEquals(ObjectSimulationMode.PHYSICS_ACTIVE, manager.modeFor("lander-1").orElseThrow());
+    }
+
     private record StubZone(ZoneId zoneId) implements PhysicsZone {
         @Override
         public ReferenceFrame anchorFrame() {

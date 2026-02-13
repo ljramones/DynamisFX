@@ -38,6 +38,7 @@ import org.dynamisfx.simulation.coupling.CouplingDecisionReason;
 import org.dynamisfx.simulation.coupling.CouplingStateReconciler;
 import org.dynamisfx.simulation.coupling.CouplingTelemetryEvent;
 import org.dynamisfx.simulation.coupling.CouplingTransitionApplier;
+import org.dynamisfx.simulation.coupling.DeterministicZoneSelector;
 import org.dynamisfx.simulation.coupling.DefaultCouplingManager;
 import org.dynamisfx.simulation.coupling.MutableCouplingObservationProvider;
 import org.dynamisfx.simulation.coupling.Phase1CouplingBootstrap;
@@ -142,7 +143,12 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 this::seedOrbitalFromPhysics,
                 objectId -> {
                 },
-                (objectId, zones) -> zones.isEmpty() ? Optional.empty() : Optional.of(zones.get(0)),
+                (objectId, zones) -> DeterministicZoneSelector.select(
+                        zones,
+                        zoneBodyRegistry.bindingForObject(objectId)
+                                .map(ZoneBodyRegistry.ZoneBodyBinding::zoneId)
+                                .orElse(null),
+                        stateBuffers.orbital().get(objectId).map(OrbitalState::position).orElse(null)),
                 snapshot -> {
                     if (!handoffDiagnosticsEnabled) {
                         return;

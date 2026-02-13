@@ -73,4 +73,37 @@ class SimulationOrchestratorTest {
         assertTrue(couplingEvents.get(0).objectId().equals("lander-1"));
         assertEquals(9.0, store.sample(0).posX(), 1e-9);
     }
+
+    @Test
+    void supportsListenerRemovalDuringPhaseCallback() {
+        SimulationEntityRegistry<String> registry = new SimulationEntityRegistry<>();
+        registry.register("lander-1", "entity");
+        SimulationTransformBridge bridge = new SimulationTransformBridge(registry, new TransformStore(1));
+        ScriptedOrbitalDynamicsEngine orbital = new ScriptedOrbitalDynamicsEngine();
+        orbital.setTrajectory("lander-1", (time, frame) -> new OrbitalState(
+                PhysicsVector3.ZERO,
+                PhysicsVector3.ZERO,
+                PhysicsQuaternion.IDENTITY,
+                frame,
+                time));
+        DefaultCouplingManager coupling = new DefaultCouplingManager(context ->
+                CouplingTransitionDecision.noChange(CouplingDecisionReason.NO_CHANGE));
+        coupling.setMode("lander-1", org.dynamisfx.simulation.ObjectSimulationMode.ORBITAL_ONLY);
+        SimulationOrchestrator orchestrator = new SimulationOrchestrator(
+                new SimulationClock(),
+                orbital,
+                coupling,
+                dt -> {
+                },
+                bridge,
+                Map::of,
+                () -> List.of("lander-1"),
+                ReferenceFrame.WORLD);
+        SimulationOrchestratorListener[] ref = new SimulationOrchestratorListener[1];
+        ref[0] = (phase, time) -> orchestrator.removeListener(ref[0]);
+        orchestrator.addListener(ref[0]);
+
+        double simTime = orchestrator.tick(0.25);
+        assertEquals(0.25, simTime, 1e-9);
+    }
 }
