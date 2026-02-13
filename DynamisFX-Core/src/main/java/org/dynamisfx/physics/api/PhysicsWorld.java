@@ -4,6 +4,7 @@ import java.util.Collection;
 import org.dynamisfx.physics.model.PhysicsBodyDefinition;
 import org.dynamisfx.physics.model.PhysicsBodyState;
 import org.dynamisfx.physics.model.PhysicsRuntimeTuning;
+import org.dynamisfx.physics.model.PhysicsVector3;
 
 /**
  * Engine-neutral world surface used by FXyz runtime orchestration.
@@ -31,6 +32,14 @@ public interface PhysicsWorld extends AutoCloseable {
     PhysicsRuntimeTuning runtimeTuning();
 
     void setRuntimeTuning(PhysicsRuntimeTuning tuning);
+
+    default PhysicsVector3 gravity() {
+        return PhysicsVector3.ZERO;
+    }
+
+    default void setGravity(PhysicsVector3 gravity) {
+        // optional capability
+    }
 
     void step(double dtSeconds);
 

@@ -29,6 +29,7 @@ public final class OrekitWorld implements PhysicsWorld {
     private final Map<PhysicsBodyHandle, BodyEntry> bodies = new LinkedHashMap<>();
     private long nextBodyHandle = 1L;
     private PhysicsRuntimeTuning runtimeTuning;
+    private PhysicsVector3 gravity;
     private double timeScale = 1.0;
     private double simulationTimeSeconds;
     private AbsoluteDate simulationDate = AbsoluteDate.J2000_EPOCH;
@@ -40,6 +41,7 @@ public final class OrekitWorld implements PhysicsWorld {
         }
         this.configuration = configuration;
         this.runtimeTuning = configuration.runtimeTuning();
+        this.gravity = configuration.gravity();
     }
 
     @Override
@@ -116,6 +118,21 @@ public final class OrekitWorld implements PhysicsWorld {
             throw new IllegalArgumentException("tuning must not be null");
         }
         runtimeTuning = tuning;
+    }
+
+    @Override
+    public PhysicsVector3 gravity() {
+        ensureOpen();
+        return gravity;
+    }
+
+    @Override
+    public void setGravity(PhysicsVector3 gravity) {
+        ensureOpen();
+        if (gravity == null) {
+            throw new IllegalArgumentException("gravity must not be null");
+        }
+        this.gravity = gravity;
     }
 
     public double timeScale() {
@@ -277,7 +294,6 @@ public final class OrekitWorld implements PhysicsWorld {
             PhysicsBodyHandle self,
             PhysicsVector3 position,
             Map<PhysicsBodyHandle, PhysicsBodyState> states) {
-        PhysicsVector3 gravity = configuration.gravity();
         double ax = gravity.x();
         double ay = gravity.y();
         double az = gravity.z();

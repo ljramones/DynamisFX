@@ -65,15 +65,17 @@ public final class Ode4jWorld implements PhysicsWorld {
     private long nextHandleValue;
     private long nextConstraintHandleValue;
     private double timeSeconds;
+    private PhysicsVector3 gravity;
     private boolean closed;
 
     public Ode4jWorld(PhysicsWorldConfiguration configuration) {
         this.configuration = Objects.requireNonNull(configuration, "configuration must not be null");
         world = OdeHelper.createWorld();
+        gravity = configuration.gravity();
         world.setGravity(
-                configuration.gravity().x(),
-                configuration.gravity().y(),
-                configuration.gravity().z());
+                gravity.x(),
+                gravity.y(),
+                gravity.z());
         runtimeTuning = configuration.runtimeTuning();
         world.setQuickStepNumIterations(runtimeTuning.solverIterations());
         space = OdeHelper.createHashSpace();
@@ -225,6 +227,22 @@ public final class Ode4jWorld implements PhysicsWorld {
         }
         runtimeTuning = tuning;
         world.setQuickStepNumIterations(tuning.solverIterations());
+    }
+
+    @Override
+    public PhysicsVector3 gravity() {
+        ensureOpen();
+        return gravity;
+    }
+
+    @Override
+    public void setGravity(PhysicsVector3 gravity) {
+        ensureOpen();
+        if (gravity == null) {
+            throw new IllegalArgumentException("gravity must not be null");
+        }
+        this.gravity = gravity;
+        world.setGravity(gravity.x(), gravity.y(), gravity.z());
     }
 
     @Override

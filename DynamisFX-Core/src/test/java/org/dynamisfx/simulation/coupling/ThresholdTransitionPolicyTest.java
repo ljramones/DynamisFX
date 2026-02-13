@@ -164,6 +164,33 @@ class ThresholdTransitionPolicyTest {
         assertEquals(CouplingDecisionReason.DEMOTE_ALTITUDE_THRESHOLD, next.reason());
     }
 
+    @Test
+    void remainsStableBetweenPromoteAndDemoteAltitudeThresholds() {
+        ThresholdTransitionPolicy policy = new ThresholdTransitionPolicy(
+                new StubObservationProvider(10.0, false, 350.0),
+                100.0,
+                150.0,
+                0.0,
+                0.0,
+                400.0,
+                900.0);
+
+        CouplingTransitionDecision promote = policy.evaluate(context(ObjectSimulationMode.ORBITAL_ONLY, 1.0, -1.0));
+        assertEquals(ObjectSimulationMode.PHYSICS_ACTIVE, promote.nextMode().orElseThrow());
+
+        ThresholdTransitionPolicy midBandPolicy = new ThresholdTransitionPolicy(
+                new StubObservationProvider(10.0, false, 600.0),
+                100.0,
+                150.0,
+                0.0,
+                0.0,
+                400.0,
+                900.0);
+        CouplingTransitionDecision midBand = midBandPolicy.evaluate(context(ObjectSimulationMode.PHYSICS_ACTIVE, 2.0, 1.0));
+        assertTrue(midBand.nextMode().isEmpty());
+        assertEquals(CouplingDecisionReason.NO_CHANGE, midBand.reason());
+    }
+
     private static CouplingTransitionContext context(
             ObjectSimulationMode mode,
             double simulationTimeSeconds,

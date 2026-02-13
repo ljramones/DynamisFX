@@ -49,7 +49,10 @@ import org.dynamisfx.simulation.coupling.SphericalTangentFrameBuilder;
 import org.dynamisfx.simulation.coupling.SimulationStateReconcilerFactory;
 import org.dynamisfx.simulation.coupling.StateHandoffDiagnostics;
 import org.dynamisfx.simulation.coupling.StateHandoffSnapshot;
+import org.dynamisfx.simulation.coupling.TerrainPatchSpawner;
+import org.dynamisfx.simulation.coupling.TerrainPatchSpec;
 import org.dynamisfx.simulation.coupling.ThresholdTransitionPolicy;
+import org.dynamisfx.simulation.coupling.ZoneGravityProjection;
 import org.dynamisfx.simulation.coupling.ZoneBodyRegistry;
 import org.dynamisfx.simulation.coupling.ZoneId;
 import org.dynamisfx.simulation.entity.SimulationEntityRegistry;
@@ -184,19 +187,14 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 2_000.0,
                 new Ode4jRigidBodyWorldAdapter(new PhysicsWorldConfiguration(
                         ReferenceFrame.WORLD,
-                        new PhysicsVector3(0.0, -1.62, 0.0),
+                        PhysicsVector3.ZERO,
                         1.0 / 120.0)));
-        demoZone.world().createBody(new PhysicsBodyDefinition(
-                PhysicsBodyType.STATIC,
-                0.0,
-                new BoxShape(8_000.0, 40.0, 8_000.0),
-                new PhysicsBodyState(
-                        new PhysicsVector3(0.0, -120.0, 0.0),
-                        PhysicsQuaternion.IDENTITY,
-                        PhysicsVector3.ZERO,
-                        PhysicsVector3.ZERO,
-                        ReferenceFrame.WORLD,
-                        0.0)));
+        TerrainPatchSpawner.spawnTiles(
+                demoZone.world(),
+                ReferenceFrame.WORLD,
+                new TerrainPatchSpec(2_000.0, 200.0, 80.0),
+                (x, y) -> 20.0 * Math.sin(x * 0.002) * Math.cos(y * 0.002),
+                0.0);
         couplingManager.registerZone(demoZone);
         couplingManager.setMode(OBJECT_ID, lastMode);
         couplingManager.addTelemetryListener(this::onTelemetry);
@@ -353,6 +351,9 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 demoZone.updateAnchorPose(
                         tangentFrame.anchorPosition(),
                         tangentFrame.anchorOrientation());
+            }
+            if (demoZone != null && demoZone.world() != null) {
+                demoZone.world().setGravity(ZoneGravityProjection.projectSphericalGravity(demoZone, 1.62));
             }
         }
         if (autoScenarioCheck != null && autoScenarioCheck.isSelected()) {

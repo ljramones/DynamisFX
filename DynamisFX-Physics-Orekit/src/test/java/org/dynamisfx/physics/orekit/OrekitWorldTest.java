@@ -120,6 +120,16 @@ class OrekitWorldTest {
     }
 
     @Test
+    void supportsRuntimeGravityMutation() {
+        OrekitWorld world = new OrekitWorld(new PhysicsWorldConfiguration(
+                ReferenceFrame.ICRF,
+                PhysicsVector3.ZERO,
+                1.0));
+        world.setGravity(new PhysicsVector3(0.0, -1.62, 0.0));
+        assertEquals(-1.62, world.gravity().y(), 1e-9);
+    }
+
+    @Test
     void usesAllMassiveBodiesForAcceleration() {
         OrekitWorld world = new OrekitWorld(new PhysicsWorldConfiguration(
                 ReferenceFrame.ICRF,

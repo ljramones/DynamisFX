@@ -166,4 +166,14 @@ class Ode4jWorldTest {
         assertEquals(12, world.runtimeTuning().solverIterations());
         assertEquals(0.9, world.runtimeTuning().contactFriction(), 1e-9);
     }
+
+    @Test
+    void supportsRuntimeGravityMutation() {
+        Ode4jWorld world = new Ode4jWorld(new PhysicsWorldConfiguration(
+                ReferenceFrame.WORLD,
+                PhysicsVector3.ZERO,
+                1.0 / 120.0));
+        world.setGravity(new PhysicsVector3(0.0, 0.0, -9.81));
+        assertEquals(-9.81, world.gravity().z(), 1e-9);
+    }
 }

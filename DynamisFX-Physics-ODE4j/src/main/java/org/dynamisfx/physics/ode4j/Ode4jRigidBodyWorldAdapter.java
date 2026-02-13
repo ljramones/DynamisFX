@@ -13,6 +13,7 @@ import org.dynamisfx.physics.api.PhysicsWorld;
 import org.dynamisfx.physics.model.PhysicsBodyDefinition;
 import org.dynamisfx.physics.model.PhysicsBodyState;
 import org.dynamisfx.physics.model.PhysicsRuntimeTuning;
+import org.dynamisfx.physics.model.PhysicsVector3;
 import org.dynamisfx.physics.model.PhysicsWorldConfiguration;
 import org.dynamisfx.simulation.rigid.RigidBodyWorld;
 
@@ -82,6 +83,16 @@ public final class Ode4jRigidBodyWorldAdapter implements RigidBodyWorld {
     @Override
     public void setRuntimeTuning(PhysicsRuntimeTuning tuning) {
         delegate.setRuntimeTuning(tuning);
+    }
+
+    @Override
+    public PhysicsVector3 gravity() {
+        return delegate.gravity();
+    }
+
+    @Override
+    public void setGravity(PhysicsVector3 gravity) {
+        delegate.setGravity(gravity);
     }
 
     @Override
