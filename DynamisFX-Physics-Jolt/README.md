@@ -9,6 +9,9 @@ Current state:
   - environment override: `DYNAMISFX_JOLT_NATIVE_PATH`
 - JNI bridge now calls shim functions for world create/destroy, body create/get/set/remove, and step.
 - Native bridge exposes backend mode (`stub` vs `real`) for diagnostics/tests.
+- Native C shim now has two build modes:
+  - `stub` (deterministic in-memory implementation, default)
+  - `real` (Jolt SDK/library-backed implementation via CMake flags)
 - World creation fails fast when the native shim is not present and reports load diagnostics.
 - Native shim source and build files live in `native/`.
 - Optional Panama probe source is available under `src/panama/java` (JDK 22+ profile).

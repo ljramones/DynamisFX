@@ -13,7 +13,7 @@ if(NOT DYNAMISFX_JOLT_BACKEND STREQUAL "stub" AND NOT DYNAMISFX_JOLT_BACKEND STR
 endif()
 
 set(DYNAMISFX_JOLT_SOURCES
-    src/jolt_c_api.cpp
+    src/jolt_jni_bridge.cpp
 )
 
 set(DYNAMISFX_JOLT_BACKEND_MODE 0)
@@ -26,7 +26,16 @@ if(DYNAMISFX_JOLT_BACKEND STREQUAL "real")
     if(NOT EXISTS "${JOLT_SDK_DIR}/Jolt/Jolt.h")
         message(FATAL_ERROR "Expected Jolt header not found: ${JOLT_SDK_DIR}/Jolt/Jolt.h")
     endif()
-    list(APPEND DYNAMISFX_JOLT_SOURCES src/jolt_real_probe.cpp)
+    set(JOLT_LIBRARY "" CACHE FILEPATH "Path to libJolt shared/static library")
+    if(JOLT_LIBRARY STREQUAL "")
+        message(FATAL_ERROR "JOLT_LIBRARY must be set when DYNAMISFX_JOLT_BACKEND=real")
+    endif()
+    if(NOT EXISTS "${JOLT_LIBRARY}")
+        message(FATAL_ERROR "Expected Jolt library not found: ${JOLT_LIBRARY}")
+    endif()
+    list(APPEND DYNAMISFX_JOLT_SOURCES src/jolt_c_api_real.cpp)
+else()
+    list(APPEND DYNAMISFX_JOLT_SOURCES src/jolt_c_api.cpp)
 endif()
 
 add_library(dynamisfx_jolt_cshim SHARED
@@ -41,7 +50,9 @@ target_include_directories(dynamisfx_jolt_cshim
 )
 
 if(DYNAMISFX_JOLT_BACKEND STREQUAL "real")
+    find_package(Threads REQUIRED)
     target_include_directories(dynamisfx_jolt_cshim PRIVATE "${JOLT_SDK_DIR}")
+    target_link_libraries(dynamisfx_jolt_cshim PRIVATE "${JOLT_LIBRARY}" Threads::Threads)
 endif()
 
 target_compile_definitions(dynamisfx_jolt_cshim
