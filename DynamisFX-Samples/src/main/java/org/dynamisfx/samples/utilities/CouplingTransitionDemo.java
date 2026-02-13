@@ -23,7 +23,9 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
 import org.dynamisfx.physics.model.BoxShape;
 import org.dynamisfx.physics.model.PhysicsBodyDefinition;
+import org.dynamisfx.physics.model.PhysicsBodyState;
 import org.dynamisfx.physics.model.PhysicsBodyType;
+import org.dynamisfx.physics.model.PhysicsQuaternion;
 import org.dynamisfx.physics.model.PhysicsVector3;
 import org.dynamisfx.physics.model.PhysicsWorldConfiguration;
 import org.dynamisfx.physics.model.ReferenceFrame;
@@ -42,10 +44,12 @@ import org.dynamisfx.simulation.coupling.DeterministicZoneSelector;
 import org.dynamisfx.simulation.coupling.DefaultCouplingManager;
 import org.dynamisfx.simulation.coupling.MutablePhysicsZone;
 import org.dynamisfx.simulation.coupling.MutableCouplingObservationProvider;
-import org.dynamisfx.simulation.coupling.Phase1CouplingBootstrap;
+import org.dynamisfx.simulation.coupling.SphericalTangentFrame;
+import org.dynamisfx.simulation.coupling.SphericalTangentFrameBuilder;
 import org.dynamisfx.simulation.coupling.SimulationStateReconcilerFactory;
 import org.dynamisfx.simulation.coupling.StateHandoffDiagnostics;
 import org.dynamisfx.simulation.coupling.StateHandoffSnapshot;
+import org.dynamisfx.simulation.coupling.ThresholdTransitionPolicy;
 import org.dynamisfx.simulation.coupling.ZoneBodyRegistry;
 import org.dynamisfx.simulation.coupling.ZoneId;
 import org.dynamisfx.simulation.entity.SimulationEntityRegistry;
@@ -67,6 +71,9 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private static final double LANDER_WIDTH = 80.0;
     private static final double LANDER_HEIGHT = 40.0;
     private static final double LANDER_DEPTH = 80.0;
+    private static final double DEMO_PLANET_RADIUS_METERS = 1_000.0;
+    private static final double SURFACE_PROMOTE_ALTITUDE_METERS = 400.0;
+    private static final double SURFACE_DEMOTE_ALTITUDE_METERS = 900.0;
     private static final Preferences PREFS = Preferences.userNodeForPackage(CouplingTransitionDemo.class);
     private static final String PREF_HANDOFF_DIAGNOSTICS = "coupling.handoffDiagnosticsEnabled";
     private static final String PREF_FREEZE_SELECTION = "coupling.handoffFreezeSelection";
@@ -75,7 +82,16 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private final Group worldGroup = new Group();
     private final MutableCouplingObservationProvider observationProvider = new MutableCouplingObservationProvider();
     private final DefaultCouplingManager couplingManager =
-            Phase1CouplingBootstrap.createDefaultManager(observationProvider);
+            new DefaultCouplingManager(
+                    new ThresholdTransitionPolicy(
+                            observationProvider,
+                            1_000.0,
+                            1_500.0,
+                            1.0,
+                            2.0,
+                            SURFACE_PROMOTE_ALTITUDE_METERS,
+                            SURFACE_DEMOTE_ALTITUDE_METERS),
+                    observationProvider);
     private final SimulationClock clock = new SimulationClock(0.0, 1.0, false);
     private final SimulationEntityRegistry<Node> entityRegistry = new SimulationEntityRegistry<>();
     private final TransformStore transformStore = new TransformStore(1);
@@ -164,12 +180,23 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 new ZoneId("demo-zone"),
                 ReferenceFrame.WORLD,
                 PhysicsVector3.ZERO,
-                org.dynamisfx.physics.model.PhysicsQuaternion.IDENTITY,
+                PhysicsQuaternion.IDENTITY,
                 2_000.0,
                 new Ode4jRigidBodyWorldAdapter(new PhysicsWorldConfiguration(
                         ReferenceFrame.WORLD,
                         new PhysicsVector3(0.0, -1.62, 0.0),
                         1.0 / 120.0)));
+        demoZone.world().createBody(new PhysicsBodyDefinition(
+                PhysicsBodyType.STATIC,
+                0.0,
+                new BoxShape(8_000.0, 40.0, 8_000.0),
+                new PhysicsBodyState(
+                        new PhysicsVector3(0.0, -120.0, 0.0),
+                        PhysicsQuaternion.IDENTITY,
+                        PhysicsVector3.ZERO,
+                        PhysicsVector3.ZERO,
+                        ReferenceFrame.WORLD,
+                        0.0)));
         couplingManager.registerZone(demoZone);
         couplingManager.setMode(OBJECT_ID, lastMode);
         couplingManager.addTelemetryListener(this::onTelemetry);
@@ -320,9 +347,12 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         if (state != null) {
             stateBuffers.orbital().put(OBJECT_ID, state);
             if (lastMode != ObjectSimulationMode.PHYSICS_ACTIVE && demoZone != null) {
-                demoZone.updateAnchorPose(
+                SphericalTangentFrame tangentFrame = SphericalTangentFrameBuilder.fromCartesian(
                         state.position(),
-                        org.dynamisfx.physics.model.PhysicsQuaternion.IDENTITY);
+                        DEMO_PLANET_RADIUS_METERS);
+                demoZone.updateAnchorPose(
+                        tangentFrame.anchorPosition(),
+                        tangentFrame.anchorOrientation());
             }
         }
         if (autoScenarioCheck != null && autoScenarioCheck.isSelected()) {
@@ -331,23 +361,36 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                     ? 3.0 - simulationTimeSeconds
                     : null;
             if (state != null) {
-                setObservationState(Math.abs(state.position().x()), contact, predictedIntercept);
+                double distance = Math.abs(state.position().x());
+                double altitude = Math.max(0.0, distance - DEMO_PLANET_RADIUS_METERS);
+                setObservationState(distance, contact, predictedIntercept, altitude);
             }
             return;
         }
 
         if (distanceSlider != null && contactCheck != null) {
-            setObservationState(distanceSlider.getValue(), contactCheck.isSelected(), null);
+            double distance = distanceSlider.getValue();
+            double altitude = Math.max(0.0, distance - DEMO_PLANET_RADIUS_METERS);
+            setObservationState(distance, contactCheck.isSelected(), null, altitude);
         }
     }
 
-    private void setObservationState(double distanceMeters, boolean activeContact, Double predictedInterceptSeconds) {
+    private void setObservationState(
+            double distanceMeters,
+            boolean activeContact,
+            Double predictedInterceptSeconds,
+            Double altitudeMetersAboveSurface) {
         observationProvider.setDistanceMeters(OBJECT_ID, distanceMeters);
         observationProvider.setActiveContact(OBJECT_ID, activeContact);
         if (predictedInterceptSeconds == null) {
             observationProvider.clearPredictedIntercept(OBJECT_ID);
         } else {
             observationProvider.setPredictedInterceptSeconds(OBJECT_ID, predictedInterceptSeconds);
+        }
+        if (altitudeMetersAboveSurface == null) {
+            observationProvider.clearAltitudeMetersAboveSurface(OBJECT_ID);
+        } else {
+            observationProvider.setAltitudeMetersAboveSurface(OBJECT_ID, altitudeMetersAboveSurface);
         }
 
         if (distanceSlider != null && Math.abs(distanceSlider.getValue() - distanceMeters) > 1e-6) {

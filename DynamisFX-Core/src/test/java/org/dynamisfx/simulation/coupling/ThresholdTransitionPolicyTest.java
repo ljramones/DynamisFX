@@ -98,6 +98,8 @@ class ThresholdTransitionPolicyTest {
         assertThrows(IllegalArgumentException.class, () -> new ThresholdTransitionPolicy(provider, 0, 2, 0));
         assertThrows(IllegalArgumentException.class, () -> new ThresholdTransitionPolicy(provider, 2, 1, 0));
         assertThrows(IllegalArgumentException.class, () -> new ThresholdTransitionPolicy(provider, 1, 2, -1));
+        assertThrows(IllegalArgumentException.class, () -> new ThresholdTransitionPolicy(provider, 1, 2, 0, 0, -1, 5));
+        assertThrows(IllegalArgumentException.class, () -> new ThresholdTransitionPolicy(provider, 1, 2, 0, 0, 10, 5));
     }
 
     @Test
@@ -128,6 +130,40 @@ class ThresholdTransitionPolicyTest {
                 policy.evaluate(context(ObjectSimulationMode.ORBITAL_ONLY, 1.0, -1.0)));
     }
 
+    @Test
+    void promotesOnAltitudeThresholdWhenConfigured() {
+        ThresholdTransitionPolicy policy = new ThresholdTransitionPolicy(
+                new StubObservationProvider(500.0, false, 40.0),
+                100.0,
+                150.0,
+                0.0,
+                0.0,
+                50.0,
+                80.0);
+
+        CouplingTransitionDecision next = policy.evaluate(context(ObjectSimulationMode.ORBITAL_ONLY, 1.0, -1.0));
+
+        assertEquals(ObjectSimulationMode.PHYSICS_ACTIVE, next.nextMode().orElseThrow());
+        assertEquals(CouplingDecisionReason.PROMOTE_ALTITUDE_THRESHOLD, next.reason());
+    }
+
+    @Test
+    void demotesOnAltitudeThresholdWhenConfiguredAndNoContact() {
+        ThresholdTransitionPolicy policy = new ThresholdTransitionPolicy(
+                new StubObservationProvider(10.0, false, 120.0),
+                100.0,
+                150.0,
+                0.0,
+                0.0,
+                50.0,
+                80.0);
+
+        CouplingTransitionDecision next = policy.evaluate(context(ObjectSimulationMode.PHYSICS_ACTIVE, 2.0, -1.0));
+
+        assertEquals(ObjectSimulationMode.ORBITAL_ONLY, next.nextMode().orElseThrow());
+        assertEquals(CouplingDecisionReason.DEMOTE_ALTITUDE_THRESHOLD, next.reason());
+    }
+
     private static CouplingTransitionContext context(
             ObjectSimulationMode mode,
             double simulationTimeSeconds,
@@ -151,7 +187,12 @@ class ThresholdTransitionPolicyTest {
                 List.of());
     }
 
-    private record StubObservationProvider(double distanceMeters, boolean contact) implements CouplingObservationProvider {
+    private record StubObservationProvider(double distanceMeters, boolean contact, double altitudeMeters)
+            implements CouplingObservationProvider {
+        private StubObservationProvider(double distanceMeters, boolean contact) {
+            this(distanceMeters, contact, Double.NaN);
+        }
+
         @Override
         public OptionalDouble distanceMetersToNearestZone(String objectId, Collection<PhysicsZone> zones) {
             return OptionalDouble.of(distanceMeters);
@@ -165,6 +206,11 @@ class ThresholdTransitionPolicyTest {
         @Override
         public boolean hasActiveContact(String objectId) {
             return contact;
+        }
+
+        @Override
+        public OptionalDouble altitudeMetersAboveSurface(String objectId, Collection<PhysicsZone> zones) {
+            return Double.isFinite(altitudeMeters) ? OptionalDouble.of(altitudeMeters) : OptionalDouble.empty();
         }
     }
 }

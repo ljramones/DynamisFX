@@ -13,6 +13,7 @@ public final class MutableCouplingObservationProvider implements CouplingObserva
     private final Map<String, Double> distanceByObjectId = new ConcurrentHashMap<>();
     private final Map<String, Double> interceptSecondsByObjectId = new ConcurrentHashMap<>();
     private final Map<String, Boolean> contactByObjectId = new ConcurrentHashMap<>();
+    private final Map<String, Double> altitudeByObjectId = new ConcurrentHashMap<>();
 
     @Override
     public OptionalDouble distanceMetersToNearestZone(String objectId, Collection<PhysicsZone> zones) {
@@ -50,6 +51,21 @@ public final class MutableCouplingObservationProvider implements CouplingObserva
             throw new IllegalArgumentException("objectId must not be blank");
         }
         return Boolean.TRUE.equals(contactByObjectId.get(objectId));
+    }
+
+    @Override
+    public OptionalDouble altitudeMetersAboveSurface(String objectId, Collection<PhysicsZone> zones) {
+        if (objectId == null || objectId.isBlank()) {
+            throw new IllegalArgumentException("objectId must not be blank");
+        }
+        if (zones == null) {
+            throw new IllegalArgumentException("zones must not be null");
+        }
+        if (zones.isEmpty()) {
+            return OptionalDouble.empty();
+        }
+        Double altitude = altitudeByObjectId.get(objectId);
+        return altitude == null ? OptionalDouble.empty() : OptionalDouble.of(altitude);
     }
 
     public void setDistanceMeters(String objectId, double distanceMeters) {
@@ -91,5 +107,22 @@ public final class MutableCouplingObservationProvider implements CouplingObserva
             throw new IllegalArgumentException("objectId must not be blank");
         }
         interceptSecondsByObjectId.remove(objectId);
+    }
+
+    public void setAltitudeMetersAboveSurface(String objectId, double altitudeMeters) {
+        if (objectId == null || objectId.isBlank()) {
+            throw new IllegalArgumentException("objectId must not be blank");
+        }
+        if (!Double.isFinite(altitudeMeters) || altitudeMeters < 0.0) {
+            throw new IllegalArgumentException("altitudeMeters must be finite and >= 0");
+        }
+        altitudeByObjectId.put(objectId, altitudeMeters);
+    }
+
+    public void clearAltitudeMetersAboveSurface(String objectId) {
+        if (objectId == null || objectId.isBlank()) {
+            throw new IllegalArgumentException("objectId must not be blank");
+        }
+        altitudeByObjectId.remove(objectId);
     }
 }

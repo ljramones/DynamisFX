@@ -23,4 +23,11 @@ public interface CouplingObservationProvider {
      * Indicates whether the object currently has active physical contact/constraints.
      */
     boolean hasActiveContact(String objectId);
+
+    /**
+     * Optional estimated altitude above local surface/terrain in meters.
+     */
+    default OptionalDouble altitudeMetersAboveSurface(String objectId, Collection<PhysicsZone> zones) {
+        return OptionalDouble.empty();
+    }
 }

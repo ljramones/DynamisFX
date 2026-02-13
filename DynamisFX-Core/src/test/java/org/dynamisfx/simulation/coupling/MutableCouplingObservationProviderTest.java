@@ -19,11 +19,15 @@ class MutableCouplingObservationProviderTest {
         MutableCouplingObservationProvider provider = new MutableCouplingObservationProvider();
         provider.setDistanceMeters("lander-1", 123.0);
         provider.setActiveContact("lander-1", true);
+        provider.setAltitudeMetersAboveSurface("lander-1", 25.0);
 
         OptionalDouble distance = provider.distanceMetersToNearestZone("lander-1", List.of(new StubZone()));
+        OptionalDouble altitude = provider.altitudeMetersAboveSurface("lander-1", List.of(new StubZone()));
 
         assertTrue(distance.isPresent());
         assertEquals(123.0, distance.orElseThrow(), 1e-9);
+        assertTrue(altitude.isPresent());
+        assertEquals(25.0, altitude.orElseThrow(), 1e-9);
         assertTrue(provider.hasActiveContact("lander-1"));
     }
 
@@ -34,7 +38,9 @@ class MutableCouplingObservationProviderTest {
 
         assertTrue(provider.distanceMetersToNearestZone("lander-1", List.of()).isEmpty());
         provider.clearDistance("lander-1");
+        provider.clearAltitudeMetersAboveSurface("lander-1");
         assertTrue(provider.distanceMetersToNearestZone("lander-1", List.of(new StubZone())).isEmpty());
+        assertTrue(provider.altitudeMetersAboveSurface("lander-1", List.of(new StubZone())).isEmpty());
         assertFalse(provider.hasActiveContact("lander-1"));
     }
 
@@ -47,6 +53,10 @@ class MutableCouplingObservationProviderTest {
         assertThrows(IllegalArgumentException.class, () -> provider.distanceMetersToNearestZone("id", null));
         assertThrows(IllegalArgumentException.class, () -> provider.setActiveContact(" ", true));
         assertThrows(IllegalArgumentException.class, () -> provider.hasActiveContact(""));
+        assertThrows(IllegalArgumentException.class, () -> provider.setAltitudeMetersAboveSurface("", 1.0));
+        assertThrows(IllegalArgumentException.class, () -> provider.setAltitudeMetersAboveSurface("id", -1.0));
+        assertThrows(IllegalArgumentException.class, () -> provider.altitudeMetersAboveSurface(" ", List.of()));
+        assertThrows(IllegalArgumentException.class, () -> provider.altitudeMetersAboveSurface("id", null));
     }
 
     private static final class StubZone implements PhysicsZone {
