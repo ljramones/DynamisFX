@@ -30,6 +30,7 @@ import org.dynamisfx.simulation.coupling.Phase1CouplingBootstrap;
 import org.dynamisfx.simulation.coupling.PhysicsZone;
 import org.dynamisfx.simulation.coupling.SimulationStateReconcilerFactory;
 import org.dynamisfx.simulation.coupling.StateHandoffDiagnostics;
+import org.dynamisfx.simulation.coupling.StateHandoffSnapshot;
 import org.dynamisfx.simulation.coupling.ZoneId;
 import org.dynamisfx.simulation.entity.SimulationEntityRegistry;
 import org.dynamisfx.simulation.orbital.OrbitalState;
@@ -64,6 +65,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private AnimationTimer timer;
     private ObjectSimulationMode lastMode = ObjectSimulationMode.ORBITAL_ONLY;
     private CouplingTelemetryEvent latestTelemetry;
+    private StateHandoffSnapshot latestHandoff;
 
     private Slider distanceSlider;
     private CheckBox contactCheck;
@@ -71,6 +73,10 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private Label modeLabel;
     private Label distanceLabel;
     private Label telemetryLabel;
+    private Label handoffDirectionLabel;
+    private Label handoffZoneLabel;
+    private Label handoffGlobalLabel;
+    private Label handoffLocalLabel;
 
     public static void main(String[] args) {
         launch(args);
@@ -96,7 +102,10 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 objectId -> {
                 },
                 (objectId, zones) -> zones.isEmpty() ? Optional.empty() : Optional.of(zones.get(0)),
-                StateHandoffDiagnostics.loggingSink(LOG));
+                snapshot -> {
+                    latestHandoff = snapshot;
+                    StateHandoffDiagnostics.loggingSink(LOG).accept(snapshot);
+                });
 
         couplingManager.registerZone(new DemoZone());
         couplingManager.setMode(OBJECT_ID, lastMode);
@@ -151,6 +160,10 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         modeLabel = new Label("Mode: " + lastMode);
         distanceLabel = new Label("Distance: 2000 m");
         telemetryLabel = new Label("Telemetry: waiting");
+        handoffDirectionLabel = new Label("Handoff: waiting");
+        handoffZoneLabel = new Label("Zone: n/a");
+        handoffGlobalLabel = new Label("Global: n/a");
+        handoffLocalLabel = new Label("Local: n/a");
 
         distanceSlider = new Slider(0, 3000, 2000);
         distanceSlider.valueProperty().addListener((obs, oldValue, newValue) -> updateDistanceLabel(newValue.doubleValue()));
@@ -164,6 +177,11 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 modeLabel,
                 distanceLabel,
                 telemetryLabel,
+                new Label("Handoff Debug"),
+                handoffDirectionLabel,
+                handoffZoneLabel,
+                handoffGlobalLabel,
+                handoffLocalLabel,
                 new Label("Distance To Zone (m)"),
                 distanceSlider,
                 contactCheck,
@@ -258,6 +276,40 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         if (telemetryLabel != null && latestTelemetry != null) {
             telemetryLabel.setText(formatTelemetry(latestTelemetry));
         }
+        updateHandoffDebugLabels();
+    }
+
+    private void updateHandoffDebugLabels() {
+        if (handoffDirectionLabel == null || handoffZoneLabel == null || handoffGlobalLabel == null || handoffLocalLabel == null) {
+            return;
+        }
+        if (latestHandoff == null) {
+            handoffDirectionLabel.setText("Handoff: waiting");
+            handoffZoneLabel.setText("Zone: n/a");
+            handoffGlobalLabel.setText("Global: n/a");
+            handoffLocalLabel.setText("Local: n/a");
+            return;
+        }
+        handoffDirectionLabel.setText(String.format(
+                "Handoff: %s @ t=%.2f",
+                latestHandoff.direction(),
+                latestHandoff.simulationTimeSeconds()));
+        handoffZoneLabel.setText(String.format(
+                "Zone: %s anchor=%s",
+                latestHandoff.zoneId().value(),
+                formatVector(latestHandoff.zoneAnchorPosition())));
+        handoffGlobalLabel.setText(String.format(
+                "Global: pos=%s vel=%s",
+                formatVector(latestHandoff.globalPosition()),
+                formatVector(latestHandoff.globalVelocity())));
+        handoffLocalLabel.setText(String.format(
+                "Local: pos=%s vel=%s",
+                formatVector(latestHandoff.localPosition()),
+                formatVector(latestHandoff.localVelocity())));
+    }
+
+    private static String formatVector(PhysicsVector3 v) {
+        return String.format("(%.1f, %.1f, %.1f)", v.x(), v.y(), v.z());
     }
 
     private static PhongMaterial materialForMode(ObjectSimulationMode mode) {
