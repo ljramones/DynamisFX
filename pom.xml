@@ -13,6 +13,7 @@
     <modules>
         <module>DynamisFX-Core</module>
         <module>DynamisFX-Physics-ODE4j</module>
+        <module>DynamisFX-Physics-Jolt</module>
         <module>DynamisFX-Physics-Orekit</module>
         <module>DynamisFX-Importers</module>
         <module>DynamisFX-Client</module>
@@ -162,6 +163,11 @@
             <dependency>
                 <groupId>org.dynamisfx</groupId>
                 <artifactId>dynamisfx-physics-ode4j</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.dynamisfx</groupId>
+                <artifactId>dynamisfx-physics-jolt</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
