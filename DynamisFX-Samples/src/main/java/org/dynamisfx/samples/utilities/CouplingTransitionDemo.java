@@ -1,5 +1,6 @@
 package org.dynamisfx.samples.utilities;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -9,6 +10,7 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.input.Clipboard;
@@ -49,6 +51,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
 
     private static final Logger LOG = Logger.getLogger(CouplingTransitionDemo.class.getName());
     private static final String OBJECT_ID = "lander-1";
+    private static final int HANDOFF_HISTORY_LIMIT = 10;
 
     private final Group worldGroup = new Group();
     private final MutableCouplingObservationProvider observationProvider = new MutableCouplingObservationProvider();
@@ -69,6 +72,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private ObjectSimulationMode lastMode = ObjectSimulationMode.ORBITAL_ONLY;
     private CouplingTelemetryEvent latestTelemetry;
     private StateHandoffSnapshot latestHandoff;
+    private final List<StateHandoffSnapshot> handoffHistory = new ArrayList<>();
 
     private Slider distanceSlider;
     private CheckBox contactCheck;
@@ -81,6 +85,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private Label handoffZoneLabel;
     private Label handoffGlobalLabel;
     private Label handoffLocalLabel;
+    private ComboBox<String> handoffHistoryBox;
     private Button copyHandoffButton;
     private Button copyHandoffJsonButton;
     private boolean handoffDiagnosticsEnabled = true;
@@ -113,7 +118,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                     if (!handoffDiagnosticsEnabled) {
                         return;
                     }
-                    latestHandoff = snapshot;
+                    appendHandoffSnapshot(snapshot);
                     StateHandoffDiagnostics.loggingSink(LOG).accept(snapshot);
                 });
 
@@ -174,6 +179,9 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         handoffZoneLabel = new Label("Zone: n/a");
         handoffGlobalLabel = new Label("Global: n/a");
         handoffLocalLabel = new Label("Local: n/a");
+        handoffHistoryBox = new ComboBox<>();
+        handoffHistoryBox.setPromptText("Select recent handoff");
+        handoffHistoryBox.valueProperty().addListener((obs, oldValue, newValue) -> updateHandoffDebugLabels());
         copyHandoffButton = new Button("Copy Handoff Line");
         copyHandoffButton.setOnAction(event -> copyLatestHandoffToClipboard());
         copyHandoffButton.setDisable(true);
@@ -193,7 +201,9 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
             handoffDiagnosticsEnabled = newValue;
             if (!newValue) {
                 latestHandoff = null;
+                handoffHistory.clear();
             }
+            refreshHandoffHistoryControl();
             updateHandoffDebugLabels();
         });
 
@@ -207,6 +217,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 handoffZoneLabel,
                 handoffGlobalLabel,
                 handoffLocalLabel,
+                handoffHistoryBox,
                 copyHandoffButton,
                 copyHandoffJsonButton,
                 new Label("Distance To Zone (m)"),
@@ -311,7 +322,8 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         if (handoffDirectionLabel == null || handoffZoneLabel == null || handoffGlobalLabel == null || handoffLocalLabel == null) {
             return;
         }
-        if (latestHandoff == null) {
+        StateHandoffSnapshot selected = selectedHandoffSnapshot();
+        if (selected == null) {
             handoffDirectionLabel.setText("Handoff: waiting");
             handoffZoneLabel.setText("Zone: n/a");
             handoffGlobalLabel.setText("Global: n/a");
@@ -326,20 +338,20 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         }
         handoffDirectionLabel.setText(String.format(
                 "Handoff: %s @ t=%.2f",
-                latestHandoff.direction(),
-                latestHandoff.simulationTimeSeconds()));
+                selected.direction(),
+                selected.simulationTimeSeconds()));
         handoffZoneLabel.setText(String.format(
                 "Zone: %s anchor=%s",
-                latestHandoff.zoneId().value(),
-                formatVector(latestHandoff.zoneAnchorPosition())));
+                selected.zoneId().value(),
+                formatVector(selected.zoneAnchorPosition())));
         handoffGlobalLabel.setText(String.format(
                 "Global: pos=%s vel=%s",
-                formatVector(latestHandoff.globalPosition()),
-                formatVector(latestHandoff.globalVelocity())));
+                formatVector(selected.globalPosition()),
+                formatVector(selected.globalVelocity())));
         handoffLocalLabel.setText(String.format(
                 "Local: pos=%s vel=%s",
-                formatVector(latestHandoff.localPosition()),
-                formatVector(latestHandoff.localVelocity())));
+                formatVector(selected.localPosition()),
+                formatVector(selected.localVelocity())));
         if (copyHandoffButton != null) {
             copyHandoffButton.setDisable(false);
         }
@@ -353,21 +365,63 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     }
 
     private void copyLatestHandoffToClipboard() {
-        if (latestHandoff == null) {
+        StateHandoffSnapshot selected = selectedHandoffSnapshot();
+        if (selected == null) {
             return;
         }
         ClipboardContent content = new ClipboardContent();
-        content.putString(StateHandoffDiagnostics.format(latestHandoff));
+        content.putString(StateHandoffDiagnostics.format(selected));
         Clipboard.getSystemClipboard().setContent(content);
     }
 
     private void copyLatestHandoffJsonToClipboard() {
-        if (latestHandoff == null) {
+        StateHandoffSnapshot selected = selectedHandoffSnapshot();
+        if (selected == null) {
             return;
         }
         ClipboardContent content = new ClipboardContent();
-        content.putString(StateHandoffDiagnostics.toJson(latestHandoff));
+        content.putString(StateHandoffDiagnostics.toJson(selected));
         Clipboard.getSystemClipboard().setContent(content);
+    }
+
+    private void appendHandoffSnapshot(StateHandoffSnapshot snapshot) {
+        latestHandoff = snapshot;
+        handoffHistory.add(0, snapshot);
+        if (handoffHistory.size() > HANDOFF_HISTORY_LIMIT) {
+            handoffHistory.remove(handoffHistory.size() - 1);
+        }
+        refreshHandoffHistoryControl();
+        updateHandoffDebugLabels();
+    }
+
+    private void refreshHandoffHistoryControl() {
+        if (handoffHistoryBox == null) {
+            return;
+        }
+        List<String> labels = new ArrayList<>(handoffHistory.size());
+        for (StateHandoffSnapshot snapshot : handoffHistory) {
+            labels.add(String.format(
+                    "t=%.2f %s %s",
+                    snapshot.simulationTimeSeconds(),
+                    snapshot.direction(),
+                    snapshot.zoneId().value()));
+        }
+        handoffHistoryBox.getItems().setAll(labels);
+        if (labels.isEmpty()) {
+            handoffHistoryBox.getSelectionModel().clearSelection();
+        } else if (handoffHistoryBox.getSelectionModel().getSelectedIndex() < 0) {
+            handoffHistoryBox.getSelectionModel().select(0);
+        }
+    }
+
+    private StateHandoffSnapshot selectedHandoffSnapshot() {
+        if (handoffHistoryBox != null) {
+            int selectedIndex = handoffHistoryBox.getSelectionModel().getSelectedIndex();
+            if (selectedIndex >= 0 && selectedIndex < handoffHistory.size()) {
+                return handoffHistory.get(selectedIndex);
+            }
+        }
+        return latestHandoff;
     }
 
     private static PhongMaterial materialForMode(ObjectSimulationMode mode) {
