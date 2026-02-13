@@ -27,7 +27,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-module org.fxyz3d.core {
+module org.dynamisfx.core {
     requires transitive javafx.controls;
     requires static javafx.swing;
     requires java.desktop;
@@ -37,26 +37,26 @@ module org.fxyz3d.core {
     requires static org.orbisgis.poly2tri.core; // resolved as automatic module
     requires org.slf4j;
 
-    exports org.fxyz3d.collision;
-    exports org.fxyz3d.geometry;
-    exports org.fxyz3d.io;
-    exports org.fxyz3d.physics.api;
-    exports org.fxyz3d.physics.hybrid;
-    exports org.fxyz3d.physics.model;
-    exports org.fxyz3d.physics.step;
-    exports org.fxyz3d.physics.sync;
-    exports org.fxyz3d.scene;
-    exports org.fxyz3d.scene.paint;
-    exports org.fxyz3d.scene.selection;
-    exports org.fxyz3d.shapes;
-    exports org.fxyz3d.shapes.complex.cloth;
-    exports org.fxyz3d.shapes.composites;
-    exports org.fxyz3d.shapes.containers;
-    exports org.fxyz3d.shapes.polygon;
-    exports org.fxyz3d.shapes.polygon.symbolic;
-    exports org.fxyz3d.shapes.primitives;
-    exports org.fxyz3d.shapes.primitives.helper;
-    exports org.fxyz3d.tools;
-    exports org.fxyz3d.utils;
-    exports org.fxyz3d.utils.geom;
+    exports org.dynamisfx.collision;
+    exports org.dynamisfx.geometry;
+    exports org.dynamisfx.io;
+    exports org.dynamisfx.physics.api;
+    exports org.dynamisfx.physics.hybrid;
+    exports org.dynamisfx.physics.model;
+    exports org.dynamisfx.physics.step;
+    exports org.dynamisfx.physics.sync;
+    exports org.dynamisfx.scene;
+    exports org.dynamisfx.scene.paint;
+    exports org.dynamisfx.scene.selection;
+    exports org.dynamisfx.shapes;
+    exports org.dynamisfx.shapes.complex.cloth;
+    exports org.dynamisfx.shapes.composites;
+    exports org.dynamisfx.shapes.containers;
+    exports org.dynamisfx.shapes.polygon;
+    exports org.dynamisfx.shapes.polygon.symbolic;
+    exports org.dynamisfx.shapes.primitives;
+    exports org.dynamisfx.shapes.primitives.helper;
+    exports org.dynamisfx.tools;
+    exports org.dynamisfx.utils;
+    exports org.dynamisfx.utils.geom;
 }

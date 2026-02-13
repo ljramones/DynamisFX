@@ -14,7 +14,7 @@
     <name>DynamisFX-Samples</name>
 
     <properties>
-        <samples.main.class>org.fxyz3d.samples.Launcher</samples.main.class>
+        <samples.main.class>org.dynamisfx.samples.Launcher</samples.main.class>
     </properties>
 
     <dependencies>
