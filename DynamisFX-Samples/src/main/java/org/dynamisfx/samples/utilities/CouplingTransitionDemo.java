@@ -100,6 +100,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private Button copyHandoffJsonButton;
     private Button exportHistoryJsonButton;
     private Button clearHandoffHistoryButton;
+    private Button resetHandoffDefaultsButton;
     private boolean handoffDiagnosticsEnabled = PREFS.getBoolean(PREF_HANDOFF_DIAGNOSTICS, true);
     private boolean freezeHandoffSelection = PREFS.getBoolean(PREF_FREEZE_SELECTION, false);
     private int handoffHistoryLimit = clampHistoryLimit(PREFS.getInt(PREF_HISTORY_LIMIT, DEFAULT_HANDOFF_HISTORY_LIMIT));
@@ -219,6 +220,8 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         exportHistoryJsonButton.setDisable(true);
         clearHandoffHistoryButton = new Button("Clear History");
         clearHandoffHistoryButton.setOnAction(event -> clearHandoffHistory());
+        resetHandoffDefaultsButton = new Button("Reset Defaults");
+        resetHandoffDefaultsButton.setOnAction(event -> resetHandoffDebugDefaults());
 
         distanceSlider = new Slider(0, 3000, 2000);
         distanceSlider.valueProperty().addListener((obs, oldValue, newValue) -> updateDistanceLabel(newValue.doubleValue()));
@@ -262,6 +265,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 copyHandoffJsonButton,
                 exportHistoryJsonButton,
                 clearHandoffHistoryButton,
+                resetHandoffDefaultsButton,
                 new Label("Distance To Zone (m)"),
                 distanceSlider,
                 contactCheck,
@@ -506,6 +510,27 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         handoffHistory.clear();
         refreshHandoffHistoryControl();
         updateHandoffDebugLabels();
+    }
+
+    private void resetHandoffDebugDefaults() {
+        PREFS.remove(PREF_HANDOFF_DIAGNOSTICS);
+        PREFS.remove(PREF_FREEZE_SELECTION);
+        PREFS.remove(PREF_HISTORY_LIMIT);
+
+        handoffDiagnosticsEnabled = true;
+        freezeHandoffSelection = false;
+        handoffHistoryLimit = DEFAULT_HANDOFF_HISTORY_LIMIT;
+
+        if (handoffDiagnosticsCheck != null) {
+            handoffDiagnosticsCheck.setSelected(handoffDiagnosticsEnabled);
+        }
+        if (freezeHandoffSelectionCheck != null) {
+            freezeHandoffSelectionCheck.setSelected(freezeHandoffSelection);
+        }
+        if (handoffHistoryLimitSpinner != null) {
+            handoffHistoryLimitSpinner.getValueFactory().setValue(handoffHistoryLimit);
+        }
+        clearHandoffHistory();
     }
 
     private static int clampHistoryLimit(int value) {
