@@ -92,6 +92,44 @@ class ThresholdTransitionPolicyTest {
     }
 
     @Test
+    void demotesOnPredictedExitWindowWhenNoContact() {
+        ThresholdTransitionPolicy policy = new ThresholdTransitionPolicy(
+                new StubObservationProvider(10.0, false),
+                100.0,
+                150.0,
+                0.0,
+                2.0);
+
+        CouplingTransitionDecision next = policy.evaluate(context(
+                ObjectSimulationMode.PHYSICS_ACTIVE,
+                10.0,
+                -1.0,
+                1.25));
+
+        assertEquals(ObjectSimulationMode.ORBITAL_ONLY, next.nextMode().orElseThrow());
+        assertEquals(CouplingDecisionReason.DEMOTE_PREDICTED_EXIT, next.reason());
+    }
+
+    @Test
+    void doesNotDemoteOnPredictedExitWhenContactActive() {
+        ThresholdTransitionPolicy policy = new ThresholdTransitionPolicy(
+                new StubObservationProvider(10.0, true),
+                100.0,
+                150.0,
+                0.0,
+                2.0);
+
+        CouplingTransitionDecision next = policy.evaluate(context(
+                ObjectSimulationMode.PHYSICS_ACTIVE,
+                10.0,
+                -1.0,
+                1.25));
+
+        assertTrue(next.nextMode().isEmpty());
+        assertEquals(CouplingDecisionReason.BLOCKED_BY_CONTACT, next.reason());
+    }
+
+    @Test
     void validatesConstructorArguments() {
         CouplingObservationProvider provider = new StubObservationProvider(10.0, false);
         assertThrows(NullPointerException.class, () -> new ThresholdTransitionPolicy(null, 1, 2, 0));

@@ -154,6 +154,17 @@ public final class ThresholdTransitionPolicy implements CouplingTransitionPolicy
         }
 
         if (mode == ObjectSimulationMode.PHYSICS_ACTIVE) {
+            if (preemptInterceptWindowSeconds > 0.0) {
+                double predictedIntercept = context.predictedInterceptSeconds().orElse(Double.POSITIVE_INFINITY);
+                if (predictedIntercept <= preemptInterceptWindowSeconds) {
+                    if (observationProvider.hasActiveContact(context.objectId())) {
+                        return CouplingTransitionDecision.noChange(CouplingDecisionReason.BLOCKED_BY_CONTACT);
+                    }
+                    return CouplingTransitionDecision.transitionTo(
+                            ObjectSimulationMode.ORBITAL_ONLY,
+                            CouplingDecisionReason.DEMOTE_PREDICTED_EXIT);
+                }
+            }
             if (Double.isFinite(demoteAltitudeMeters)) {
                 OptionalDouble altitudeMeters = observationProvider.altitudeMetersAboveSurface(context.objectId(), context.zones());
                 if (altitudeMeters.isPresent()) {
