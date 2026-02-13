@@ -89,6 +89,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private ComboBox<String> handoffHistoryBox;
     private Button copyHandoffButton;
     private Button copyHandoffJsonButton;
+    private Button exportHistoryJsonButton;
     private Button clearHandoffHistoryButton;
     private boolean handoffDiagnosticsEnabled = true;
     private boolean freezeHandoffSelection;
@@ -191,6 +192,9 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         copyHandoffJsonButton = new Button("Copy JSON");
         copyHandoffJsonButton.setOnAction(event -> copyLatestHandoffJsonToClipboard());
         copyHandoffJsonButton.setDisable(true);
+        exportHistoryJsonButton = new Button("Export History JSON");
+        exportHistoryJsonButton.setOnAction(event -> copyHandoffHistoryJsonToClipboard());
+        exportHistoryJsonButton.setDisable(true);
         clearHandoffHistoryButton = new Button("Clear History");
         clearHandoffHistoryButton.setOnAction(event -> clearHandoffHistory());
 
@@ -230,6 +234,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 handoffHistoryBox,
                 copyHandoffButton,
                 copyHandoffJsonButton,
+                exportHistoryJsonButton,
                 clearHandoffHistoryButton,
                 new Label("Distance To Zone (m)"),
                 distanceSlider,
@@ -346,6 +351,9 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
             if (copyHandoffJsonButton != null) {
                 copyHandoffJsonButton.setDisable(true);
             }
+            if (exportHistoryJsonButton != null) {
+                exportHistoryJsonButton.setDisable(handoffHistory.isEmpty());
+            }
             return;
         }
         handoffDirectionLabel.setText(String.format(
@@ -370,6 +378,9 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         if (copyHandoffJsonButton != null) {
             copyHandoffJsonButton.setDisable(false);
         }
+        if (exportHistoryJsonButton != null) {
+            exportHistoryJsonButton.setDisable(handoffHistory.isEmpty());
+        }
     }
 
     private static String formatVector(PhysicsVector3 v) {
@@ -393,6 +404,24 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         }
         ClipboardContent content = new ClipboardContent();
         content.putString(StateHandoffDiagnostics.toJson(selected));
+        Clipboard.getSystemClipboard().setContent(content);
+    }
+
+    private void copyHandoffHistoryJsonToClipboard() {
+        if (handoffHistory.isEmpty()) {
+            return;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append('[');
+        for (int i = 0; i < handoffHistory.size(); i++) {
+            if (i > 0) {
+                sb.append(',');
+            }
+            sb.append(StateHandoffDiagnostics.toJson(handoffHistory.get(i)));
+        }
+        sb.append(']');
+        ClipboardContent content = new ClipboardContent();
+        content.putString(sb.toString());
         Clipboard.getSystemClipboard().setContent(content);
     }
 
