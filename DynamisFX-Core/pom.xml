@@ -25,6 +25,12 @@
         <dependency>
             <groupId>eu.mihosoft.vrl.jcsg</groupId>
             <artifactId>jcsg</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>eu.mihosoft.vvecmath</groupId>

@@ -36,7 +36,7 @@ import org.dynamisfx.samples.shapes.ShapeBaseSample;
  */
 public class HybridPhysicsCoordinatorSample extends ShapeBaseSample<Group> {
 
-    private final Group worldGroup = new Group();
+    private Group worldGroup;
     private PhysicsBackend generalBackend;
     private PhysicsBackend orbitalBackend;
     private PhysicsWorld generalWorld;
@@ -53,6 +53,7 @@ public class HybridPhysicsCoordinatorSample extends ShapeBaseSample<Group> {
     @Override
     protected void createMesh() {
         camera.setTranslateZ(-1800);
+        worldGroup = new Group();
 
         generalBackend = RigidBodyBackendSelector.createBackend();
         generalWorld = generalBackend.createWorld(new PhysicsWorldConfiguration(

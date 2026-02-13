@@ -52,7 +52,6 @@ import javafx.scene.layout.VBox;
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 /**
@@ -69,8 +68,12 @@ public class ScriptFunction2DControl extends ControlBase<Property<Function<Point
     public ScriptFunction2DControl(Property<Function<Point2D,Number>> prop, final Collection<String> items, boolean subControl) {
         super("/org/dynamisfx/controls/ScriptFunction2DControl.fxml", prop);
 
-        Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
-        bindings.put("polyglot.js.allowAllAccess", true);
+        if (engine != null) {
+            Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+            if (bindings != null) {
+                bindings.put("polyglot.js.allowAllAccess", true);
+            }
+        }
 
         Point2D p=new Point2D(1,2);
         res1.setText("p: {"+p.getX()+","+p.getY()+"}");
@@ -116,7 +119,7 @@ public class ScriptFunction2DControl extends ControlBase<Property<Function<Point
         });
         change.addListener((obs,b,b1)->{
             if (engine == null) {
-                System.err.println("Script Error: No Script Engine found");
+                ScriptEngineSupport.logNoEngineOnce();
                 return;
             }
             if(b1){
@@ -144,6 +147,11 @@ public class ScriptFunction2DControl extends ControlBase<Property<Function<Point
                 }
             }
         });
+
+        if (engine == null) {
+            selection.setDisable(true);
+            res2.setText("val: script engine unavailable");
+        }
         
     }
     
@@ -155,7 +163,7 @@ public class ScriptFunction2DControl extends ControlBase<Property<Function<Point
     private Label res2;
     @FXML
     private ComboBox<String> selection;
-    private final ScriptEngine engine = new ScriptEngineManager().getEngineByName("graal.js");
+    private final ScriptEngine engine = ScriptEngineSupport.sharedEngine();
     
     @FXML
     protected VBox subControls;
@@ -194,4 +202,5 @@ public class ScriptFunction2DControl extends ControlBase<Property<Function<Point
     public BooleanProperty usingSubControlsProperty() {
         return usesSubControls;
     }
+
 }

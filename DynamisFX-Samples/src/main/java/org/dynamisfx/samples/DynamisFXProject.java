@@ -47,6 +47,7 @@ import org.dynamisfx.model.WelcomePage;
  * @author Jason Pollastrini aka jdub1581
  */
 public class DynamisFXProject implements DynamisFXSamplerProject {
+    private static final String LEGACY_CONTROLS_THEME_PROPERTY = "dynamisfx.client.legacyControlsTheme";
     
          
     @Override
@@ -94,10 +95,13 @@ public class DynamisFXProject implements DynamisFXSamplerProject {
         vBox.setAlignment(Pos.CENTER);
         WelcomePage wPage = new WelcomePage("Welcome to DynamisFX!", vBox);
         
-        pane.sceneProperty().addListener(l->{
-            if(pane.getScene()!= null){
-                pane.getScene().getStylesheets().add(DynamisFXProject.class.getResource("/org/dynamisfx/controls/smokeBlackGlassControls.css").toExternalForm());
-            }                
+        pane.sceneProperty().addListener(l -> {
+            if (pane.getScene() != null && Boolean.getBoolean(LEGACY_CONTROLS_THEME_PROPERTY)) {
+                pane.getScene().getStylesheets().add(
+                        DynamisFXProject.class
+                                .getResource("/org/dynamisfx/controls/smokeBlackGlassControls.css")
+                                .toExternalForm());
+            }
         });
         
         return wPage;

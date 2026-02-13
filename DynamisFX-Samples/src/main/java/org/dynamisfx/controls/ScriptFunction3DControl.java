@@ -51,7 +51,6 @@ import javafx.scene.layout.VBox;
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import org.dynamisfx.geometry.Point3D;
 
@@ -69,8 +68,12 @@ public class ScriptFunction3DControl extends ControlBase<Property<Function<Point
     public ScriptFunction3DControl(Property<Function<Point3D,Number>> prop, final Collection<String> items, boolean subControl) {
         super("/org/dynamisfx/controls/ScriptFunction3DControl.fxml", prop);
 
-        Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
-        bindings.put("polyglot.js.allowAllAccess", true);
+        if (engine != null) {
+            Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+            if (bindings != null) {
+                bindings.put("polyglot.js.allowAllAccess", true);
+            }
+        }
 
         Point3D p=new Point3D(1f,2f,3f);
         res1.setText("p: {"+p.x+","+p.y+","+p.z+"}");
@@ -115,7 +118,7 @@ public class ScriptFunction3DControl extends ControlBase<Property<Function<Point
         });
         change.addListener((obs,b,b1)->{
             if (engine == null) {
-                System.err.println("Script Error: No Script Engine found");
+                ScriptEngineSupport.logNoEngineOnce();
                 return;
             }
             if(b1){
@@ -143,6 +146,11 @@ public class ScriptFunction3DControl extends ControlBase<Property<Function<Point
                 }
             }
         });
+
+        if (engine == null) {
+            selection.setDisable(true);
+            res2.setText("val: script engine unavailable");
+        }
         
         selection.getSelectionModel().select(0);
         
@@ -157,7 +165,7 @@ public class ScriptFunction3DControl extends ControlBase<Property<Function<Point
     private Label res2;
     @FXML
     private ComboBox<String> selection;
-    private final ScriptEngine engine = new ScriptEngineManager().getEngineByName("graal.js");
+    private final ScriptEngine engine = ScriptEngineSupport.sharedEngine();
     
     @FXML
     protected VBox subControls;
@@ -196,4 +204,5 @@ public class ScriptFunction3DControl extends ControlBase<Property<Function<Point
     public BooleanProperty usingSubControlsProperty() {
         return usesSubControls;
     }
+
 }

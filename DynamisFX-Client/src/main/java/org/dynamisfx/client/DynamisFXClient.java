@@ -62,6 +62,7 @@ import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
 import static javafx.scene.layout.Region.USE_PREF_SIZE;
 import javafx.scene.layout.StackPane;
@@ -86,6 +87,8 @@ public class DynamisFXClient extends Application {
             BACKGROUNDS = DynamisFXClient.class.getResource("/org/dynamisfx/client/clientBackgrounds.css").toExternalForm(),
             BLACK_GLASS_BASE = DynamisFXClient.class.getResource("/org/dynamisfx/client/smokeBlackGlassBase.css").toExternalForm();
             //BLACK_GLASS_CONTROLS = DynamisFXClient.class.getResource("/org/dynamisfx/client/smokeBlackGlassControls.css").toExternalForm();
+    private static final String TRANSPARENT_WINDOW_PROPERTY = "dynamisfx.client.transparentWindow";
+    private static final String HIDDEN_SIDES_PROPERTY = "dynamisfx.client.hiddenSides";
 
     private static final int MIN_WINDOW_WIDTH = 800;
     private static final int MIN_WINDOW_HEIGHT = 600;
@@ -155,7 +158,7 @@ public class DynamisFXClient extends Application {
             buildProjectTree(searchBar.getText());
         });
         searchBar.setOnMouseEntered(e->{
-            if(client.getPinnedSide() == null){
+            if(client != null && client.getPinnedSide() == null){
                 client.setPinnedSide(Side.LEFT);
             }
         });
@@ -165,7 +168,9 @@ public class DynamisFXClient extends Application {
         ab.setAlignment(Pos.CENTER);
         ab.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         ab.setOnAction(e->{
-            client.setPinnedSide(null);
+            if (client != null) {
+                client.setPinnedSide(null);
+            }
         });
 
         gizmoEnabled = new CheckBox("Gizmo");
@@ -236,15 +241,22 @@ public class DynamisFXClient extends Application {
         leftSideContent.getChildren().addAll(toolbar, snapBar, contentTree);
         VBox.setVgrow(contentTree, Priority.ALWAYS);
 
-        client = new HiddenSidesClient();
-        client.setContent(centerContent);
-        client.setLeft(leftSideContent);
-        client.setTriggerDistance(20);
+        final boolean useHiddenSides = Boolean.getBoolean(HIDDEN_SIDES_PROPERTY);
+        final Region appRoot;
+        if (useHiddenSides) {
+            client = new HiddenSidesClient();
+            client.setContent(centerContent);
+            client.setLeft(leftSideContent);
+            client.setTriggerDistance(20);
+            appRoot = client;
+        } else {
+            client = null;
+            SplitPane appSplitPane = new SplitPane(leftSideContent, centerContent);
+            appSplitPane.getStyleClass().add("fxyz-split-pane");
+            appSplitPane.setDividerPositions(0.30);
+            appRoot = appSplitPane;
+        }
         
-        frame = new SimpleWindowFrame(stage, MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT);
-        frame.setText("Fxyz-SamplerApp <ver: 0.1.1>");
-        frame.setRootContent(client);
-                
         List<TreeItem<DynamisFXSample>> projects = contentTree.getRoot().getChildren();
         if (!projects.isEmpty()) {
             TreeItem<DynamisFXSample> firstProject = projects.get(0);
@@ -254,12 +266,24 @@ public class DynamisFXClient extends Application {
         }
         syncGizmoControls();
 
-        Scene scene = new Scene(frame, INITIAL_WINDOW_WIDTH, INITIAL_WINDOW_HEIGHT);
-        scene.setFill(Color.TRANSPARENT);
-        scene.getStylesheets().addAll(BLACK_GLASS_BASE);
+        Scene scene;
+        if (Boolean.getBoolean(TRANSPARENT_WINDOW_PROPERTY)) {
+            frame = new SimpleWindowFrame(stage, MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT);
+            frame.setText("DynamisFX Sampler");
+            frame.setRootContent(appRoot);
+            scene = new Scene(frame, INITIAL_WINDOW_WIDTH, INITIAL_WINDOW_HEIGHT);
+            scene.setFill(Color.TRANSPARENT);
+            stage.initStyle(StageStyle.TRANSPARENT);
+            scene.getStylesheets().addAll(BLACK_GLASS_BASE);
+        } else {
+            scene = new Scene(appRoot, INITIAL_WINDOW_WIDTH, INITIAL_WINDOW_HEIGHT);
+            scene.setFill(Color.web("#2b2b2b"));
+            stage.setTitle("DynamisFX Sampler");
+        }
 
+        this.stage.setMinWidth(MIN_WINDOW_WIDTH);
+        this.stage.setMinHeight(MIN_WINDOW_HEIGHT);
         this.stage.setScene(scene);
-        this.stage.initStyle(StageStyle.TRANSPARENT);
         this.stage.show();
 
         LOG.log(Level.FINE, "Loaded projects: {0}", contentTree.getRoot().getChildren().size());
@@ -373,13 +397,13 @@ public class DynamisFXClient extends Application {
     private WelcomePage getDefaultWelcomePage() {
         // line 1
         Label welcomeLabel1 = new Label("Welcome to DynamisFX Sampler!");
-        welcomeLabel1.setStyle("-fx-font-size: 2em; -fx-padding: 0 0 0 5;");
+        welcomeLabel1.setStyle("-fx-font-size: 2em; -fx-padding: 0 0 0 5; -fx-text-fill: white;");
 
         // line 2
         Label welcomeLabel2 = new Label(
                 "Explore the available UI controls and other interesting projects "
                 + "by clicking on the options to the left.");
-        welcomeLabel2.setStyle("-fx-font-size: 1.25em; -fx-padding: 0 0 0 5;");
+        welcomeLabel2.setStyle("-fx-font-size: 1.25em; -fx-padding: 0 0 0 5; -fx-text-fill: white;");
 
         WelcomePage wPage = new WelcomePage("Welcome!", new VBox(5, welcomeLabel1, welcomeLabel2));
         return wPage;

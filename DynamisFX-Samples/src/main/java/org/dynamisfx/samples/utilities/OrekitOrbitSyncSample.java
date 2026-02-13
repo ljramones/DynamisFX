@@ -29,7 +29,7 @@ import org.dynamisfx.samples.shapes.ShapeBaseSample;
  */
 public class OrekitOrbitSyncSample extends ShapeBaseSample<Group> {
 
-    private final Group worldGroup = new Group();
+    private Group worldGroup;
     private PhysicsBackend backend;
     private PhysicsWorld world;
     private PhysicsSceneSync<Node> sceneSync;
@@ -44,6 +44,7 @@ public class OrekitOrbitSyncSample extends ShapeBaseSample<Group> {
     @Override
     protected void createMesh() {
         camera.setTranslateZ(-2000);
+        worldGroup = new Group();
 
         backend = new OrekitBackendFactory().createBackend();
         world = backend.createWorld(new PhysicsWorldConfiguration(
@@ -86,8 +87,14 @@ public class OrekitOrbitSyncSample extends ShapeBaseSample<Group> {
                 }
                 double dt = Math.min((now - lastNanos) * 1.0e-9, 0.1);
                 lastNanos = now;
-                accumulator.advance(dt, world::step);
-                sceneSync.applyFrame(world::getBodyState);
+                PhysicsWorld currentWorld = world;
+                FixedStepAccumulator currentAccumulator = accumulator;
+                PhysicsSceneSync<Node> currentSceneSync = sceneSync;
+                if (currentWorld == null || currentAccumulator == null || currentSceneSync == null) {
+                    return;
+                }
+                currentAccumulator.advance(dt, currentWorld::step);
+                currentSceneSync.applyFrame(currentWorld::getBodyState);
             }
         };
         timer.start();

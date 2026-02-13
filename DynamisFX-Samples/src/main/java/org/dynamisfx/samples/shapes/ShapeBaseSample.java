@@ -477,19 +477,24 @@ public abstract class ShapeBaseSample<T extends Node> extends DynamisFXSample {
                 }
 
                 if (model != null) {
+                    final Node currentModel = model;
                     // remove old model when it is detached from the scene
-                    model.sceneProperty().addListener(new InvalidationListener() {
+                    currentModel.sceneProperty().addListener(new InvalidationListener() {
                         @Override
                         public void invalidated(Observable observable) {
-                            if (model.getScene() == null) {
-                                model.sceneProperty().removeListener(this);
+                            if (currentModel.getScene() == null) {
+                                currentModel.sceneProperty().removeListener(this);
                                 releaseBinders();
-                                group.getChildren().remove(model);
-                                model = null;
+                                group.getChildren().remove(currentModel);
+                                if (model == currentModel) {
+                                    model = null;
+                                }
                             }
                         }
                     });
-                    group.getChildren().add(model);
+                    if (currentModel.getParent() != group && !group.getChildren().contains(currentModel)) {
+                        group.getChildren().add(currentModel);
+                    }
                 } else {
                     throw new UnsupportedOperationException("Model returned Null ... ");
                 }
@@ -565,7 +570,7 @@ public abstract class ShapeBaseSample<T extends Node> extends DynamisFXSample {
 
     @Override
     public Node getControlPanel() {
-        return buildControlPanel() != null ? buildControlPanel() : null;
+        return buildControlPanel();
     }
 
     @Override

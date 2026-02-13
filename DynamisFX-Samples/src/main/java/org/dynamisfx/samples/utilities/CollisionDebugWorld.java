@@ -40,8 +40,8 @@ public class CollisionDebugWorld extends ShapeBaseSample<Group> {
 
     private final List<Box> bodies = new ArrayList<>();
     private final List<Vector3D> velocities = new ArrayList<>();
-    private final Group debugOverlay = new Group();
-    private final Group worldGroup = new Group();
+    private Group debugOverlay;
+    private Group worldGroup;
 
     private CollisionWorld3D<Node> world;
     private AnimationTimer timer;
@@ -55,6 +55,10 @@ public class CollisionDebugWorld extends ShapeBaseSample<Group> {
     @Override
     protected void createMesh() {
         camera.setTranslateZ(-1300);
+        bodies.clear();
+        velocities.clear();
+        worldGroup = new Group();
+        debugOverlay = new Group();
 
         world = CollisionWorld3D.forJavaFxNodes(new SweepAndPrune3D<>());
         spawnBody(-220, -120, -80, 120, 90, 70, 85, 65, 70);

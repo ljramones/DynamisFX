@@ -51,7 +51,6 @@ import javafx.scene.layout.VBox;
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 /**
@@ -68,8 +67,12 @@ public class ScriptFunction1DControl extends ControlBase<Property<Function<Numbe
     public ScriptFunction1DControl(Property<Function<Number,Number>> prop, final Collection<String> items, boolean subControl) {
         super("/org/dynamisfx/controls/ScriptFunction1DControl.fxml", prop);
 
-        Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
-        bindings.put("polyglot.js.allowAllAccess", true);
+        if (engine != null) {
+            Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+            if (bindings != null) {
+                bindings.put("polyglot.js.allowAllAccess", true);
+            }
+        }
 
         Double x=1d;
         res1.setText("x: {"+x+"}");
@@ -114,7 +117,7 @@ public class ScriptFunction1DControl extends ControlBase<Property<Function<Numbe
         });
         change.addListener((obs,b,b1)->{
             if (engine == null) {
-                System.err.println("Script Error: No Script Engine found");
+                ScriptEngineSupport.logNoEngineOnce();
                 return;
             }
             if(b1){
@@ -142,6 +145,11 @@ public class ScriptFunction1DControl extends ControlBase<Property<Function<Numbe
                 }
             }
         });
+
+        if (engine == null) {
+            selection.setDisable(true);
+            res2.setText("val: script engine unavailable");
+        }
         
         selection.getSelectionModel().select(0);
         
@@ -156,7 +164,7 @@ public class ScriptFunction1DControl extends ControlBase<Property<Function<Numbe
     private Label res2;
     @FXML
     private ComboBox<String> selection;
-    private final ScriptEngine engine = new ScriptEngineManager().getEngineByName("graal.js");
+    private final ScriptEngine engine = ScriptEngineSupport.sharedEngine();
     
     @FXML
     protected VBox subControls;
@@ -195,4 +203,5 @@ public class ScriptFunction1DControl extends ControlBase<Property<Function<Numbe
     public BooleanProperty usingSubControlsProperty() {
         return usesSubControls;
     }
+
 }

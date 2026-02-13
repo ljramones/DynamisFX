@@ -34,14 +34,23 @@ import java.lang.module.ModuleReader;
 import java.lang.module.ResolvedModule;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.net.JarURLConnection;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.dynamisfx.DynamisFXSample;
@@ -162,8 +171,83 @@ public class SampleScanner {
                         LOG.log(Level.FINE, "Failed to scan module " + moduleName, ioe);
                     }
                 });
+
+        // Most sampler runs in this repo use classpath mode (useModulePath=false),
+        // where ModuleLayer scanning won't see sample classes.
+        if (classes.isEmpty()) {
+            loadFromClassPathScanning(classes, allowedClassPathPrefixes);
+        }
         
         return classes.toArray(new Class[classes.size()]);
+    }
+
+    private void loadFromClassPathScanning(Set<Class<?>> classes, Set<String> allowedPrefixes) {
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        for (String prefix : allowedPrefixes) {
+            try {
+                final Enumeration<URL> resources = classLoader.getResources(prefix);
+                while (resources.hasMoreElements()) {
+                    final URL resource = resources.nextElement();
+                    final String protocol = resource.getProtocol();
+                    if ("file".equals(protocol)) {
+                        scanDirectoryResource(classes, allowedPrefixes, classLoader, prefix, resource);
+                    } else if ("jar".equals(protocol)) {
+                        scanJarResource(classes, allowedPrefixes, classLoader, resource);
+                    }
+                }
+            } catch (IOException ioe) {
+                LOG.log(Level.FINE, "Failed to scan classpath for prefix " + prefix, ioe);
+            }
+        }
+    }
+
+    private void scanDirectoryResource(Set<Class<?>> classes,
+                                       Set<String> allowedPrefixes,
+                                       ClassLoader classLoader,
+                                       String prefix,
+                                       URL resource) {
+        try {
+            final Path root = Paths.get(resource.toURI());
+            if (!Files.exists(root)) {
+                return;
+            }
+            Files.walk(root)
+                    .filter(Files::isRegularFile)
+                    .forEach(path -> {
+                        final String relative = root.relativize(path).toString().replace('\\', '/');
+                        final String classPath = prefix + relative;
+                        if (isScannableClass(classPath, allowedPrefixes)) {
+                            final Class<?> clazz = processClassName(classPath, classLoader);
+                            if (clazz != null) {
+                                classes.add(clazz);
+                            }
+                        }
+                    });
+        } catch (IOException | URISyntaxException ex) {
+            LOG.log(Level.FINE, "Failed to scan directory classpath resource " + resource, ex);
+        }
+    }
+
+    private void scanJarResource(Set<Class<?>> classes,
+                                 Set<String> allowedPrefixes,
+                                 ClassLoader classLoader,
+                                 URL resource) {
+        try {
+            final JarURLConnection connection = (JarURLConnection) resource.openConnection();
+            try (JarFile jarFile = connection.getJarFile()) {
+                jarFile.stream()
+                        .map(JarEntry::getName)
+                        .filter(name -> isScannableClass(name, allowedPrefixes))
+                        .forEach(name -> {
+                            final Class<?> clazz = processClassName(name, classLoader);
+                            if (clazz != null) {
+                                classes.add(clazz);
+                            }
+                        });
+            }
+        } catch (IOException ex) {
+            LOG.log(Level.FINE, "Failed to scan jar classpath resource " + resource, ex);
+        }
     }
 
     private boolean isScannableClass(final String classPath, Set<String> allowedPrefixes) {

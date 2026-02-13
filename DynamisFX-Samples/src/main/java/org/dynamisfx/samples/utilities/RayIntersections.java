@@ -208,7 +208,7 @@ public class RayIntersections extends DynamisFXSample {
             org.dynamisfx.geometry.Point3D gloOriginInLoc1 = new org.dynamisfx.geometry.Point3D((float) gloOriginInLoc.getX(), (float) gloOriginInLoc.getY(), (float) gloOriginInLoc.getZ());
             org.dynamisfx.geometry.Point3D gloDirection1 = new org.dynamisfx.geometry.Point3D((float) gloDirection.getX(), (float) gloDirection.getY(), (float) gloDirection.getZ());
 
-            System.out.println("inter: " + spring.getIntersections(gloOriginInLoc1, gloDirection1));
+            spring.getIntersections(gloOriginInLoc1, gloDirection1);
         }
 
         sceneRoot.getChildren().addAll(group);

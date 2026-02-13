@@ -172,6 +172,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     @Override
     protected void createMesh() {
         camera.setTranslateZ(-900);
+        worldGroup.getChildren().clear();
 
         lander.setMaterial(materialForMode(lastMode));
         dockingTarget.setMaterial(new PhongMaterial(Color.LIGHTGREEN));
