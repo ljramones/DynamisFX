@@ -38,6 +38,7 @@ import org.dynamisfx.simulation.SimulationTransformBridge;
 import org.dynamisfx.simulation.TransformStore;
 import org.dynamisfx.simulation.coupling.CouplingBodyDefinitionProvider;
 import org.dynamisfx.simulation.coupling.CouplingDecisionReason;
+import org.dynamisfx.simulation.coupling.CouplingModeTransitionEvent;
 import org.dynamisfx.simulation.coupling.CouplingStateReconciler;
 import org.dynamisfx.simulation.coupling.CouplingTelemetryEvent;
 import org.dynamisfx.simulation.coupling.CouplingTransitionApplier;
@@ -83,6 +84,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private static final double DEMO_PLANET_RADIUS_METERS = 1_000.0;
     private static final double SURFACE_PROMOTE_ALTITUDE_METERS = 400.0;
     private static final double SURFACE_DEMOTE_ALTITUDE_METERS = 900.0;
+    private static final int TIMELINE_LIMIT = 8;
     private static final Preferences PREFS = Preferences.userNodeForPackage(CouplingTransitionDemo.class);
     private static final String PREF_HANDOFF_DIAGNOSTICS = "coupling.handoffDiagnosticsEnabled";
     private static final String PREF_FREEZE_SELECTION = "coupling.handoffFreezeSelection";
@@ -143,6 +145,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private Label zoneLabel;
     private Label predictionLabel;
     private Label telemetryLabel;
+    private Label timelineLabel;
     private Label dockingLabel;
     private Label interactionLabel;
     private Label handoffDirectionLabel;
@@ -160,6 +163,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private boolean freezeHandoffSelection = PREFS.getBoolean(PREF_FREEZE_SELECTION, false);
     private int handoffHistoryLimit = clampHistoryLimit(PREFS.getInt(PREF_HISTORY_LIMIT, DEFAULT_HANDOFF_HISTORY_LIMIT));
     private int terrainTileCount;
+    private final List<String> transitionTimeline = new ArrayList<>();
 
     public static void main(String[] args) {
         launch(args);
@@ -242,6 +246,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         couplingManager.registerZone(demoZone);
         couplingManager.setMode(OBJECT_ID, lastMode);
         couplingManager.addTelemetryListener(this::onTelemetry);
+        couplingManager.addTransitionListener(this::onTransitionEvent);
         couplingManager.addTransitionListener(transitionApplier);
         couplingManager.addTransitionListener(stateReconciler);
         orchestrator = new SimulationOrchestrator(
@@ -299,6 +304,8 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         zoneLabel = new Label("Zone/Frame: n/a");
         predictionLabel = new Label("Prediction: n/a");
         telemetryLabel = new Label("Telemetry: waiting");
+        timelineLabel = new Label("Transitions: none");
+        timelineLabel.setWrapText(true);
         dockingLabel = new Label("Docking: unlocked");
         interactionLabel = new Label("Interactions: pending");
         handoffDirectionLabel = new Label("Handoff: waiting");
@@ -367,6 +374,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 zoneLabel,
                 predictionLabel,
                 telemetryLabel,
+                timelineLabel,
                 dockingLabel,
                 interactionLabel,
                 new Label("Handoff Debug"),
@@ -760,6 +768,27 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
             if (event.transitioned()) {
                 LOG.info(() -> formatTelemetry(event));
             }
+        }
+    }
+
+    private void onTransitionEvent(CouplingModeTransitionEvent event) {
+        if (!OBJECT_ID.equals(event.objectId())) {
+            return;
+        }
+        String zone = event.selectedZoneId().map(ZoneId::value).orElse("none");
+        String line = String.format(
+                "t=%.2f %s->%s %s zone=%s",
+                event.simulationTimeSeconds(),
+                event.fromMode(),
+                event.toMode(),
+                event.reason(),
+                zone);
+        transitionTimeline.add(0, line);
+        while (transitionTimeline.size() > TIMELINE_LIMIT) {
+            transitionTimeline.remove(transitionTimeline.size() - 1);
+        }
+        if (timelineLabel != null) {
+            timelineLabel.setText("Transitions:\n" + String.join("\n", transitionTimeline));
         }
     }
 
