@@ -53,6 +53,7 @@ module org.dynamisfx.core {
     exports org.dynamisfx.simulation.entity;
     exports org.dynamisfx.simulation.orbital;
     exports org.dynamisfx.simulation.rigid;
+    exports org.dynamisfx.simulation.runtime;
     exports org.dynamisfx.shapes;
     exports org.dynamisfx.shapes.complex.cloth;
     exports org.dynamisfx.shapes.composites;

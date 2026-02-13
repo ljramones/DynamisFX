@@ -1,0 +1,84 @@
+package org.dynamisfx.simulation.runtime;
+
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.DoubleConsumer;
+import java.util.function.Supplier;
+import org.dynamisfx.physics.model.ReferenceFrame;
+import org.dynamisfx.simulation.SimulationClock;
+import org.dynamisfx.simulation.SimulationTransformBridge;
+import org.dynamisfx.simulation.coupling.CouplingManager;
+import org.dynamisfx.simulation.orbital.OrbitalDynamicsEngine;
+import org.dynamisfx.simulation.orbital.OrbitalState;
+
+/**
+ * Minimal orchestrator coordinating orbital, coupling, rigid, and publish phases in order.
+ */
+public final class SimulationOrchestrator {
+
+    private final SimulationClock clock;
+    private final OrbitalDynamicsEngine orbitalEngine;
+    private final CouplingManager couplingManager;
+    private final DoubleConsumer rigidStep;
+    private final SimulationTransformBridge transformBridge;
+    private final Supplier<Collection<String>> objectIdsSupplier;
+    private final ReferenceFrame orbitalOutputFrame;
+    private final Set<SimulationOrchestratorListener> listeners = new LinkedHashSet<>();
+
+    public SimulationOrchestrator(
+            SimulationClock clock,
+            OrbitalDynamicsEngine orbitalEngine,
+            CouplingManager couplingManager,
+            DoubleConsumer rigidStep,
+            SimulationTransformBridge transformBridge,
+            Supplier<Collection<String>> objectIdsSupplier,
+            ReferenceFrame orbitalOutputFrame) {
+        this.clock = Objects.requireNonNull(clock, "clock must not be null");
+        this.orbitalEngine = Objects.requireNonNull(orbitalEngine, "orbitalEngine must not be null");
+        this.couplingManager = Objects.requireNonNull(couplingManager, "couplingManager must not be null");
+        this.rigidStep = Objects.requireNonNull(rigidStep, "rigidStep must not be null");
+        this.transformBridge = Objects.requireNonNull(transformBridge, "transformBridge must not be null");
+        this.objectIdsSupplier = Objects.requireNonNull(objectIdsSupplier, "objectIdsSupplier must not be null");
+        this.orbitalOutputFrame = Objects.requireNonNull(orbitalOutputFrame, "orbitalOutputFrame must not be null");
+    }
+
+    public double tick(double realDeltaSeconds) {
+        double simulationTimeSeconds = clock.advance(realDeltaSeconds);
+
+        firePhase(OrchestratorPhase.ORBITAL, simulationTimeSeconds);
+        Map<String, OrbitalState> orbitalStates = orbitalEngine.propagateTo(
+                objectIdsSupplier.get(),
+                simulationTimeSeconds,
+                orbitalOutputFrame);
+        transformBridge.writeOrbitalStates(orbitalStates);
+
+        firePhase(OrchestratorPhase.COUPLING, simulationTimeSeconds);
+        couplingManager.update(simulationTimeSeconds);
+
+        firePhase(OrchestratorPhase.RIGID, simulationTimeSeconds);
+        rigidStep.accept(realDeltaSeconds);
+
+        firePhase(OrchestratorPhase.PUBLISH, simulationTimeSeconds);
+        transformBridge.publish(simulationTimeSeconds);
+        return simulationTimeSeconds;
+    }
+
+    public void addListener(SimulationOrchestratorListener listener) {
+        Objects.requireNonNull(listener, "listener must not be null");
+        listeners.add(listener);
+    }
+
+    public boolean removeListener(SimulationOrchestratorListener listener) {
+        Objects.requireNonNull(listener, "listener must not be null");
+        return listeners.remove(listener);
+    }
+
+    private void firePhase(OrchestratorPhase phase, double simulationTimeSeconds) {
+        for (SimulationOrchestratorListener listener : listeners) {
+            listener.onPhase(phase, simulationTimeSeconds);
+        }
+    }
+}

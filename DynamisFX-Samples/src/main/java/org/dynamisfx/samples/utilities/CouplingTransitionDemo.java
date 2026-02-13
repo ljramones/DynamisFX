@@ -17,6 +17,8 @@ import org.dynamisfx.physics.model.PhysicsVector3;
 import org.dynamisfx.physics.model.ReferenceFrame;
 import org.dynamisfx.simulation.ObjectSimulationMode;
 import org.dynamisfx.simulation.SimulationClock;
+import org.dynamisfx.simulation.SimulationTransformBridge;
+import org.dynamisfx.simulation.TransformStore;
 import org.dynamisfx.simulation.coupling.CouplingDecisionReason;
 import org.dynamisfx.simulation.coupling.CouplingTelemetryEvent;
 import org.dynamisfx.simulation.coupling.DefaultCouplingManager;
@@ -28,6 +30,7 @@ import org.dynamisfx.simulation.entity.SimulationEntityRegistry;
 import org.dynamisfx.simulation.orbital.OrbitalState;
 import org.dynamisfx.simulation.orbital.ScriptedOrbitalDynamicsEngine;
 import org.dynamisfx.simulation.rigid.RigidBodyWorld;
+import org.dynamisfx.simulation.runtime.SimulationOrchestrator;
 import org.dynamisfx.samples.shapes.ShapeBaseSample;
 
 /**
@@ -44,7 +47,11 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
             Phase1CouplingBootstrap.createDefaultManager(observationProvider);
     private final SimulationClock clock = new SimulationClock(0.0, 1.0, false);
     private final SimulationEntityRegistry<Node> entityRegistry = new SimulationEntityRegistry<>();
+    private final TransformStore transformStore = new TransformStore(1);
+    private final SimulationTransformBridge transformBridge =
+            new SimulationTransformBridge(entityRegistry, transformStore);
     private final ScriptedOrbitalDynamicsEngine orbitalEngine = new ScriptedOrbitalDynamicsEngine();
+    private SimulationOrchestrator orchestrator;
 
     private final Box lander = new Box(80, 40, 80);
     private AnimationTimer timer;
@@ -80,6 +87,16 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         couplingManager.registerZone(new DemoZone());
         couplingManager.setMode(OBJECT_ID, lastMode);
         couplingManager.addTelemetryListener(this::onTelemetry);
+        orchestrator = new SimulationOrchestrator(
+                clock,
+                orbitalEngine,
+                couplingManager,
+                dt -> {
+                    // Phase-1 demo has no active rigid-body backend stepping yet.
+                },
+                transformBridge,
+                () -> List.of(OBJECT_ID),
+                ReferenceFrame.WORLD);
     }
 
     @Override
@@ -96,9 +113,9 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 double dt = Math.min((now - lastNanos) * 1.0e-9, 0.1);
                 lastNanos = now;
 
-                double simulationTime = clock.advance(dt);
+                double simulationTime = clock.simulationTimeSeconds() + dt;
                 applyScenario(simulationTime);
-                couplingManager.update(simulationTime);
+                simulationTime = orchestrator.tick(dt);
                 updateVisualState(simulationTime);
             }
         };
@@ -193,6 +210,11 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
             modeLabel.setText("Mode: " + currentMode);
         }
         entityRegistry.get(OBJECT_ID).ifPresent(entity -> entity.setTranslateX(modeOffset(currentMode)));
+        entityRegistry.get(OBJECT_ID).ifPresent(entity ->
+                entityRegistry.indexOf(OBJECT_ID).ifPresent(index -> {
+                    TransformStore.TransformSample sample = transformStore.sample(index);
+                    entity.setTranslateZ(sample.posX() * 0.15);
+                }));
         if (telemetryLabel != null && latestTelemetry != null) {
             telemetryLabel.setText(formatTelemetry(latestTelemetry));
         }

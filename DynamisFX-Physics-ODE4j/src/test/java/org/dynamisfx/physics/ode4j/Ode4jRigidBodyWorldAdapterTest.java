@@ -2,6 +2,7 @@ package org.dynamisfx.physics.ode4j;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -38,6 +39,16 @@ class Ode4jRigidBodyWorldAdapterTest {
         assertEquals(1, snapshots.size());
         assertTrue(snapshots.containsKey(handle));
         assertTrue(snapshots.get(handle).timestampSeconds() > 0.0);
+
+        double[] positions = new double[3];
+        double[] orientations = new double[4];
+        int written = adapter.readTransforms(List.of(handle), positions, orientations);
+        assertEquals(1, written);
+        assertTrue(positions[1] < 0.0);
+        assertEquals(1.0, orientations[3], 1e-9);
+        assertThrows(IllegalArgumentException.class, () ->
+                adapter.readTransforms(List.of(handle), new double[2], new double[4]));
+
         assertTrue(adapter.removeBody(handle));
         assertFalse(adapter.removeBody(handle));
         adapter.close();

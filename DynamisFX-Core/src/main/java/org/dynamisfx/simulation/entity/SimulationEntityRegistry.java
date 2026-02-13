@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 /**
  * Shared registry for mapping simulation object identifiers to runtime entities.
@@ -13,10 +14,14 @@ import java.util.Optional;
 public final class SimulationEntityRegistry<T> {
 
     private final Map<String, T> entitiesById = new LinkedHashMap<>();
+    private final Map<String, Integer> indicesById = new LinkedHashMap<>();
 
     public synchronized void register(String objectId, T entity) {
         validateObjectId(objectId);
         Objects.requireNonNull(entity, "entity must not be null");
+        if (!indicesById.containsKey(objectId)) {
+            indicesById.put(objectId, indicesById.size());
+        }
         entitiesById.put(objectId, entity);
     }
 
@@ -27,7 +32,9 @@ public final class SimulationEntityRegistry<T> {
 
     public synchronized boolean remove(String objectId) {
         validateObjectId(objectId);
-        return entitiesById.remove(objectId) != null;
+        boolean removedEntity = entitiesById.remove(objectId) != null;
+        indicesById.remove(objectId);
+        return removedEntity;
     }
 
     public synchronized Collection<String> objectIds() {
@@ -38,8 +45,15 @@ public final class SimulationEntityRegistry<T> {
         return entitiesById.size();
     }
 
+    public synchronized OptionalInt indexOf(String objectId) {
+        validateObjectId(objectId);
+        Integer index = indicesById.get(objectId);
+        return index == null ? OptionalInt.empty() : OptionalInt.of(index);
+    }
+
     public synchronized void clear() {
         entitiesById.clear();
+        indicesById.clear();
     }
 
     private static void validateObjectId(String objectId) {

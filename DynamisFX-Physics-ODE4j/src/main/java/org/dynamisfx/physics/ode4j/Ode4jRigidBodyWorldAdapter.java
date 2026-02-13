@@ -110,6 +110,42 @@ public final class Ode4jRigidBodyWorldAdapter implements RigidBodyWorld {
         return result;
     }
 
+    /**
+     * Writes transform snapshots into flat arrays to avoid per-frame map allocations.
+     *
+     * @return number of written body transforms
+     */
+    public int readTransforms(
+            Collection<PhysicsBodyHandle> handles,
+            double[] positions,
+            double[] orientations) {
+        Objects.requireNonNull(handles, "handles must not be null");
+        Objects.requireNonNull(positions, "positions must not be null");
+        Objects.requireNonNull(orientations, "orientations must not be null");
+        int count = handles.size();
+        if (positions.length < count * 3) {
+            throw new IllegalArgumentException("positions buffer too small");
+        }
+        if (orientations.length < count * 4) {
+            throw new IllegalArgumentException("orientations buffer too small");
+        }
+        int i = 0;
+        for (PhysicsBodyHandle handle : handles) {
+            PhysicsBodyState state = delegate.getBodyState(handle);
+            int p = i * 3;
+            positions[p] = state.position().x();
+            positions[p + 1] = state.position().y();
+            positions[p + 2] = state.position().z();
+            int q = i * 4;
+            orientations[q] = state.orientation().x();
+            orientations[q + 1] = state.orientation().y();
+            orientations[q + 2] = state.orientation().z();
+            orientations[q + 3] = state.orientation().w();
+            i++;
+        }
+        return count;
+    }
+
     @Override
     public void close() {
         delegate.close();
