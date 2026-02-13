@@ -18,6 +18,12 @@
             <groupId>org.dynamisfx</groupId>
             <artifactId>dynamisfx-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.github.stephengold</groupId>
+            <artifactId>jolt-jni-Windows64</artifactId>
+            <version>${jolt.jni.version}</version>
+            <optional>true</optional>
+        </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -79,6 +85,78 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>jolt-jni-native-macos-arm64</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                    <arch>aarch64</arch>
+                </os>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>com.github.stephengold</groupId>
+                    <artifactId>jolt-jni-MacOSX_ARM64</artifactId>
+                    <version>${jolt.jni.version}</version>
+                    <classifier>ReleaseSp</classifier>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>jolt-jni-native-macos-x64</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                    <arch>x86_64</arch>
+                </os>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>com.github.stephengold</groupId>
+                    <artifactId>jolt-jni-MacOSX64</artifactId>
+                    <version>${jolt.jni.version}</version>
+                    <classifier>ReleaseSp</classifier>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>jolt-jni-native-linux-x64</id>
+            <activation>
+                <os>
+                    <family>linux</family>
+                    <arch>x86_64</arch>
+                </os>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>com.github.stephengold</groupId>
+                    <artifactId>jolt-jni-Linux64</artifactId>
+                    <version>${jolt.jni.version}</version>
+                    <classifier>ReleaseSp</classifier>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>jolt-jni-native-windows-x64</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                    <arch>x86_64</arch>
+                </os>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>com.github.stephengold</groupId>
+                    <artifactId>jolt-jni-Windows64</artifactId>
+                    <version>${jolt.jni.version}</version>
+                    <classifier>ReleaseSp</classifier>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+        </profile>
         <profile>
             <id>panama-preview</id>
             <activation>

@@ -16,15 +16,25 @@ public final class JoltBackend implements PhysicsBackend {
             true,
             true,
             true);
+    static final String PROVIDER_PROPERTY = "dynamisfx.jolt.provider";
+    static final String PROVIDER_AUTO = "auto";
+    static final String PROVIDER_JOLT_JNI = "jolt-jni";
+    static final String PROVIDER_CSHIM = "cshim";
 
     private final JoltNativeBridge bridge;
+    private final PhysicsBackend delegate;
 
     public JoltBackend() {
-        this(new JoltNativeBridge());
+        this(new JoltNativeBridge(), null);
     }
 
     JoltBackend(JoltNativeBridge bridge) {
+        this(bridge, cshimBackend(bridge));
+    }
+
+    private JoltBackend(JoltNativeBridge bridge, PhysicsBackend forcedDelegate) {
         this.bridge = bridge;
+        this.delegate = forcedDelegate != null ? forcedDelegate : selectDelegate(bridge);
     }
 
     @Override
@@ -34,11 +44,47 @@ public final class JoltBackend implements PhysicsBackend {
 
     @Override
     public PhysicsCapabilities capabilities() {
-        return CAPABILITIES;
+        return delegate.capabilities();
     }
 
     @Override
     public PhysicsWorld createWorld(PhysicsWorldConfiguration configuration) {
-        return new JoltWorld(configuration, bridge);
+        return delegate.createWorld(configuration);
+    }
+
+    private PhysicsBackend selectDelegate(JoltNativeBridge bridge) {
+        String provider = System.getProperty(PROVIDER_PROPERTY, PROVIDER_AUTO).trim().toLowerCase();
+        return switch (provider) {
+            case PROVIDER_AUTO -> autoSelect(bridge);
+            case PROVIDER_JOLT_JNI -> new JoltJniBackend();
+            case PROVIDER_CSHIM -> cshimBackend(bridge);
+            default -> throw new IllegalArgumentException(
+                    "Unknown jolt provider '" + provider + "', expected one of: "
+                            + PROVIDER_AUTO + ", " + PROVIDER_JOLT_JNI + ", " + PROVIDER_CSHIM);
+        };
+    }
+
+    private PhysicsBackend autoSelect(JoltNativeBridge bridge) {
+        JoltJniBackend joltJniBackend = new JoltJniBackend();
+        return joltJniBackend.isAvailable() ? joltJniBackend : cshimBackend(bridge);
+    }
+
+    private static PhysicsBackend cshimBackend(JoltNativeBridge bridge) {
+        return new PhysicsBackend() {
+            @Override
+            public String id() {
+                return "jolt";
+            }
+
+            @Override
+            public PhysicsCapabilities capabilities() {
+                return CAPABILITIES;
+            }
+
+            @Override
+            public PhysicsWorld createWorld(PhysicsWorldConfiguration configuration) {
+                return new JoltWorld(configuration, bridge);
+            }
+        };
     }
 }

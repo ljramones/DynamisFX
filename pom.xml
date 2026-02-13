@@ -37,6 +37,7 @@
         <poly2tri-core.version>0.1.2</poly2tri-core.version>
         <ode4j.version>0.5.3</ode4j.version>
         <orekit.version>12.2</orekit.version>
+        <jolt.jni.version>3.6.0</jolt.jni.version>
 
         <slf4j.version>2.0.7</slf4j.version>
 

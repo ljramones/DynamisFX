@@ -4,9 +4,18 @@ Optional Jolt backend module for DynamisFX rigid-body simulation.
 
 Current state:
 - Java backend/factory scaffolding is in place.
+- Provider selection is configurable via `dynamisfx.jolt.provider`:
+  - `auto` (default): try `jolt-jni`, then fall back to c-shim
+  - `jolt-jni`: require published `jolt-jni` bindings
+  - `cshim`: require `dynamisfx_jolt_cshim`
 - Runtime expects a native C-shim library named `dynamisfx_jolt_cshim`.
   - system property override: `dynamisfx.jolt.native.path`
   - environment override: `DYNAMISFX_JOLT_NATIVE_PATH`
+- `jolt-jni` native override:
+  - system property override: `dynamisfx.joltjni.native.path`
+  - environment override: `DYNAMISFX_JOLTJNI_NATIVE_PATH`
+- Native integration test is opt-in:
+  - `-Ddynamisfx.joltjni.integration=true`
 - JNI bridge now calls shim functions for world create/destroy, body create/get/set/remove, and step.
 - Native bridge exposes backend mode (`stub` vs `real`) for diagnostics/tests.
 - Native C shim now has two build modes:
