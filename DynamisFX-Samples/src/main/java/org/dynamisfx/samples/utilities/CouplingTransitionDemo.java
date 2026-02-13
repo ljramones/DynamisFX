@@ -45,6 +45,7 @@ import org.dynamisfx.simulation.coupling.DeterministicZoneSelector;
 import org.dynamisfx.simulation.coupling.DockingConstraintController;
 import org.dynamisfx.simulation.coupling.DockingConstraintEvent;
 import org.dynamisfx.simulation.coupling.DefaultCouplingManager;
+import org.dynamisfx.simulation.coupling.KinematicCouplingObservationProvider;
 import org.dynamisfx.simulation.coupling.MutablePhysicsZone;
 import org.dynamisfx.simulation.coupling.MutableCouplingObservationProvider;
 import org.dynamisfx.simulation.coupling.SphericalTangentFrame;
@@ -88,7 +89,12 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private static final String PREF_HISTORY_LIMIT = "coupling.handoffHistoryLimit";
 
     private final Group worldGroup = new Group();
-    private final MutableCouplingObservationProvider observationProvider = new MutableCouplingObservationProvider();
+    private final SimulationStateBuffers stateBuffers = new SimulationStateBuffers();
+    private final MutableCouplingObservationProvider manualObservationProvider = new MutableCouplingObservationProvider();
+    private final KinematicCouplingObservationProvider observationProvider = new KinematicCouplingObservationProvider(
+            stateBuffers.rigid()::get,
+            stateBuffers.orbital()::get,
+            manualObservationProvider);
     private final DefaultCouplingManager couplingManager =
             new DefaultCouplingManager(
                     new ThresholdTransitionPolicy(
@@ -105,7 +111,6 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private final TransformStore transformStore = new TransformStore(1);
     private final SimulationTransformBridge transformBridge =
             new SimulationTransformBridge(entityRegistry, transformStore);
-    private final SimulationStateBuffers stateBuffers = new SimulationStateBuffers();
     private final ZoneBodyRegistry zoneBodyRegistry = new ZoneBodyRegistry();
     private final ScriptedOrbitalDynamicsEngine orbitalEngine = new ScriptedOrbitalDynamicsEngine();
     private final List<String> interactionEvents = new ArrayList<>();
@@ -134,6 +139,9 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private CheckBox freezeHandoffSelectionCheck;
     private Label modeLabel;
     private Label distanceLabel;
+    private Label decisionLabel;
+    private Label zoneLabel;
+    private Label predictionLabel;
     private Label telemetryLabel;
     private Label dockingLabel;
     private Label interactionLabel;
@@ -287,6 +295,9 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
 
         modeLabel = new Label("Mode: " + lastMode);
         distanceLabel = new Label("Distance: 2000 m");
+        decisionLabel = new Label("Decision: waiting");
+        zoneLabel = new Label("Zone/Frame: n/a");
+        predictionLabel = new Label("Prediction: n/a");
         telemetryLabel = new Label("Telemetry: waiting");
         dockingLabel = new Label("Docking: unlocked");
         interactionLabel = new Label("Interactions: pending");
@@ -352,6 +363,9 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 new Label("Coupling Transition Demo"),
                 modeLabel,
                 distanceLabel,
+                decisionLabel,
+                zoneLabel,
+                predictionLabel,
                 telemetryLabel,
                 dockingLabel,
                 interactionLabel,
@@ -398,49 +412,34 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         }
         if (autoScenarioCheck != null && autoScenarioCheck.isSelected()) {
             boolean contact = simulationTimeSeconds >= 6.0 && simulationTimeSeconds < 7.5;
-            Double predictedIntercept = simulationTimeSeconds < 3.0
-                    ? 3.0 - simulationTimeSeconds
-                    : null;
             if (state != null) {
-                double distance = Math.abs(state.position().x());
-                double altitude = Math.max(0.0, distance - DEMO_PLANET_RADIUS_METERS);
-                setObservationState(distance, contact, predictedIntercept, altitude);
+                double altitude = Math.max(0.0, radialDistance(state.position()) - DEMO_PLANET_RADIUS_METERS);
+                setObservationState(contact, altitude);
             }
             return;
         }
 
-        if (distanceSlider != null && contactCheck != null) {
-            double distance = distanceSlider.getValue();
-            double altitude = Math.max(0.0, distance - DEMO_PLANET_RADIUS_METERS);
-            setObservationState(distance, contactCheck.isSelected(), null, altitude);
+        if (contactCheck != null) {
+            Double altitude = null;
+            if (distanceSlider != null) {
+                altitude = Math.max(0.0, distanceSlider.getValue() - DEMO_PLANET_RADIUS_METERS);
+            }
+            setObservationState(contactCheck.isSelected(), altitude);
         }
     }
 
     private void setObservationState(
-            double distanceMeters,
             boolean activeContact,
-            Double predictedInterceptSeconds,
             Double altitudeMetersAboveSurface) {
-        observationProvider.setDistanceMeters(OBJECT_ID, distanceMeters);
-        observationProvider.setActiveContact(OBJECT_ID, activeContact);
-        if (predictedInterceptSeconds == null) {
-            observationProvider.clearPredictedIntercept(OBJECT_ID);
-        } else {
-            observationProvider.setPredictedInterceptSeconds(OBJECT_ID, predictedInterceptSeconds);
-        }
+        manualObservationProvider.setActiveContact(OBJECT_ID, activeContact);
         if (altitudeMetersAboveSurface == null) {
-            observationProvider.clearAltitudeMetersAboveSurface(OBJECT_ID);
+            manualObservationProvider.clearAltitudeMetersAboveSurface(OBJECT_ID);
         } else {
-            observationProvider.setAltitudeMetersAboveSurface(OBJECT_ID, altitudeMetersAboveSurface);
-        }
-
-        if (distanceSlider != null && Math.abs(distanceSlider.getValue() - distanceMeters) > 1e-6) {
-            distanceSlider.setValue(distanceMeters);
+            manualObservationProvider.setAltitudeMetersAboveSurface(OBJECT_ID, altitudeMetersAboveSurface);
         }
         if (contactCheck != null && contactCheck.isSelected() != activeContact) {
             contactCheck.setSelected(activeContact);
         }
-        updateDistanceLabel(distanceMeters);
     }
 
     private void stepRigidDemo(double dtSeconds) {
@@ -475,6 +474,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         orbitalEngine.setTrajectory(objectId, (time, frame) -> new OrbitalState(
                 seededState.position(),
                 seededState.linearVelocity(),
+                seededState.angularVelocity(),
                 seededState.orientation(),
                 frame,
                 time));
@@ -501,8 +501,25 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                     TransformStore.TransformSample sample = transformStore.sample(index);
                     entity.setTranslateZ(sample.posX() * 0.15);
                 }));
-        if (telemetryLabel != null && latestTelemetry != null) {
-            telemetryLabel.setText(formatTelemetry(latestTelemetry));
+        if (latestTelemetry != null) {
+            if (telemetryLabel != null) {
+                telemetryLabel.setText(formatTelemetry(latestTelemetry));
+            }
+            if (decisionLabel != null) {
+                decisionLabel.setText("Decision: " + latestTelemetry.reason());
+            }
+            if (zoneLabel != null) {
+                String zone = latestTelemetry.selectedZoneId().map(ZoneId::value).orElse("none");
+                String frame = latestTelemetry.selectedZoneFrame().map(Enum::name).orElse("UNSPECIFIED");
+                zoneLabel.setText("Zone/Frame: " + zone + " / " + frame);
+            }
+            if (predictionLabel != null) {
+                String intercept = latestTelemetry.predictedInterceptSeconds().isPresent()
+                        ? String.format("%.2f s", latestTelemetry.predictedInterceptSeconds().orElseThrow())
+                        : "n/a";
+                predictionLabel.setText("Prediction: intercept=" + intercept);
+            }
+            updateDistanceLabel(latestTelemetry.observedDistanceMeters().orElse(Double.NaN));
         }
         if (dockingLabel != null) {
             dockingLabel.setText("Docking: " + (dockingLatched ? "latched" : "unlocked"));
@@ -722,8 +739,19 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
 
     private void updateDistanceLabel(double distanceMeters) {
         if (distanceLabel != null) {
-            distanceLabel.setText(String.format("Distance: %.0f m", distanceMeters));
+            if (Double.isFinite(distanceMeters)) {
+                distanceLabel.setText(String.format("Distance: %.0f m", distanceMeters));
+            } else {
+                distanceLabel.setText("Distance: n/a");
+            }
         }
+    }
+
+    private static double radialDistance(PhysicsVector3 position) {
+        return Math.sqrt(
+                (position.x() * position.x())
+                        + (position.y() * position.y())
+                        + (position.z() * position.z()));
     }
 
     private void onTelemetry(CouplingTelemetryEvent event) {
