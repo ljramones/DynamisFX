@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
@@ -53,6 +54,12 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private static final Logger LOG = Logger.getLogger(CouplingTransitionDemo.class.getName());
     private static final String OBJECT_ID = "lander-1";
     private static final int DEFAULT_HANDOFF_HISTORY_LIMIT = 10;
+    private static final int MIN_HANDOFF_HISTORY_LIMIT = 1;
+    private static final int MAX_HANDOFF_HISTORY_LIMIT = 100;
+    private static final Preferences PREFS = Preferences.userNodeForPackage(CouplingTransitionDemo.class);
+    private static final String PREF_HANDOFF_DIAGNOSTICS = "coupling.handoffDiagnosticsEnabled";
+    private static final String PREF_FREEZE_SELECTION = "coupling.handoffFreezeSelection";
+    private static final String PREF_HISTORY_LIMIT = "coupling.handoffHistoryLimit";
 
     private final Group worldGroup = new Group();
     private final MutableCouplingObservationProvider observationProvider = new MutableCouplingObservationProvider();
@@ -93,9 +100,9 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private Button copyHandoffJsonButton;
     private Button exportHistoryJsonButton;
     private Button clearHandoffHistoryButton;
-    private boolean handoffDiagnosticsEnabled = true;
-    private boolean freezeHandoffSelection;
-    private int handoffHistoryLimit = DEFAULT_HANDOFF_HISTORY_LIMIT;
+    private boolean handoffDiagnosticsEnabled = PREFS.getBoolean(PREF_HANDOFF_DIAGNOSTICS, true);
+    private boolean freezeHandoffSelection = PREFS.getBoolean(PREF_FREEZE_SELECTION, false);
+    private int handoffHistoryLimit = clampHistoryLimit(PREFS.getInt(PREF_HISTORY_LIMIT, DEFAULT_HANDOFF_HISTORY_LIMIT));
 
     public static void main(String[] args) {
         launch(args);
@@ -189,10 +196,14 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         handoffHistoryBox = new ComboBox<>();
         handoffHistoryBox.setPromptText("Select recent handoff");
         handoffHistoryBox.valueProperty().addListener((obs, oldValue, newValue) -> updateHandoffDebugLabels());
-        handoffHistoryLimitSpinner = new Spinner<>(1, 100, DEFAULT_HANDOFF_HISTORY_LIMIT);
+        handoffHistoryLimitSpinner = new Spinner<>(MIN_HANDOFF_HISTORY_LIMIT, MAX_HANDOFF_HISTORY_LIMIT, handoffHistoryLimit);
         handoffHistoryLimitSpinner.setEditable(true);
         handoffHistoryLimitSpinner.valueProperty().addListener((obs, oldValue, newValue) -> {
-            handoffHistoryLimit = newValue;
+            if (newValue == null) {
+                return;
+            }
+            handoffHistoryLimit = clampHistoryLimit(newValue);
+            PREFS.putInt(PREF_HISTORY_LIMIT, handoffHistoryLimit);
             trimHandoffHistoryToLimit();
             refreshHandoffHistoryControl();
             updateHandoffDebugLabels();
@@ -216,9 +227,10 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         autoScenarioCheck = new CheckBox("Auto Scenario");
         autoScenarioCheck.setSelected(true);
         handoffDiagnosticsCheck = new CheckBox("Handoff Diagnostics");
-        handoffDiagnosticsCheck.setSelected(true);
+        handoffDiagnosticsCheck.setSelected(handoffDiagnosticsEnabled);
         handoffDiagnosticsCheck.selectedProperty().addListener((obs, oldValue, newValue) -> {
             handoffDiagnosticsEnabled = newValue;
+            PREFS.putBoolean(PREF_HANDOFF_DIAGNOSTICS, newValue);
             if (!newValue) {
                 latestHandoff = null;
                 handoffHistory.clear();
@@ -227,9 +239,10 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
             updateHandoffDebugLabels();
         });
         freezeHandoffSelectionCheck = new CheckBox("Freeze Selection");
-        freezeHandoffSelectionCheck.setSelected(false);
+        freezeHandoffSelectionCheck.setSelected(freezeHandoffSelection);
         freezeHandoffSelectionCheck.selectedProperty().addListener((obs, oldValue, newValue) -> {
             freezeHandoffSelection = newValue;
+            PREFS.putBoolean(PREF_FREEZE_SELECTION, newValue);
         });
 
         root.getChildren().addAll(
@@ -493,6 +506,10 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         handoffHistory.clear();
         refreshHandoffHistoryControl();
         updateHandoffDebugLabels();
+    }
+
+    private static int clampHistoryLimit(int value) {
+        return Math.max(MIN_HANDOFF_HISTORY_LIMIT, Math.min(MAX_HANDOFF_HISTORY_LIMIT, value));
     }
 
     private static PhongMaterial materialForMode(ObjectSimulationMode mode) {
