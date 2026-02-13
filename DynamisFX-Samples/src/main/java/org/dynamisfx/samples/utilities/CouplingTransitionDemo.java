@@ -21,16 +21,23 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
+import org.dynamisfx.physics.model.BoxShape;
+import org.dynamisfx.physics.model.PhysicsBodyDefinition;
+import org.dynamisfx.physics.model.PhysicsBodyType;
 import org.dynamisfx.physics.model.PhysicsVector3;
+import org.dynamisfx.physics.model.PhysicsWorldConfiguration;
 import org.dynamisfx.physics.model.ReferenceFrame;
+import org.dynamisfx.physics.ode4j.Ode4jRigidBodyWorldAdapter;
 import org.dynamisfx.simulation.ObjectSimulationMode;
 import org.dynamisfx.simulation.SimulationClock;
 import org.dynamisfx.simulation.SimulationStateBuffers;
 import org.dynamisfx.simulation.SimulationTransformBridge;
 import org.dynamisfx.simulation.TransformStore;
+import org.dynamisfx.simulation.coupling.CouplingBodyDefinitionProvider;
 import org.dynamisfx.simulation.coupling.CouplingDecisionReason;
 import org.dynamisfx.simulation.coupling.CouplingStateReconciler;
 import org.dynamisfx.simulation.coupling.CouplingTelemetryEvent;
+import org.dynamisfx.simulation.coupling.CouplingTransitionApplier;
 import org.dynamisfx.simulation.coupling.DefaultCouplingManager;
 import org.dynamisfx.simulation.coupling.MutableCouplingObservationProvider;
 import org.dynamisfx.simulation.coupling.Phase1CouplingBootstrap;
@@ -38,6 +45,7 @@ import org.dynamisfx.simulation.coupling.PhysicsZone;
 import org.dynamisfx.simulation.coupling.SimulationStateReconcilerFactory;
 import org.dynamisfx.simulation.coupling.StateHandoffDiagnostics;
 import org.dynamisfx.simulation.coupling.StateHandoffSnapshot;
+import org.dynamisfx.simulation.coupling.ZoneBodyRegistry;
 import org.dynamisfx.simulation.coupling.ZoneId;
 import org.dynamisfx.simulation.entity.SimulationEntityRegistry;
 import org.dynamisfx.simulation.orbital.OrbitalState;
@@ -56,6 +64,9 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private static final int DEFAULT_HANDOFF_HISTORY_LIMIT = 10;
     private static final int MIN_HANDOFF_HISTORY_LIMIT = 1;
     private static final int MAX_HANDOFF_HISTORY_LIMIT = 100;
+    private static final double LANDER_WIDTH = 80.0;
+    private static final double LANDER_HEIGHT = 40.0;
+    private static final double LANDER_DEPTH = 80.0;
     private static final Preferences PREFS = Preferences.userNodeForPackage(CouplingTransitionDemo.class);
     private static final String PREF_HANDOFF_DIAGNOSTICS = "coupling.handoffDiagnosticsEnabled";
     private static final String PREF_FREEZE_SELECTION = "coupling.handoffFreezeSelection";
@@ -71,11 +82,14 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private final SimulationTransformBridge transformBridge =
             new SimulationTransformBridge(entityRegistry, transformStore);
     private final SimulationStateBuffers stateBuffers = new SimulationStateBuffers();
+    private final ZoneBodyRegistry zoneBodyRegistry = new ZoneBodyRegistry();
     private final ScriptedOrbitalDynamicsEngine orbitalEngine = new ScriptedOrbitalDynamicsEngine();
+    private CouplingTransitionApplier transitionApplier;
     private CouplingStateReconciler stateReconciler;
     private SimulationOrchestrator orchestrator;
+    private DemoZone demoZone;
 
-    private final Box lander = new Box(80, 40, 80);
+    private final Box lander = new Box(LANDER_WIDTH, LANDER_HEIGHT, LANDER_DEPTH);
     private AnimationTimer timer;
     private ObjectSimulationMode lastMode = ObjectSimulationMode.ORBITAL_ONLY;
     private CouplingTelemetryEvent latestTelemetry;
@@ -137,9 +151,15 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                     StateHandoffDiagnostics.loggingSink(LOG).accept(snapshot);
                 });
 
-        couplingManager.registerZone(new DemoZone());
+        transitionApplier = new CouplingTransitionApplier(
+                stateBuffers,
+                zoneBodyRegistry,
+                bodyDefinitionProvider());
+        demoZone = new DemoZone();
+        couplingManager.registerZone(demoZone);
         couplingManager.setMode(OBJECT_ID, lastMode);
         couplingManager.addTelemetryListener(this::onTelemetry);
+        couplingManager.addTransitionListener(transitionApplier);
         couplingManager.addTransitionListener(stateReconciler);
         orchestrator = new SimulationOrchestrator(
                 clock,
@@ -178,6 +198,9 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
             if (newScene == null && timer != null) {
                 timer.stop();
                 timer = null;
+                if (demoZone != null) {
+                    demoZone.close();
+                }
             }
         });
     }
@@ -321,11 +344,16 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         if (dtSeconds <= 0.0) {
             return;
         }
-        ObjectSimulationMode mode = couplingManager.modeFor(OBJECT_ID).orElse(ObjectSimulationMode.ORBITAL_ONLY);
-        if (mode != ObjectSimulationMode.PHYSICS_ACTIVE) {
+        if (demoZone == null || demoZone.world() == null) {
             return;
         }
-        stateBuffers.rigid().advanceLinear(OBJECT_ID, dtSeconds, clock.simulationTimeSeconds() + dtSeconds);
+        demoZone.world().step(dtSeconds);
+        zoneBodyRegistry.bindingForObject(OBJECT_ID).ifPresent(binding -> {
+            if (!demoZone.zoneId().equals(binding.zoneId())) {
+                return;
+            }
+            stateBuffers.rigid().put(OBJECT_ID, demoZone.world().getBodyState(binding.bodyHandle()));
+        });
     }
 
     private void seedOrbitalFromPhysics(String objectId, OrbitalState seededState) {
@@ -608,10 +636,24 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         return 0.0;
     }
 
-    private static final class DemoZone implements PhysicsZone {
+    private static CouplingBodyDefinitionProvider bodyDefinitionProvider() {
+        return (objectId, event, zone, seedState) -> new PhysicsBodyDefinition(
+                PhysicsBodyType.DYNAMIC,
+                1.0,
+                new BoxShape(LANDER_WIDTH, LANDER_HEIGHT, LANDER_DEPTH),
+                seedState);
+    }
+
+    private static final class DemoZone implements PhysicsZone, AutoCloseable {
+        private final ZoneId zoneId = new ZoneId("demo-zone");
+        private final RigidBodyWorld world = new Ode4jRigidBodyWorldAdapter(new PhysicsWorldConfiguration(
+                ReferenceFrame.WORLD,
+                new PhysicsVector3(0.0, -1.62, 0.0),
+                1.0 / 120.0));
+
         @Override
         public ZoneId zoneId() {
-            return new ZoneId("demo-zone");
+            return zoneId;
         }
 
         @Override
@@ -631,7 +673,12 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
 
         @Override
         public RigidBodyWorld world() {
-            return null;
+            return world;
+        }
+
+        @Override
+        public void close() {
+            world.close();
         }
     }
 }
