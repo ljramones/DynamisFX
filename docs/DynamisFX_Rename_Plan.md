@@ -107,7 +107,7 @@ Recommendation:
 Goal: align folder names with new identity.
 
 1. Rename module directories:
-   - `FXyz-Core` -> `DynamisFX-Core` etc.
+   - `DynamisFX-Core` -> `DynamisFX-Core` etc.
 2. Update root `pom.xml` module paths.
 3. Update CI scripts and release pipelines.
 

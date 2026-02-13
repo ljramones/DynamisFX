@@ -55,7 +55,7 @@ Deliverables:
 
 Exit criteria:
 
-- Jolt backend can run existing physics flow without changing `FXyz-Core` public SPI.
+- Jolt backend can run existing physics flow without changing `DynamisFX-Core` public SPI.
 
 ## Phase 2 - Jolt Hardening
 

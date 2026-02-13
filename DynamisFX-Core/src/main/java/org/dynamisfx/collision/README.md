@@ -19,4 +19,4 @@ Collision code is organized by responsibility while keeping package names stable
 
 ## Test Source Mirrors
 
-Tests under `FXyz-Core/src/test/java/org/fxyz3d/collision/` mirror the same folder structure for easier navigation.
+Tests under `DynamisFX-Core/src/test/java/org/fxyz3d/collision/` mirror the same folder structure for easier navigation.

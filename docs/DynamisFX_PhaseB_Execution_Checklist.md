@@ -37,10 +37,10 @@ Execute the breaking rename from `org.fxyz3d` to `org.dynamisfx` with controlled
 
 Validation:
 
-- `mvn -pl FXyz-Core -DskipTests compile`
-- `mvn -pl FXyz-Importers -DskipTests compile`
-- `mvn -pl FXyz-Client -DskipTests compile`
-- `mvn -pl FXyz-Samples -DskipTests compile`
+- `mvn -pl DynamisFX-Core -DskipTests compile`
+- `mvn -pl DynamisFX-Importers -DskipTests compile`
+- `mvn -pl DynamisFX-Client -DskipTests compile`
+- `mvn -pl DynamisFX-Samples -DskipTests compile`
 
 ## Step 2 - JPMS module rename
 
@@ -76,7 +76,7 @@ Validation:
 
 Validation:
 
-- launch `FXyz-Samples` and verify major sample pages
+- launch `DynamisFX-Samples` and verify major sample pages
 - importer/exporter smoke checks
 
 ## Step 5 - Documentation and migration guide

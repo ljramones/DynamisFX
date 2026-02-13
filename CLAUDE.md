@@ -17,20 +17,20 @@ mvn clean install                     # Clean build and install
 
 Run a single test class:
 ```bash
-mvn test -pl FXyz-Core -Dtest=QuadMeshTest
+mvn test -pl DynamisFX-Core -Dtest=QuadMeshTest
 ```
 
 Run tests for a specific module:
 ```bash
-mvn test -pl FXyz-Core
+mvn test -pl DynamisFX-Core
 ```
 
 ## Module Structure
 
-- **FXyz-Core** - Core 3D shapes, geometry, and utilities (`org.fxyz3d.shapes`, `org.fxyz3d.geometry`, `org.fxyz3d.utils`)
-- **FXyz-Importers** - 3D model format importers
-- **FXyz-Client** - FXSampler UI framework
-- **FXyz-Samples** - Sample applications and demos (entry point: `Launcher` → `FXyzClient`)
+- **DynamisFX-Core** - Core 3D shapes, geometry, and utilities (`org.fxyz3d.shapes`, `org.fxyz3d.geometry`, `org.fxyz3d.utils`)
+- **DynamisFX-Importers** - 3D model format importers
+- **DynamisFX-Client** - FXSampler UI framework
+- **DynamisFX-Samples** - Sample applications and demos (entry point: `Launcher` → `FXyzClient`)
 
 ## Architecture Notes
 
@@ -45,6 +45,6 @@ mvn test -pl FXyz-Core
 - Package root: `org.fxyz3d`
 - 4-space indentation
 - Standard Java naming: `UpperCamelCase` for classes, `lowerCamelCase` for methods/fields
-- New shapes go in `FXyz-Core/src/main/java/org/fxyz3d/shapes/`
+- New shapes go in `DynamisFX-Core/src/main/java/org/fxyz3d/shapes/`
 - Tests mirror source package structure in `src/test/java/`
 - BSD 3-Clause license headers required on all source files

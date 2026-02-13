@@ -9,7 +9,7 @@ Integrate two physics domains without coupling DynamisFX core to a specific engi
 
 ## Principles
 
-- Keep `FXyz-Core` engine-agnostic.
+- Keep `DynamisFX-Core` engine-agnostic.
 - Define stable SPI/API first, then adapters.
 - Use fixed-step simulation with immutable state snapshots for render sync.
 - Keep unit/frame/time conventions explicit.
@@ -25,12 +25,12 @@ Deliverables:
 - Canonical conventions:
   - units: meters, kilograms, seconds, radians
   - explicit reference frames per state
-- Engine-agnostic SPI boundaries in `FXyz-Core`
+- Engine-agnostic SPI boundaries in `DynamisFX-Core`
 - Architecture document and non-goals
 
 Exit criteria:
 
-- No Orekit/ODE4j-specific classes in `FXyz-Core` public API.
+- No Orekit/ODE4j-specific classes in `DynamisFX-Core` public API.
 
 ### Phase 1 - Core SPI + Sync Skeleton
 
@@ -54,14 +54,14 @@ Status: `IN PROGRESS`
 
 Deliverables:
 
-- New module: `FXyz-Physics-ODE4j`
+- New module: `DynamisFX-Physics-ODE4j`
 - Rigid bodies (box/sphere/capsule), gravity, core constraints
 - Adapter implementation through SPI only
 - Samples + regression tests
 
 Exit criteria:
 
-- Stable rigid-body sample with no direct ODE4j leakage into `FXyz-Core`.
+- Stable rigid-body sample with no direct ODE4j leakage into `DynamisFX-Core`.
 
 Current kickoff progress:
 
@@ -101,7 +101,7 @@ Status: `IN PROGRESS`
 
 Deliverables:
 
-- New module: `FXyz-Physics-Orekit`
+- New module: `DynamisFX-Physics-Orekit`
 - Propagator-backed body states and frame-aware transforms
 - Time-scale controls and orbital sample
 
@@ -187,7 +187,7 @@ Current kickoff progress:
   - interpolation alpha
   - extrapolation seconds
 - Coordinator can update render metadata from accumulator output after stepping.
-- Hybrid sample wiring added in `FXyz-Samples`:
+- Hybrid sample wiring added in `DynamisFX-Samples`:
   - `org.fxyz3d.samples.utilities.HybridPhysicsCoordinatorSample`
 
 ### Phase 5 - Hardening
@@ -225,7 +225,7 @@ Implemented in this slice:
 
 - Commit-level consolidation of Phase 0/1/2 foundations.
 - Phase 3 kickoff module and orbital scaffold:
-  - `FXyz-Physics-Orekit`
+  - `DynamisFX-Physics-Orekit`
   - backend/world shell + tests + sample wiring.
 
 Next slice:

@@ -161,7 +161,7 @@ Note: For more information on JavaFX, check this [link](https://openjfx.io).
 
 To use the FXSampler and visualize all the samples and the different options available, run:
 
-    mvn -pl FXyz-Samples -DskipTests javafx:run
+    mvn -pl DynamisFX-Samples -DskipTests javafx:run
     
 There is a hidden side popup menu at the left, from where different samples can be selected. From the right panels different options can be applied dynamically to the 3D shape.
 
@@ -171,11 +171,11 @@ There is a hidden side popup menu at the left, from where different samples can 
 
 You can create a custom image for your platform running:
 
-    mvn -pl FXyz-Samples -DskipTests clean package javafx:jlink
+    mvn -pl DynamisFX-Samples -DskipTests clean package javafx:jlink
 
 And you can run it with Java 17 on your platform:
 
-    FXyz-Samples/build/FXyz/bin/FXyzSamples
+    DynamisFX-Samples/build/FXyz/bin/FXyzSamples
 
 Special Thanks go to ControlsFX for providing the FXSampler framework.
 http://fxexperience.com/controlsfx/
@@ -183,7 +183,7 @@ Our Sampler uses a heavily modified version, due to being 3D.
 
 ## Code Quality Improvements (2026)
 
-A comprehensive code quality review was performed on FXyz-Core, addressing 20 issues across critical, high, medium, and low priorities. All 534 unit tests pass.
+A comprehensive code quality review was performed on DynamisFX-Core, addressing 20 issues across critical, high, medium, and low priorities. All 534 unit tests pass.
 
 ### Critical Fixes
 
@@ -238,11 +238,11 @@ These changes include API modifications that may require updates to existing cod
 
 ## Import/Export Formats
 
-DynamisFX supports multiple 3D file formats through the FXyz-Importers module.
+DynamisFX supports multiple 3D file formats through the DynamisFX-Importers module.
 
 ## Generic Picking/Selection (2026)
 
-FXyz-Core now includes a reusable picking/selection system for 3D scene nodes.
+DynamisFX-Core now includes a reusable picking/selection system for 3D scene nodes.
 
 ### Core API
 
@@ -289,7 +289,7 @@ viewer.getSelectionModel().getSelectedNodes().addListener((change) -> {
 
 ## Collision Foundations (2026)
 
-FXyz-Core now includes a baseline collision package: `org.fxyz3d.collision`.
+DynamisFX-Core now includes a baseline collision package: `org.fxyz3d.collision`.
 
 ### Core API
 
@@ -362,7 +362,7 @@ Both are broad-phase only and should be followed by narrow-phase validation.
 
 ### Collision Debug Sample
 
-`FXyz-Samples` includes `org.fxyz3d.samples.utilities.CollisionDebugWorld` for collision diagnostics:
+`DynamisFX-Samples` includes `org.fxyz3d.samples.utilities.CollisionDebugWorld` for collision diagnostics:
 
 - Animated moving boxes in a bounded world
 - Live wireframe AABB overlays
@@ -385,7 +385,7 @@ Both are broad-phase only and should be followed by narrow-phase validation.
 
 For local performance comparisons of broad-phase strategies, use:
 
-- `FXyz-Core/src/test/java/org/fxyz3d/collision/BroadPhase3DBenchmark.java`
+- `DynamisFX-Core/src/test/java/org/fxyz3d/collision/BroadPhase3DBenchmark.java`
 
 This compares `SpatialHash3D` and `SweepAndPrune3D` on generated AABB scenes.
 
@@ -393,7 +393,7 @@ See `docs/Core_Collision.md` for details.
 
 ## Physics Backend SPI (2026)
 
-FXyz-Core now includes an engine-agnostic physics scaffolding layer intended to make Orekit and ODE4j integration modular:
+DynamisFX-Core now includes an engine-agnostic physics scaffolding layer intended to make Orekit and ODE4j integration modular:
 
 - `org.fxyz3d.physics.api`
   - `PhysicsBackendFactory`
@@ -427,7 +427,7 @@ Roadmap and phased execution details:
 
 Phase 2 kickoff is now in progress with a new module shell:
 
-- `FXyz-Physics-ODE4j`
+- `DynamisFX-Physics-ODE4j`
   - `Ode4jBackendFactory`
   - `Ode4jBackend`
   - `Ode4jWorld`
@@ -442,7 +442,7 @@ Current status:
 
 Phase 3 kickoff is also now in progress with:
 
-- `FXyz-Physics-Orekit`
+- `DynamisFX-Physics-Orekit`
   - `OrekitBackendFactory`
   - `OrekitBackend`
   - `OrekitWorld`
@@ -457,7 +457,7 @@ Current Orekit module scope/shortcomings:
 - Constraint creation is intentionally unsupported in this backend.
 - Additional high-fidelity force models and deeper Orekit propagator abstractions are still planned next in Phase 3.
 
-Phase 4 kickoff is now in progress in `FXyz-Core` with a hybrid coordinator layer:
+Phase 4 kickoff is now in progress in `DynamisFX-Core` with a hybrid coordinator layer:
 
 - `org.fxyz3d.physics.hybrid.HybridPhysicsCoordinator`
 - ownership model via `HybridOwnership`

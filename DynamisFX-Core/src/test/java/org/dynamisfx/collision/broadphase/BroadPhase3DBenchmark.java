@@ -10,7 +10,7 @@ import java.util.function.Function;
  * Lightweight benchmark harness for broad-phase candidate generation.
  *
  * Run:
- * {@code mvn -pl FXyz-Core -DskipTests test-compile}
+ * {@code mvn -pl DynamisFX-Core -DskipTests test-compile}
  * then execute this class from your IDE or test classpath runner.
  */
 public final class BroadPhase3DBenchmark {

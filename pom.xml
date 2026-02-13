@@ -11,13 +11,13 @@
     <description>DynamisFX 3D JavaFX library (Maven build)</description>
 
     <modules>
-        <module>FXyz-Core</module>
-        <module>FXyz-Physics-ODE4j</module>
-        <module>FXyz-Physics-Orekit</module>
-        <module>FXyz-Importers</module>
-        <module>FXyz-Client</module>
-        <module>FXyz-Compat</module>
-        <module>FXyz-Samples</module>
+        <module>DynamisFX-Core</module>
+        <module>DynamisFX-Physics-ODE4j</module>
+        <module>DynamisFX-Physics-Orekit</module>
+        <module>DynamisFX-Importers</module>
+        <module>DynamisFX-Client</module>
+        <module>DynamisFX-Compat</module>
+        <module>DynamisFX-Samples</module>
     </modules>
 
     <properties>

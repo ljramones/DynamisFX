@@ -2,7 +2,7 @@
 
 ## Scope
 
-`FXyz-Core` now includes a baseline collision package: `org.fxyz3d.collision`.
+`DynamisFX-Core` now includes a baseline collision package: `org.fxyz3d.collision`.
 
 Implemented primitives and utilities:
 
@@ -128,7 +128,7 @@ Use `CollisionPipeline` to filter broad-phase candidate pairs with narrow-phase 
   - per-item bounds
   - per-contact points with event type and manifold metadata
 - This is intended for debug overlays, instrumentation, and diagnostics tools.
-- `FXyz-Samples` includes `org.fxyz3d.samples.utilities.CollisionDebugWorld`:
+- `DynamisFX-Samples` includes `org.fxyz3d.samples.utilities.CollisionDebugWorld`:
   - moving-body collision world demo
   - wireframe AABB overlays
   - contact-point markers (`ENTER`/`STAY`/`EXIT`)
@@ -138,7 +138,7 @@ Use `CollisionPipeline` to filter broad-phase candidate pairs with narrow-phase 
 
 ## Benchmark Harness
 
-`FXyz-Core/src/test/java/org/fxyz3d/collision/BroadPhase3DBenchmark.java` provides a simple runtime comparison for:
+`DynamisFX-Core/src/test/java/org/fxyz3d/collision/BroadPhase3DBenchmark.java` provides a simple runtime comparison for:
 
 - `SpatialHash3D`
 - `SweepAndPrune3D`
@@ -159,7 +159,7 @@ It is intended for local tuning/regression checks (not as a strict microbenchmar
 
 ## Testing
 
-Coverage added in `FXyz-Core`:
+Coverage added in `DynamisFX-Core`:
 
 - `AabbAndSphereValidationTest`
 - `Intersection3DTest`
