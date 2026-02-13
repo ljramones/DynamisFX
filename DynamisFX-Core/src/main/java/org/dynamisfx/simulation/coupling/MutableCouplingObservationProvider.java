@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class MutableCouplingObservationProvider implements CouplingObservationProvider {
 
     private final Map<String, Double> distanceByObjectId = new ConcurrentHashMap<>();
+    private final Map<String, Double> interceptSecondsByObjectId = new ConcurrentHashMap<>();
     private final Map<String, Boolean> contactByObjectId = new ConcurrentHashMap<>();
 
     @Override
@@ -26,6 +27,21 @@ public final class MutableCouplingObservationProvider implements CouplingObserva
         }
         Double distance = distanceByObjectId.get(objectId);
         return distance == null ? OptionalDouble.empty() : OptionalDouble.of(distance);
+    }
+
+    @Override
+    public OptionalDouble predictedInterceptSeconds(String objectId, Collection<PhysicsZone> zones) {
+        if (objectId == null || objectId.isBlank()) {
+            throw new IllegalArgumentException("objectId must not be blank");
+        }
+        if (zones == null) {
+            throw new IllegalArgumentException("zones must not be null");
+        }
+        if (zones.isEmpty()) {
+            return OptionalDouble.empty();
+        }
+        Double intercept = interceptSecondsByObjectId.get(objectId);
+        return intercept == null ? OptionalDouble.empty() : OptionalDouble.of(intercept);
     }
 
     @Override
@@ -58,5 +74,22 @@ public final class MutableCouplingObservationProvider implements CouplingObserva
             throw new IllegalArgumentException("objectId must not be blank");
         }
         contactByObjectId.put(objectId, activeContact);
+    }
+
+    public void setPredictedInterceptSeconds(String objectId, double predictedInterceptSeconds) {
+        if (objectId == null || objectId.isBlank()) {
+            throw new IllegalArgumentException("objectId must not be blank");
+        }
+        if (!Double.isFinite(predictedInterceptSeconds) || predictedInterceptSeconds < 0.0) {
+            throw new IllegalArgumentException("predictedInterceptSeconds must be finite and >= 0");
+        }
+        interceptSecondsByObjectId.put(objectId, predictedInterceptSeconds);
+    }
+
+    public void clearPredictedIntercept(String objectId) {
+        if (objectId == null || objectId.isBlank()) {
+            throw new IllegalArgumentException("objectId must not be blank");
+        }
+        interceptSecondsByObjectId.remove(objectId);
     }
 }

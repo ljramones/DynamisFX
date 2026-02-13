@@ -73,6 +73,25 @@ class ThresholdTransitionPolicyTest {
     }
 
     @Test
+    void promotesOnPredictedInterceptWindow() {
+        ThresholdTransitionPolicy policy = new ThresholdTransitionPolicy(
+                new StubObservationProvider(500.0, false),
+                100.0,
+                150.0,
+                0.0,
+                2.0);
+
+        CouplingTransitionDecision next = policy.evaluate(context(
+                ObjectSimulationMode.ORBITAL_ONLY,
+                10.0,
+                -1.0,
+                1.5));
+
+        assertEquals(ObjectSimulationMode.PHYSICS_ACTIVE, next.nextMode().orElseThrow());
+        assertEquals(CouplingDecisionReason.PROMOTE_PREDICTED_INTERCEPT, next.reason());
+    }
+
+    @Test
     void validatesConstructorArguments() {
         CouplingObservationProvider provider = new StubObservationProvider(10.0, false);
         assertThrows(NullPointerException.class, () -> new ThresholdTransitionPolicy(null, 1, 2, 0));
@@ -87,6 +106,11 @@ class ThresholdTransitionPolicyTest {
             @Override
             public OptionalDouble distanceMetersToNearestZone(String objectId, Collection<PhysicsZone> zones) {
                 return OptionalDouble.of(Double.NaN);
+            }
+
+            @Override
+            public OptionalDouble predictedInterceptSeconds(String objectId, Collection<PhysicsZone> zones) {
+                return OptionalDouble.empty();
             }
 
             @Override
@@ -108,11 +132,22 @@ class ThresholdTransitionPolicyTest {
             ObjectSimulationMode mode,
             double simulationTimeSeconds,
             double lastTransitionTimeSeconds) {
+        return context(mode, simulationTimeSeconds, lastTransitionTimeSeconds, null);
+    }
+
+    private static CouplingTransitionContext context(
+            ObjectSimulationMode mode,
+            double simulationTimeSeconds,
+            double lastTransitionTimeSeconds,
+            Double predictedInterceptSeconds) {
         return new CouplingTransitionContext(
                 "lander-1",
                 mode,
                 simulationTimeSeconds,
                 lastTransitionTimeSeconds,
+                predictedInterceptSeconds == null
+                        ? OptionalDouble.empty()
+                        : OptionalDouble.of(predictedInterceptSeconds),
                 List.of());
     }
 
@@ -120,6 +155,11 @@ class ThresholdTransitionPolicyTest {
         @Override
         public OptionalDouble distanceMetersToNearestZone(String objectId, Collection<PhysicsZone> zones) {
             return OptionalDouble.of(distanceMeters);
+        }
+
+        @Override
+        public OptionalDouble predictedInterceptSeconds(String objectId, Collection<PhysicsZone> zones) {
+            return OptionalDouble.empty();
         }
 
         @Override

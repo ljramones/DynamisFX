@@ -50,6 +50,7 @@ module org.dynamisfx.core {
     exports org.dynamisfx.scene.selection;
     exports org.dynamisfx.simulation;
     exports org.dynamisfx.simulation.coupling;
+    exports org.dynamisfx.simulation.entity;
     exports org.dynamisfx.simulation.orbital;
     exports org.dynamisfx.simulation.rigid;
     exports org.dynamisfx.shapes;

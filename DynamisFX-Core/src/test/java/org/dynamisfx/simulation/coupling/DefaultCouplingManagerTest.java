@@ -56,6 +56,8 @@ class DefaultCouplingManagerTest {
         DefaultCouplingManager manager = new DefaultCouplingManager();
 
         assertThrows(NullPointerException.class, () -> new DefaultCouplingManager(null));
+        assertThrows(NullPointerException.class, () -> new DefaultCouplingManager(
+                context -> CouplingTransitionDecision.noChange(CouplingDecisionReason.NO_CHANGE), null));
         assertThrows(NullPointerException.class, () -> manager.registerZone(null));
         assertThrows(NullPointerException.class, () -> manager.removeZone(null));
         assertThrows(IllegalArgumentException.class, () -> manager.modeFor(" "));

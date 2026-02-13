@@ -6,6 +6,7 @@ package org.dynamisfx.simulation.coupling;
 public enum CouplingDecisionReason {
     NO_CHANGE,
     PROMOTE_DISTANCE_THRESHOLD,
+    PROMOTE_PREDICTED_INTERCEPT,
     DEMOTE_DISTANCE_THRESHOLD,
     BLOCKED_BY_CONTACT,
     BLOCKED_BY_COOLDOWN,

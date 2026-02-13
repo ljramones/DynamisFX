@@ -7,6 +7,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.Set;
 import org.dynamisfx.simulation.ObjectSimulationMode;
 
@@ -20,13 +21,23 @@ public final class DefaultCouplingManager implements CouplingManager {
     private final Map<String, Double> lastTransitionTimeByObjectId = new LinkedHashMap<>();
     private final Set<CouplingTelemetryListener> telemetryListeners = new LinkedHashSet<>();
     private final CouplingTransitionPolicy transitionPolicy;
+    private final CouplingObservationProvider observationProvider;
 
     public DefaultCouplingManager() {
-        this(context -> CouplingTransitionDecision.noChange(CouplingDecisionReason.NO_CHANGE));
+        this(
+                context -> CouplingTransitionDecision.noChange(CouplingDecisionReason.NO_CHANGE),
+                new NoopObservationProvider());
     }
 
     public DefaultCouplingManager(CouplingTransitionPolicy transitionPolicy) {
+        this(transitionPolicy, new NoopObservationProvider());
+    }
+
+    public DefaultCouplingManager(
+            CouplingTransitionPolicy transitionPolicy,
+            CouplingObservationProvider observationProvider) {
         this.transitionPolicy = Objects.requireNonNull(transitionPolicy, "transitionPolicy must not be null");
+        this.observationProvider = Objects.requireNonNull(observationProvider, "observationProvider must not be null");
     }
 
     @Override
@@ -98,6 +109,7 @@ public final class DefaultCouplingManager implements CouplingManager {
                     currentMode,
                     simulationTimeSeconds,
                     lastTransitionTime,
+                    observationProvider.predictedInterceptSeconds(objectId, zoneSnapshot),
                     zoneSnapshot);
             CouplingTransitionDecision decision = transitionPolicy.evaluate(context);
             ObjectSimulationMode resolvedMode = decision.nextMode().orElse(currentMode);
@@ -122,6 +134,23 @@ public final class DefaultCouplingManager implements CouplingManager {
         }
         for (CouplingTelemetryListener listener : telemetryListeners) {
             listener.onTelemetry(event);
+        }
+    }
+
+    private static final class NoopObservationProvider implements CouplingObservationProvider {
+        @Override
+        public OptionalDouble distanceMetersToNearestZone(String objectId, Collection<PhysicsZone> zones) {
+            return OptionalDouble.empty();
+        }
+
+        @Override
+        public OptionalDouble predictedInterceptSeconds(String objectId, Collection<PhysicsZone> zones) {
+            return OptionalDouble.empty();
+        }
+
+        @Override
+        public boolean hasActiveContact(String objectId) {
+            return false;
         }
     }
 }

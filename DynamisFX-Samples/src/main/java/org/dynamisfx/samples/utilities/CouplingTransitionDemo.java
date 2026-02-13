@@ -1,7 +1,6 @@
 package org.dynamisfx.samples.utilities;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.logging.Logger;
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Insets;
@@ -25,6 +24,9 @@ import org.dynamisfx.simulation.coupling.MutableCouplingObservationProvider;
 import org.dynamisfx.simulation.coupling.Phase1CouplingBootstrap;
 import org.dynamisfx.simulation.coupling.PhysicsZone;
 import org.dynamisfx.simulation.coupling.ZoneId;
+import org.dynamisfx.simulation.entity.SimulationEntityRegistry;
+import org.dynamisfx.simulation.orbital.OrbitalState;
+import org.dynamisfx.simulation.orbital.ScriptedOrbitalDynamicsEngine;
 import org.dynamisfx.simulation.rigid.RigidBodyWorld;
 import org.dynamisfx.samples.shapes.ShapeBaseSample;
 
@@ -41,7 +43,8 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private final DefaultCouplingManager couplingManager =
             Phase1CouplingBootstrap.createDefaultManager(observationProvider);
     private final SimulationClock clock = new SimulationClock(0.0, 1.0, false);
-    private final Map<String, Node> entityRegistry = new LinkedHashMap<>();
+    private final SimulationEntityRegistry<Node> entityRegistry = new SimulationEntityRegistry<>();
+    private final ScriptedOrbitalDynamicsEngine orbitalEngine = new ScriptedOrbitalDynamicsEngine();
 
     private final Box lander = new Box(80, 40, 80);
     private AnimationTimer timer;
@@ -66,7 +69,13 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         lander.setMaterial(materialForMode(lastMode));
         worldGroup.getChildren().add(lander);
         model = worldGroup;
-        entityRegistry.put(OBJECT_ID, lander);
+        entityRegistry.register(OBJECT_ID, lander);
+        orbitalEngine.setTrajectory(OBJECT_ID, (time, frame) -> new OrbitalState(
+                new PhysicsVector3(scenarioOrbitalDistance(time), 0.0, 0.0),
+                PhysicsVector3.ZERO,
+                org.dynamisfx.physics.model.PhysicsQuaternion.IDENTITY,
+                frame,
+                time));
 
         couplingManager.registerZone(new DemoZone());
         couplingManager.setMode(OBJECT_ID, lastMode);
@@ -133,30 +142,31 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
 
     private void applyScenario(double simulationTimeSeconds) {
         if (autoScenarioCheck != null && autoScenarioCheck.isSelected()) {
-            double distance;
-            boolean contact;
-            if (simulationTimeSeconds < 3.0) {
-                distance = 2000.0;
-                contact = false;
-            } else if (simulationTimeSeconds < 6.0) {
-                distance = 300.0;
-                contact = false;
-            } else {
-                distance = 2000.0;
-                contact = simulationTimeSeconds < 7.5;
-            }
-            setObservationState(distance, contact);
+            OrbitalState state = orbitalEngine.propagateTo(
+                    List.of(OBJECT_ID),
+                    simulationTimeSeconds,
+                    ReferenceFrame.WORLD).get(OBJECT_ID);
+            boolean contact = simulationTimeSeconds >= 6.0 && simulationTimeSeconds < 7.5;
+            Double predictedIntercept = simulationTimeSeconds < 3.0
+                    ? 3.0 - simulationTimeSeconds
+                    : null;
+            setObservationState(Math.abs(state.position().x()), contact, predictedIntercept);
             return;
         }
 
         if (distanceSlider != null && contactCheck != null) {
-            setObservationState(distanceSlider.getValue(), contactCheck.isSelected());
+            setObservationState(distanceSlider.getValue(), contactCheck.isSelected(), null);
         }
     }
 
-    private void setObservationState(double distanceMeters, boolean activeContact) {
+    private void setObservationState(double distanceMeters, boolean activeContact, Double predictedInterceptSeconds) {
         observationProvider.setDistanceMeters(OBJECT_ID, distanceMeters);
         observationProvider.setActiveContact(OBJECT_ID, activeContact);
+        if (predictedInterceptSeconds == null) {
+            observationProvider.clearPredictedIntercept(OBJECT_ID);
+        } else {
+            observationProvider.setPredictedInterceptSeconds(OBJECT_ID, predictedInterceptSeconds);
+        }
 
         if (distanceSlider != null && Math.abs(distanceSlider.getValue() - distanceMeters) > 1e-6) {
             distanceSlider.setValue(distanceMeters);
@@ -182,10 +192,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         if (modeLabel != null) {
             modeLabel.setText("Mode: " + currentMode);
         }
-        Node entity = entityRegistry.get(OBJECT_ID);
-        if (entity != null) {
-            entity.setTranslateX(modeOffset(currentMode));
-        }
+        entityRegistry.get(OBJECT_ID).ifPresent(entity -> entity.setTranslateX(modeOffset(currentMode)));
         if (telemetryLabel != null && latestTelemetry != null) {
             telemetryLabel.setText(formatTelemetry(latestTelemetry));
         }
@@ -232,6 +239,21 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 event.fromMode(),
                 event.toMode(),
                 reason);
+    }
+
+    private static double scenarioOrbitalDistance(double simulationTimeSeconds) {
+        if (simulationTimeSeconds < 3.0) {
+            return 2000.0;
+        }
+        if (simulationTimeSeconds < 6.0) {
+            double alpha = (simulationTimeSeconds - 3.0) / 3.0;
+            return 2000.0 + (300.0 - 2000.0) * alpha;
+        }
+        if (simulationTimeSeconds < 8.0) {
+            double alpha = (simulationTimeSeconds - 6.0) / 2.0;
+            return 300.0 + (2200.0 - 300.0) * alpha;
+        }
+        return 2200.0;
     }
 
     private static final class DemoZone implements PhysicsZone {

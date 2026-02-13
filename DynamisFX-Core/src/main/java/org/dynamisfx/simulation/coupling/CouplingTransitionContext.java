@@ -1,6 +1,7 @@
 package org.dynamisfx.simulation.coupling;
 
 import java.util.Collection;
+import java.util.OptionalDouble;
 import java.util.Objects;
 import org.dynamisfx.simulation.ObjectSimulationMode;
 
@@ -12,6 +13,7 @@ public record CouplingTransitionContext(
         ObjectSimulationMode currentMode,
         double simulationTimeSeconds,
         double lastTransitionTimeSeconds,
+        OptionalDouble predictedInterceptSeconds,
         Collection<PhysicsZone> zones) {
 
     public CouplingTransitionContext {
@@ -19,6 +21,7 @@ public record CouplingTransitionContext(
             throw new IllegalArgumentException("objectId must not be blank");
         }
         Objects.requireNonNull(currentMode, "currentMode must not be null");
+        Objects.requireNonNull(predictedInterceptSeconds, "predictedInterceptSeconds must not be null");
         Objects.requireNonNull(zones, "zones must not be null");
         if (!Double.isFinite(simulationTimeSeconds)) {
             throw new IllegalArgumentException("simulationTimeSeconds must be finite");

@@ -15,6 +15,11 @@ public interface CouplingObservationProvider {
     OptionalDouble distanceMetersToNearestZone(String objectId, Collection<PhysicsZone> zones);
 
     /**
+     * Optional time-to-intercept estimate in seconds for pre-contact promotion.
+     */
+    OptionalDouble predictedInterceptSeconds(String objectId, Collection<PhysicsZone> zones);
+
+    /**
      * Indicates whether the object currently has active physical contact/constraints.
      */
     boolean hasActiveContact(String objectId);

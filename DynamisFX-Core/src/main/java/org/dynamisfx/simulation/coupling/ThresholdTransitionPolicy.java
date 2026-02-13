@@ -13,12 +13,27 @@ public final class ThresholdTransitionPolicy implements CouplingTransitionPolicy
     private final double promoteDistanceMeters;
     private final double demoteDistanceMeters;
     private final double cooldownSeconds;
+    private final double preemptInterceptWindowSeconds;
 
     public ThresholdTransitionPolicy(
             CouplingObservationProvider observationProvider,
             double promoteDistanceMeters,
             double demoteDistanceMeters,
             double cooldownSeconds) {
+        this(
+                observationProvider,
+                promoteDistanceMeters,
+                demoteDistanceMeters,
+                cooldownSeconds,
+                0.0);
+    }
+
+    public ThresholdTransitionPolicy(
+            CouplingObservationProvider observationProvider,
+            double promoteDistanceMeters,
+            double demoteDistanceMeters,
+            double cooldownSeconds,
+            double preemptInterceptWindowSeconds) {
         this.observationProvider = Objects.requireNonNull(observationProvider, "observationProvider must not be null");
         if (!Double.isFinite(promoteDistanceMeters) || promoteDistanceMeters <= 0.0) {
             throw new IllegalArgumentException("promoteDistanceMeters must be finite and > 0");
@@ -32,9 +47,13 @@ public final class ThresholdTransitionPolicy implements CouplingTransitionPolicy
         if (!Double.isFinite(cooldownSeconds) || cooldownSeconds < 0.0) {
             throw new IllegalArgumentException("cooldownSeconds must be finite and >= 0");
         }
+        if (!Double.isFinite(preemptInterceptWindowSeconds) || preemptInterceptWindowSeconds < 0.0) {
+            throw new IllegalArgumentException("preemptInterceptWindowSeconds must be finite and >= 0");
+        }
         this.promoteDistanceMeters = promoteDistanceMeters;
         this.demoteDistanceMeters = demoteDistanceMeters;
         this.cooldownSeconds = cooldownSeconds;
+        this.preemptInterceptWindowSeconds = preemptInterceptWindowSeconds;
     }
 
     @Override
@@ -55,6 +74,14 @@ public final class ThresholdTransitionPolicy implements CouplingTransitionPolicy
 
         ObjectSimulationMode mode = context.currentMode();
         if (mode == ObjectSimulationMode.ORBITAL_ONLY) {
+            if (preemptInterceptWindowSeconds > 0.0) {
+                double predictedIntercept = context.predictedInterceptSeconds().orElse(Double.POSITIVE_INFINITY);
+                if (predictedIntercept <= preemptInterceptWindowSeconds) {
+                    return CouplingTransitionDecision.transitionTo(
+                            ObjectSimulationMode.PHYSICS_ACTIVE,
+                            CouplingDecisionReason.PROMOTE_PREDICTED_INTERCEPT);
+                }
+            }
             if (distance <= promoteDistanceMeters) {
                 return CouplingTransitionDecision.transitionTo(
                         ObjectSimulationMode.PHYSICS_ACTIVE,
