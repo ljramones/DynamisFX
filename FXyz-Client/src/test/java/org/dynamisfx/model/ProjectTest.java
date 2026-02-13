@@ -11,7 +11,7 @@ class ProjectTest {
 
     @Test
     void addSampleIgnoresBadPackagePathAndAcceptsValidPath() {
-        Project project = new Project("FXyz-Samples", "org.dynamisfx.samples");
+        Project project = new Project("DynamisFX-Samples", "org.dynamisfx.samples");
         DynamisFXSample sample = new StubSample();
 
         project.addSample("org", sample);

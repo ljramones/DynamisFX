@@ -66,7 +66,7 @@ class ObjExporterTest {
         assertTrue(file.length() > 0);
 
         String content = Files.readString(file.toPath());
-        assertTrue(content.contains("# FXyz3D OBJ Export"));
+        assertTrue(content.contains("# DynamisFX OBJ Export"));
         assertTrue(content.contains("o test_mesh"));
         assertTrue(content.contains("mtllib test.mtl"));
         assertTrue(content.contains("v "));
