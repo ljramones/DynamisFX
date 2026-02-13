@@ -79,7 +79,7 @@ public abstract class FXyzSampleBase extends Application implements FXyzSample {
     /** {@inheritDoc}
      * @return  */
     @Override public String getProjectName() {
-        return "FXyz-Samples";
+        return "DynamisFX-Samples";
     }
     
     /**

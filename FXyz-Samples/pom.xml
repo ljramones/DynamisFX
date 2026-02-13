@@ -4,14 +4,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.fxyz3d</groupId>
-        <artifactId>fxyz3d-parent</artifactId>
+        <groupId>org.dynamisfx</groupId>
+        <artifactId>dynamisfx-parent</artifactId>
         <version>0.6.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>fxyz3d-samples</artifactId>
-    <name>FXyz-Samples</name>
+    <artifactId>dynamisfx-samples</artifactId>
+    <name>DynamisFX-Samples</name>
 
     <properties>
         <samples.main.class>org.fxyz3d.samples.Launcher</samples.main.class>
@@ -19,24 +19,24 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.fxyz3d</groupId>
-            <artifactId>fxyz3d</artifactId>
+            <groupId>org.dynamisfx</groupId>
+            <artifactId>dynamisfx-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.fxyz3d</groupId>
-            <artifactId>fxyz3d-importers</artifactId>
+            <groupId>org.dynamisfx</groupId>
+            <artifactId>dynamisfx-importers</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.fxyz3d</groupId>
-            <artifactId>fxyz3d-client</artifactId>
+            <groupId>org.dynamisfx</groupId>
+            <artifactId>dynamisfx-client</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.fxyz3d</groupId>
-            <artifactId>fxyz3d-physics-ode4j</artifactId>
+            <groupId>org.dynamisfx</groupId>
+            <artifactId>dynamisfx-physics-ode4j</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.fxyz3d</groupId>
-            <artifactId>fxyz3d-physics-orekit</artifactId>
+            <groupId>org.dynamisfx</groupId>
+            <artifactId>dynamisfx-physics-orekit</artifactId>
         </dependency>
 
         <dependency>
@@ -145,7 +145,7 @@
                     <archive>
                         <manifestEntries>
                             <Main-Class>${samples.main.class}</Main-Class>
-                            <Implementation-Title>FXyz-Samples</Implementation-Title>
+                            <Implementation-Title>DynamisFX-Samples</Implementation-Title>
                         </manifestEntries>
                     </archive>
                 </configuration>

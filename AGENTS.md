@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-This is a multi-module Maven build for the FXyz3D JavaFX library. Main modules live at the repo root:
+This is a multi-module Maven build for the DynamisFX JavaFX library. Main modules live at the repo root:
 - `FXyz-Core/` provides core 3D shapes, utilities, and geometry types under `src/main/java/org/fxyz3d`.
 - `FXyz-Importers/` contains model importers and related tests.
 - `FXyz-Client/` provides the sampler client UI.
@@ -11,7 +11,7 @@ Parent and module build configuration is defined in `pom.xml` files. Images and 
 ## Build, Test, and Development Commands
 Use JDK 17 with Maven:
 - `mvn clean install`: build all modules.
-- `mvn -pl FXyz-Samples -DskipTests javafx:run`: launch the FXyz sampler.
+- `mvn -pl FXyz-Samples -DskipTests javafx:run`: launch the DynamisFX sampler.
 - `mvn -pl FXyz-Samples -DskipTests clean package javafx:jlink`: produce a custom runtime image.
 
 ## Coding Style & Naming Conventions

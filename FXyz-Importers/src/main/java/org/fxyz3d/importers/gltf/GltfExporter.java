@@ -298,7 +298,7 @@ public class GltfExporter implements Exporter {
         sb.append("{\n");
         sb.append("  \"asset\": {\n");
         sb.append("    \"version\": \"2.0\",\n");
-        sb.append("    \"generator\": \"FXyz3D\"\n");
+        sb.append("    \"generator\": \"DynamisFX\"\n");
         sb.append("  },\n");
 
         // Scene

@@ -3,12 +3,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.fxyz3d</groupId>
-    <artifactId>fxyz3d-parent</artifactId>
+    <groupId>org.dynamisfx</groupId>
+    <artifactId>dynamisfx-parent</artifactId>
     <version>0.6.1-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>FXyzLibs</name>
-    <description>F(X)yz 3D JavaFX library (Maven build)</description>
+    <name>DynamisFX</name>
+    <description>DynamisFX 3D JavaFX library (Maven build)</description>
 
     <modules>
         <module>FXyz-Core</module>
@@ -149,28 +149,28 @@
             </dependency>
 
             <dependency>
-                <groupId>org.fxyz3d</groupId>
-                <artifactId>fxyz3d</artifactId>
+                <groupId>org.dynamisfx</groupId>
+                <artifactId>dynamisfx-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.fxyz3d</groupId>
-                <artifactId>fxyz3d-importers</artifactId>
+                <groupId>org.dynamisfx</groupId>
+                <artifactId>dynamisfx-importers</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.fxyz3d</groupId>
-                <artifactId>fxyz3d-physics-ode4j</artifactId>
+                <groupId>org.dynamisfx</groupId>
+                <artifactId>dynamisfx-physics-ode4j</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.fxyz3d</groupId>
-                <artifactId>fxyz3d-physics-orekit</artifactId>
+                <groupId>org.dynamisfx</groupId>
+                <artifactId>dynamisfx-physics-orekit</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.fxyz3d</groupId>
-                <artifactId>fxyz3d-client</artifactId>
+                <groupId>org.dynamisfx</groupId>
+                <artifactId>dynamisfx-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

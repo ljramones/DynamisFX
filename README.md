@@ -1,14 +1,14 @@
-FXyz3D
+DynamisFX
 ======
 
- - FXyz3D Core: 
- [ ![Download](http://img.shields.io/maven-central/v/org.fxyz3d/fxyz3d.svg?color=%234DC71F) ](https://search.maven.org/search?q=g:org.fxyz3d%20AND%20a:fxyz3d)
+ - DynamisFX Core: 
+ [ ![Download](http://img.shields.io/maven-central/v/org.dynamisfx/dynamisfx-core.svg?color=%234DC71F) ](https://search.maven.org/search?q=g:org.dynamisfx%20AND%20a:dynamisfx-core)
 
- - FXyz3D Client: 
-[ ![Download](https://img.shields.io/maven-central/v/org.fxyz3d/fxyz3d-client.svg?color=%234DC71F) ](https://search.maven.org/search?q=g:org.fxyz3d%20AND%20a:fxyz3d-client)
+ - DynamisFX Client: 
+[ ![Download](https://img.shields.io/maven-central/v/org.dynamisfx/dynamisfx-client.svg?color=%234DC71F) ](https://search.maven.org/search?q=g:org.dynamisfx%20AND%20a:dynamisfx-client)
 
- - FXyz3D Importers: 
-[ ![Download](https://img.shields.io/maven-central/v/org.fxyz3d/fxyz3d-importers.svg?color=%234DC71F) ](https://search.maven.org/search?q=g:org.fxyz3d%20AND%20a:fxyz3d-importers)
+ - DynamisFX Importers: 
+[ ![Download](https://img.shields.io/maven-central/v/org.dynamisfx/dynamisfx-importers.svg?color=%234DC71F) ](https://search.maven.org/search?q=g:org.dynamisfx%20AND%20a:dynamisfx-importers)
 
 A JavaFX 3D Visualization and Component Library
 
@@ -25,9 +25,9 @@ To deploy it to your local Maven repository, type:
 
 	mvn clean install
 
-## Use of FXyz3D Core
+## Use of DynamisFX Core
 
-With FXyz3D there are many different 3D custom shapes. The following sample makes use of `SpringMesh` to create 
+With DynamisFX there are many different 3D custom shapes. The following sample makes use of `SpringMesh` to create 
 a 3D mesh of a spring.
 
 ### Sample
@@ -40,7 +40,7 @@ If you have a Maven project, edit the `pom.xml` file and add:
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.fxyz3d</groupId>
+    <groupId>org.dynamisfx</groupId>
     <artifactId>sample</artifactId>
     <version>1.0-SNAPSHOT</version>
     <properties>
@@ -55,8 +55,8 @@ If you have a Maven project, edit the `pom.xml` file and add:
             <version>21</version>
         </dependency>
         <dependency>
-            <groupId>org.fxyz3d</groupId>
-            <artifactId>fxyz3d</artifactId>
+            <groupId>org.dynamisfx</groupId>
+            <artifactId>dynamisfx-core</artifactId>
             <version>0.6.0</version>
         </dependency>
     </dependencies>
@@ -125,7 +125,7 @@ public class Sample extends Application {
         scene.setCamera(camera);
 
         primaryStage.setScene(scene);
-        primaryStage.setTitle("FXyz3D Sample");
+        primaryStage.setTitle("DynamisFX Sample");
         primaryStage.show();
     }
 }
@@ -226,7 +226,7 @@ These changes include API modifications that may require updates to existing cod
 
 ## Import/Export Formats
 
-FXyz3D supports multiple 3D file formats through the FXyz-Importers module.
+DynamisFX supports multiple 3D file formats through the FXyz-Importers module.
 
 ## Generic Picking/Selection (2026)
 

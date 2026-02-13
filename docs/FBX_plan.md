@@ -1,4 +1,4 @@
-# FBX Import Plan (FXyz Nouveau)
+# FBX Import Plan (DynamisFX)
 
 ## Goal
 Deliver a practical FBX importer with minimal risk by reusing the same strategy as USD:
@@ -31,10 +31,10 @@ Out of scope for v1:
 
 ## Recommended Architecture
 Primary path:
-- FBX -> converter -> glTF -> FXyz importer
+- FBX -> converter -> glTF -> DynamisFX importer
 
 Preferred canonical path after initial prototype:
-- FBX -> converter -> glTF -> TUF -> FXyz importer
+- FBX -> converter -> glTF -> TUF -> DynamisFX importer
 
 Reason:
 - Fast time-to-value now.
@@ -129,7 +129,7 @@ Only if converter path is insufficient:
 
 ### M3: Pipeline unified
 - glTF -> TUF packer implemented
-- FXyz importer reads TUF path for FBX
+- DynamisFX importer reads TUF path for FBX
 
 ### M4: User-ready
 - Packaging strategy finalized

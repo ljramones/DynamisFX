@@ -64,7 +64,7 @@ public class SampleScanner {
     
     private static final Map<String, FXyzSamplerProject> packageToProjectMap = new HashMap<>();
     static {
-        LOG.fine("Initialising FXyz-Sampler sample scanner...");
+        LOG.fine("Initialising DynamisFX Sampler sample scanner...");
         // find all projects on the classpath that expose a FXyzSamplerProject
         // service. These guys are our friends....
         ServiceLoader<FXyzSamplerProject> loader = ServiceLoader.load(FXyzSamplerProject.class);

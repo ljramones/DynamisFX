@@ -2,7 +2,7 @@
 
 ## Goal
 
-Add a second high-performance general-physics backend with minimal risk and maximum reuse of the existing FXyz physics architecture.
+Add a second high-performance general-physics backend with minimal risk and maximum reuse of the existing DynamisFX physics architecture.
 
 Recommended order:
 

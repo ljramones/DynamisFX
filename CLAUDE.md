@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-FXyz3D is a JavaFX 3D visualization and component library. It provides custom 3D shapes, geometry utilities, model importers, and a sampler application for demos.
+DynamisFX is a JavaFX 3D visualization and component library. It provides custom 3D shapes, geometry utilities, model importers, and a sampler application for demos.
 
 ## Build Commands
 

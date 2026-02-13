@@ -4,14 +4,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.fxyz3d</groupId>
-        <artifactId>fxyz3d-parent</artifactId>
+        <groupId>org.dynamisfx</groupId>
+        <artifactId>dynamisfx-parent</artifactId>
         <version>0.6.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>fxyz3d</artifactId>
-    <name>FXyz-Core</name>
+    <artifactId>dynamisfx-core</artifactId>
+    <name>DynamisFX-Core</name>
 
     <dependencies>
         <dependency>

@@ -1,4 +1,4 @@
-# FXyz Core Collision Foundations
+# DynamisFX Core Collision Foundations
 
 ## Scope
 

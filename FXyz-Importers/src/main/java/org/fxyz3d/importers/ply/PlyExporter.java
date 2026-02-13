@@ -145,7 +145,7 @@ public class PlyExporter implements Exporter {
             writer.newLine();
             writer.write("format ascii 1.0");
             writer.newLine();
-            writer.write("comment Created by FXyz3D");
+            writer.write("comment Created by DynamisFX");
             writer.newLine();
             writer.write("comment " + meshName);
             writer.newLine();
@@ -209,7 +209,7 @@ public class PlyExporter implements Exporter {
             StringBuilder header = new StringBuilder();
             header.append("ply\n");
             header.append("format binary_little_endian 1.0\n");
-            header.append("comment Created by FXyz3D\n");
+            header.append("comment Created by DynamisFX\n");
             header.append("comment ").append(meshName).append("\n");
             header.append("element vertex ").append(numVertices).append("\n");
             header.append("property float x\n");

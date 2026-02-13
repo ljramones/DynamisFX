@@ -116,7 +116,7 @@ public class ObjExporter implements Exporter {
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             // Header
-            writer.write("# FXyz3D OBJ Export");
+            writer.write("# DynamisFX OBJ Export");
             writer.newLine();
             writer.write("# https://github.com/FXyz/FXyz");
             writer.newLine();
@@ -188,7 +188,7 @@ public class ObjExporter implements Exporter {
 
     private void exportMtlFile(File file, String mtlName) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-            writer.write("# FXyz3D MTL Export");
+            writer.write("# DynamisFX MTL Export");
             writer.newLine();
             writer.newLine();
 

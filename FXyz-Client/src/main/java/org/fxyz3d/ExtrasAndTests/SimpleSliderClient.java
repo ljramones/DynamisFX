@@ -156,7 +156,7 @@ public class SimpleSliderClient extends AbstractPopoutClient {
     protected final void buildProjectTree(String searchText) {
         // rebuild the whole tree (it isn't memory intensive - we only scan
         // classes once at startup)
-        root = new TreeItem<>(new EmptySample("FXyz-Sampler"));
+        root = new TreeItem<>(new EmptySample("DynamisFX Sampler"));
         root.setExpanded(true);
 
         for (String projectName : projectsMap.keySet()) {

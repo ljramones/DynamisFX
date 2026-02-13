@@ -64,7 +64,7 @@ public class OffExporter implements Exporter {
             // Write header
             writer.write("OFF");
             writer.newLine();
-            writer.write("# Created by FXyz3D");
+            writer.write("# Created by DynamisFX");
             writer.newLine();
             writer.write("# " + meshName);
             writer.newLine();

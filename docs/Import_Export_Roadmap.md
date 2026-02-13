@@ -1,7 +1,7 @@
-# FXyz 3D Import/Export Roadmap
+# DynamisFX 3D Import/Export Roadmap
 
 ## Purpose
-Define a practical capability roadmap for FXyz 3D import/export, focused on real user workflows and incremental delivery.
+Define a practical capability roadmap for DynamisFX 3D import/export, focused on real user workflows and incremental delivery.
 
 ## Current Baseline (Today)
 - Strong static mesh import coverage: OBJ, STL, glTF, PLY, OFF, 3DS, DAE, X3D, VRML, DXF, Maya, FXML, 3MF.

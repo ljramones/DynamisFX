@@ -288,7 +288,7 @@ public class FXyzClient extends Application {
     protected final void buildProjectTree(String searchText) {
         // rebuild the whole tree (it isn't memory intensive - we only scan
         // classes once at startup)
-        root = new TreeItem<>(new EmptySample("FXyz-Samples"));
+        root = new TreeItem<>(new EmptySample("DynamisFX-Samples"));
         root.setExpanded(true);
 
         for (String projectName : projectsMap.keySet()) {
@@ -372,7 +372,7 @@ public class FXyzClient extends Application {
 
     private WelcomePage getDefaultWelcomePage() {
         // line 1
-        Label welcomeLabel1 = new Label("Welcome to FXyz-Sampler!");
+        Label welcomeLabel1 = new Label("Welcome to DynamisFX Sampler!");
         welcomeLabel1.setStyle("-fx-font-size: 2em; -fx-padding: 0 0 0 5;");
 
         // line 2

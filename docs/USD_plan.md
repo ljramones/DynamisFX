@@ -1,7 +1,7 @@
-# USD Import Plan (FXyz Nouveau)
+# USD Import Plan (DynamisFX)
 
 ## Goal
-Add robust USD import to FXyz with a low-risk, staged approach:
+Add robust USD import to DynamisFX with a low-risk, staged approach:
 1. Deliver value quickly with a Python-based extractor.
 2. Lock a stable, versioned extraction contract.
 3. Replace Python with a native C++ shim (OpenUSD-backed) through a C ABI.
@@ -27,7 +27,7 @@ Explicitly out of scope for MVP:
 - Full composition semantics
 
 ## Architecture
-USD files are not parsed directly by FXyz at first. Instead:
+USD files are not parsed directly by DynamisFX at first. Instead:
 1. Extract USD -> `TUF v1` (TRIPSUSD binary format).
 2. Java importer reads `TUF v1`.
 3. Java adapter maps payload to FXyz/JavaFX mesh types.
@@ -52,7 +52,7 @@ Requirements:
 Temporary Java integration:
 - Run extractor CLI from importer process
 - Read generated `TUF v1`
-- Build FXyz meshes
+- Build DynamisFX meshes
 
 ### Phase 2: Contract Stabilization
 Create a USD test corpus:
@@ -148,7 +148,7 @@ Maintain a defensive Java reader that:
 - Uses `FileChannel` + `MappedByteBuffer`
 - Parses and validates all core chunks
 - Produces neutral `MeshPayload`
-- Adapts payload to FXyz mesh creation in a dedicated adapter method
+- Adapts payload to DynamisFX mesh creation in a dedicated adapter method
 
 FXyz adapter expectations:
 - `positions` -> `TriangleMesh` points
@@ -164,13 +164,13 @@ FXyz adapter expectations:
 
 ## Definition of Done (MVP)
 - Python extractor emits valid `TUF v1` for corpus MVP files
-- Java reader consumes `TUF v1` and builds FXyz meshes
+- Java reader consumes `TUF v1` and builds DynamisFX meshes
 - Snapshot validations stable in CI
 - Clear unsupported-feature behavior/messages
 
 ## Planned Next Steps
 1. Add `tools/usd/usd_extract.py` with the agreed CLI/options.
 2. Add `docs/formats/TUF_v1.md` as normative binary spec.
-3. Add Java module/package for `TUF` reader + FXyz adapter.
+3. Add Java module/package for `TUF` reader + DynamisFX adapter.
 4. Add corpus + expected snapshots under test resources.
 5. Gate merge on corpus regression checks.

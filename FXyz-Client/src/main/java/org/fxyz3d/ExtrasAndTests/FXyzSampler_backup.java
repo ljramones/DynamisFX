@@ -212,7 +212,7 @@ public class FXyzSampler_backup extends Application {
         stage.setWidth(screenBounds.getWidth() * 0.75);
         stage.setHeight(screenBounds.getHeight() * .75);
         //stage.setMinWidth(grid.getPrefWidth());
-        stage.setTitle("FXyz-Sampler!");
+        stage.setTitle("DynamisFX Sampler!");
         stage.show();
         
         rootContainer.getStyleClass().addAll("client-root");
@@ -233,7 +233,7 @@ public class FXyzSampler_backup extends Application {
     protected void buildSampleTree(String searchText) {
         // rebuild the whole tree (it isn't memory intensive - we only scan
         // classes once at startup)
-        root = new TreeItem<>(new EmptySample("FXyz-Sampler"));
+        root = new TreeItem<>(new EmptySample("DynamisFX Sampler"));
         root.setExpanded(true);
 
         for (String projectName : projectsMap.keySet()) {

@@ -51,7 +51,7 @@ public class FXyzProject implements FXyzSamplerProject {
          
     @Override
     public final String getProjectName() {
-        return "FXyz-Samples";
+        return "DynamisFX-Samples";
     }
 
     @Override
@@ -92,7 +92,7 @@ public class FXyzProject implements FXyzSamplerProject {
         lCon.setMaxWidth(label.getPrefWidth());
         vBox.getChildren().addAll(pane, lCon);
         vBox.setAlignment(Pos.CENTER);
-        WelcomePage wPage = new WelcomePage("Welcome to FXyzLib!", vBox);
+        WelcomePage wPage = new WelcomePage("Welcome to DynamisFX!", vBox);
         
         pane.sceneProperty().addListener(l->{
             if(pane.getScene()!= null){

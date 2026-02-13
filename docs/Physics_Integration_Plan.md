@@ -2,7 +2,7 @@
 
 ## Goal
 
-Integrate two physics domains without coupling FXyz core to a specific engine:
+Integrate two physics domains without coupling DynamisFX core to a specific engine:
 
 - `ODE4j` for local/general rigid-body simulation.
 - `Orekit` for astrodynamics/orbital propagation.
@@ -81,7 +81,7 @@ Current kickoff progress:
 - Minimal constraint mapping added:
   - SPI: `PhysicsConstraintDefinition` (`FIXED`, `BALL`)
   - ODE4j world create/remove/list support
-- FXyz sample integration added:
+- DynamisFX sample integration added:
   - `org.fxyz3d.samples.utilities.Ode4jPhysicsSyncSample`
 - World-level tuning parameters added in core model config and wired to ODE4j:
   - solver iterations
