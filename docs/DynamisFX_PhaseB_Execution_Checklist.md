@@ -14,6 +14,7 @@ Execute the breaking rename from `org.fxyz3d` to `org.dynamisfx` with controlled
 - Completed: Step 2 (JPMS module references updated to `org.dynamisfx.*`)
 - Completed: Step 3 (public `FXyz*` type rename with compatibility shims)
 - Completed: Step 4 (resource/service wiring + legacy string cleanup)
+- Completed: Step 5 (migration documentation)
 
 ## Pre-flight
 
