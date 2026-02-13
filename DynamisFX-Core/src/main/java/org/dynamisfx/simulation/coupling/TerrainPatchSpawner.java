@@ -21,7 +21,7 @@ public final class TerrainPatchSpawner {
     private TerrainPatchSpawner() {
     }
 
-    public static List<PhysicsBodyHandle> spawnTiles(
+    public static TerrainPatchSpawnResult spawnTiles(
             RigidBodyWorld world,
             ReferenceFrame frame,
             TerrainPatchSpec spec,
@@ -65,6 +65,7 @@ public final class TerrainPatchSpawner {
                 created.add(world.createBody(tile));
             }
         }
-        return List.copyOf(created);
+        List<PhysicsBodyHandle> handles = List.copyOf(created);
+        return new TerrainPatchSpawnResult(handles.size(), handles);
     }
 }

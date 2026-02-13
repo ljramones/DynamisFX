@@ -165,6 +165,22 @@ class ThresholdTransitionPolicyTest {
     }
 
     @Test
+    void doesNotDemoteOnAltitudeThresholdWithActiveContact() {
+        ThresholdTransitionPolicy policy = new ThresholdTransitionPolicy(
+                new StubObservationProvider(10.0, true, 120.0),
+                100.0,
+                150.0,
+                0.0,
+                0.0,
+                50.0,
+                80.0);
+
+        CouplingTransitionDecision next = policy.evaluate(context(ObjectSimulationMode.PHYSICS_ACTIVE, 2.0, -1.0));
+        assertTrue(next.nextMode().isEmpty());
+        assertEquals(CouplingDecisionReason.BLOCKED_BY_CONTACT, next.reason());
+    }
+
+    @Test
     void remainsStableBetweenPromoteAndDemoteAltitudeThresholds() {
         ThresholdTransitionPolicy policy = new ThresholdTransitionPolicy(
                 new StubObservationProvider(10.0, false, 350.0),

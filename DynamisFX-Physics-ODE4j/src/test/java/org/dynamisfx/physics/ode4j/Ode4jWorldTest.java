@@ -6,10 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
+import org.dynamisfx.physics.api.OverlapSphereQuery;
 import org.dynamisfx.physics.api.PhysicsBodyHandle;
 import org.dynamisfx.physics.api.PhysicsConstraintDefinition;
 import org.dynamisfx.physics.api.PhysicsConstraintHandle;
 import org.dynamisfx.physics.api.PhysicsConstraintType;
+import org.dynamisfx.physics.api.RaycastRequest;
 import org.dynamisfx.physics.model.BoxShape;
 import org.dynamisfx.physics.model.PhysicsBodyDefinition;
 import org.dynamisfx.physics.model.PhysicsBodyState;
@@ -18,6 +21,7 @@ import org.dynamisfx.physics.model.PhysicsRuntimeTuning;
 import org.dynamisfx.physics.model.PhysicsVector3;
 import org.dynamisfx.physics.model.PhysicsWorldConfiguration;
 import org.dynamisfx.physics.model.ReferenceFrame;
+import org.dynamisfx.physics.model.SphereShape;
 import org.junit.jupiter.api.Test;
 
 class Ode4jWorldTest {
@@ -175,5 +179,80 @@ class Ode4jWorldTest {
                 1.0 / 120.0));
         world.setGravity(new PhysicsVector3(0.0, 0.0, -9.81));
         assertEquals(-9.81, world.gravity().z(), 1e-9);
+    }
+
+    @Test
+    void queryCapabilityRaycastReturnsNearestHit() {
+        Ode4jWorld world = new Ode4jWorld(new PhysicsWorldConfiguration(
+                ReferenceFrame.WORLD,
+                PhysicsVector3.ZERO,
+                1.0 / 120.0));
+        PhysicsBodyHandle near = world.createBody(new PhysicsBodyDefinition(
+                PhysicsBodyType.STATIC,
+                0.0,
+                new SphereShape(0.5),
+                new PhysicsBodyState(
+                        new PhysicsVector3(2.0, 0.0, 0.0),
+                        org.dynamisfx.physics.model.PhysicsQuaternion.IDENTITY,
+                        PhysicsVector3.ZERO,
+                        PhysicsVector3.ZERO,
+                        ReferenceFrame.WORLD,
+                        0.0)));
+        world.createBody(new PhysicsBodyDefinition(
+                PhysicsBodyType.STATIC,
+                0.0,
+                new SphereShape(0.5),
+                new PhysicsBodyState(
+                        new PhysicsVector3(4.0, 0.0, 0.0),
+                        org.dynamisfx.physics.model.PhysicsQuaternion.IDENTITY,
+                        PhysicsVector3.ZERO,
+                        PhysicsVector3.ZERO,
+                        ReferenceFrame.WORLD,
+                        0.0)));
+
+        var hit = world.queryCapability().orElseThrow().raycast(new RaycastRequest(
+                PhysicsVector3.ZERO,
+                new PhysicsVector3(1.0, 0.0, 0.0),
+                10.0)).orElseThrow();
+        assertEquals(near, hit.bodyHandle());
+        assertTrue(hit.distanceMeters() > 1.0 && hit.distanceMeters() < 2.0);
+    }
+
+    @Test
+    void queryCapabilityOverlapSphereIsDeterministicallyOrdered() {
+        Ode4jWorld world = new Ode4jWorld(new PhysicsWorldConfiguration(
+                ReferenceFrame.WORLD,
+                PhysicsVector3.ZERO,
+                1.0 / 120.0));
+        PhysicsBodyHandle a = world.createBody(new PhysicsBodyDefinition(
+                PhysicsBodyType.STATIC,
+                0.0,
+                new SphereShape(0.5),
+                new PhysicsBodyState(
+                        new PhysicsVector3(1.0, 0.0, 0.0),
+                        org.dynamisfx.physics.model.PhysicsQuaternion.IDENTITY,
+                        PhysicsVector3.ZERO,
+                        PhysicsVector3.ZERO,
+                        ReferenceFrame.WORLD,
+                        0.0)));
+        PhysicsBodyHandle b = world.createBody(new PhysicsBodyDefinition(
+                PhysicsBodyType.STATIC,
+                0.0,
+                new SphereShape(0.5),
+                new PhysicsBodyState(
+                        new PhysicsVector3(1.0, 1.0, 0.0),
+                        org.dynamisfx.physics.model.PhysicsQuaternion.IDENTITY,
+                        PhysicsVector3.ZERO,
+                        PhysicsVector3.ZERO,
+                        ReferenceFrame.WORLD,
+                        0.0)));
+
+        List<PhysicsBodyHandle> hits = world.queryCapability().orElseThrow().overlapSphere(new OverlapSphereQuery(
+                new PhysicsVector3(1.0, 0.5, 0.0),
+                1.0,
+                8));
+        assertEquals(2, hits.size());
+        assertEquals(Math.min(a.value(), b.value()), hits.get(0).value());
+        assertEquals(Math.max(a.value(), b.value()), hits.get(1).value());
     }
 }

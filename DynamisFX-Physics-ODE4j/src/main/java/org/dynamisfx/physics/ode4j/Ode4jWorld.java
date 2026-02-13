@@ -1,12 +1,20 @@
 package org.dynamisfx.physics.ode4j;
 
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import org.dynamisfx.physics.api.OverlapSphereQuery;
 import org.dynamisfx.physics.api.PhysicsBodyHandle;
 import org.dynamisfx.physics.api.PhysicsCapabilities;
+import org.dynamisfx.physics.api.QueryCapability;
+import org.dynamisfx.physics.api.RaycastHit;
+import org.dynamisfx.physics.api.RaycastRequest;
 import org.dynamisfx.physics.api.PhysicsConstraintDefinition;
 import org.dynamisfx.physics.api.PhysicsConstraintHandle;
 import org.dynamisfx.physics.api.PhysicsConstraintType;
@@ -52,7 +60,7 @@ public final class Ode4jWorld implements PhysicsWorld {
             false,
             true,
             false,
-            false);
+            true);
     private static final int MAX_CONTACTS = 8;
 
     private final PhysicsWorldConfiguration configuration;
@@ -61,6 +69,7 @@ public final class Ode4jWorld implements PhysicsWorld {
     private final DWorld world;
     private final DSpace space;
     private final DJointGroup contactGroup;
+    private final QueryCapability queryCapability = new Ode4jQueryCapability();
     private PhysicsRuntimeTuning runtimeTuning;
     private long nextHandleValue;
     private long nextConstraintHandleValue;
@@ -243,6 +252,12 @@ public final class Ode4jWorld implements PhysicsWorld {
         }
         this.gravity = gravity;
         world.setGravity(gravity.x(), gravity.y(), gravity.z());
+    }
+
+    @Override
+    public Optional<QueryCapability> queryCapability() {
+        ensureOpen();
+        return Optional.of(queryCapability);
     }
 
     @Override
@@ -460,5 +475,238 @@ public final class Ode4jWorld implements PhysicsWorld {
     }
 
     private record ConstraintRecord(PhysicsConstraintDefinition definition, DJoint joint) {
+    }
+
+    private final class Ode4jQueryCapability implements QueryCapability {
+
+        @Override
+        public Optional<RaycastHit> raycast(RaycastRequest request) {
+            Objects.requireNonNull(request, "request must not be null");
+            PhysicsVector3 direction = normalize(request.direction());
+            List<RaycastHit> hits = bodies.entrySet().stream()
+                    .map(entry -> raycastAgainstBody(entry.getKey(), entry.getValue(), request.origin(), direction, request.maxDistanceMeters()))
+                    .filter(Objects::nonNull)
+                    .sorted(Comparator
+                            .comparingDouble(RaycastHit::distanceMeters)
+                            .thenComparingLong(hit -> hit.bodyHandle().value()))
+                    .toList();
+            return hits.isEmpty() ? Optional.empty() : Optional.of(hits.get(0));
+        }
+
+        @Override
+        public List<PhysicsBodyHandle> overlapSphere(OverlapSphereQuery query) {
+            Objects.requireNonNull(query, "query must not be null");
+            Set<PhysicsBodyHandle> hits = new LinkedHashSet<>();
+            for (Map.Entry<PhysicsBodyHandle, BodyRecord> entry : bodies.entrySet()) {
+                if (intersectsSphere(entry.getValue(), query.center(), query.radiusMeters())) {
+                    hits.add(entry.getKey());
+                    if (hits.size() >= query.maxResults()) {
+                        break;
+                    }
+                }
+            }
+            return hits.stream()
+                    .sorted(Comparator.comparingLong(PhysicsBodyHandle::value))
+                    .toList();
+        }
+    }
+
+    private static RaycastHit raycastAgainstBody(
+            PhysicsBodyHandle handle,
+            BodyRecord record,
+            PhysicsVector3 origin,
+            PhysicsVector3 directionNormalized,
+            double maxDistanceMeters) {
+        PhysicsBodyState state = record.state();
+        PhysicsVector3 localOrigin = toLocal(state, origin);
+        PhysicsVector3 localDirection = rotate(inverseNormalized(state.orientation()), directionNormalized);
+
+        PhysicsShape shape = record.definition().shape();
+        Double localDistance = null;
+        PhysicsVector3 localNormal = null;
+        if (shape instanceof SphereShape sphere) {
+            RaycastResult result = intersectSphereLocal(localOrigin, localDirection, sphere.radius());
+            if (result != null) {
+                localDistance = result.distance();
+                localNormal = result.normal();
+            }
+        } else if (shape instanceof BoxShape box) {
+            RaycastResult result = intersectBoxLocal(localOrigin, localDirection, box.width(), box.height(), box.depth());
+            if (result != null) {
+                localDistance = result.distance();
+                localNormal = result.normal();
+            }
+        } else if (shape instanceof CapsuleShape capsule) {
+            // Conservative approximation to keep query semantics stable.
+            double approxRadius = capsule.radius() + (capsule.length() * 0.5);
+            RaycastResult result = intersectSphereLocal(localOrigin, localDirection, approxRadius);
+            if (result != null) {
+                localDistance = result.distance();
+                localNormal = result.normal();
+            }
+        }
+        if (localDistance == null || localDistance < 0.0 || localDistance > maxDistanceMeters) {
+            return null;
+        }
+        PhysicsVector3 worldPoint = add(origin, scale(directionNormalized, localDistance));
+        PhysicsVector3 worldNormal = rotate(normalized(state.orientation()), localNormal);
+        return new RaycastHit(handle, worldPoint, worldNormal, localDistance);
+    }
+
+    private static boolean intersectsSphere(BodyRecord record, PhysicsVector3 center, double radius) {
+        PhysicsBodyState state = record.state();
+        PhysicsVector3 localCenter = toLocal(state, center);
+        PhysicsShape shape = record.definition().shape();
+        if (shape instanceof SphereShape sphere) {
+            return normSquared(localCenter) <= square(radius + sphere.radius());
+        }
+        if (shape instanceof BoxShape box) {
+            double hx = box.width() * 0.5;
+            double hy = box.height() * 0.5;
+            double hz = box.depth() * 0.5;
+            double dx = Math.max(Math.abs(localCenter.x()) - hx, 0.0);
+            double dy = Math.max(Math.abs(localCenter.y()) - hy, 0.0);
+            double dz = Math.max(Math.abs(localCenter.z()) - hz, 0.0);
+            return (dx * dx + dy * dy + dz * dz) <= square(radius);
+        }
+        if (shape instanceof CapsuleShape capsule) {
+            double approxRadius = capsule.radius() + (capsule.length() * 0.5);
+            return normSquared(localCenter) <= square(radius + approxRadius);
+        }
+        return false;
+    }
+
+    private static RaycastResult intersectSphereLocal(PhysicsVector3 origin, PhysicsVector3 dir, double radius) {
+        double b = 2.0 * dot(origin, dir);
+        double c = dot(origin, origin) - (radius * radius);
+        double disc = (b * b) - (4.0 * c);
+        if (disc < 0.0) {
+            return null;
+        }
+        double sqrtDisc = Math.sqrt(disc);
+        double t0 = (-b - sqrtDisc) * 0.5;
+        double t1 = (-b + sqrtDisc) * 0.5;
+        double t = t0 >= 0.0 ? t0 : t1;
+        if (t < 0.0) {
+            return null;
+        }
+        PhysicsVector3 hit = add(origin, scale(dir, t));
+        return new RaycastResult(t, normalize(hit));
+    }
+
+    private static RaycastResult intersectBoxLocal(PhysicsVector3 origin, PhysicsVector3 dir, double w, double h, double d) {
+        double[] min = {-w * 0.5, -h * 0.5, -d * 0.5};
+        double[] max = {w * 0.5, h * 0.5, d * 0.5};
+        double[] o = {origin.x(), origin.y(), origin.z()};
+        double[] v = {dir.x(), dir.y(), dir.z()};
+        double tMin = 0.0;
+        double tMax = Double.POSITIVE_INFINITY;
+        int hitAxis = -1;
+        double hitSign = 1.0;
+        for (int axis = 0; axis < 3; axis++) {
+            double vd = v[axis];
+            if (Math.abs(vd) < 1e-12) {
+                if (o[axis] < min[axis] || o[axis] > max[axis]) {
+                    return null;
+                }
+                continue;
+            }
+            double t1 = (min[axis] - o[axis]) / vd;
+            double t2 = (max[axis] - o[axis]) / vd;
+            double near = Math.min(t1, t2);
+            double far = Math.max(t1, t2);
+            if (near > tMin) {
+                tMin = near;
+                hitAxis = axis;
+                hitSign = t1 > t2 ? 1.0 : -1.0;
+            }
+            tMax = Math.min(tMax, far);
+            if (tMin > tMax) {
+                return null;
+            }
+        }
+        if (tMin < 0.0) {
+            return null;
+        }
+        PhysicsVector3 normal = switch (hitAxis) {
+            case 0 -> new PhysicsVector3(hitSign, 0.0, 0.0);
+            case 1 -> new PhysicsVector3(0.0, hitSign, 0.0);
+            case 2 -> new PhysicsVector3(0.0, 0.0, hitSign);
+            default -> PhysicsVector3.ZERO;
+        };
+        return new RaycastResult(tMin, normal);
+    }
+
+    private static PhysicsVector3 toLocal(PhysicsBodyState state, PhysicsVector3 worldPoint) {
+        PhysicsVector3 delta = subtract(worldPoint, state.position());
+        return rotate(inverseNormalized(state.orientation()), delta);
+    }
+
+    private static PhysicsVector3 normalize(PhysicsVector3 v) {
+        double n2 = normSquared(v);
+        if (!(n2 > 0.0)) {
+            return PhysicsVector3.ZERO;
+        }
+        double inv = 1.0 / Math.sqrt(n2);
+        return new PhysicsVector3(v.x() * inv, v.y() * inv, v.z() * inv);
+    }
+
+    private static PhysicsQuaternion normalized(PhysicsQuaternion q) {
+        double n2 = (q.x() * q.x()) + (q.y() * q.y()) + (q.z() * q.z()) + (q.w() * q.w());
+        if (!(n2 > 0.0)) {
+            return PhysicsQuaternion.IDENTITY;
+        }
+        double inv = 1.0 / Math.sqrt(n2);
+        return new PhysicsQuaternion(q.x() * inv, q.y() * inv, q.z() * inv, q.w() * inv);
+    }
+
+    private static PhysicsQuaternion inverseNormalized(PhysicsQuaternion q) {
+        PhysicsQuaternion n = normalized(q);
+        return new PhysicsQuaternion(-n.x(), -n.y(), -n.z(), n.w());
+    }
+
+    private static PhysicsVector3 rotate(PhysicsQuaternion rotation, PhysicsVector3 vector) {
+        PhysicsQuaternion v = new PhysicsQuaternion(vector.x(), vector.y(), vector.z(), 0.0);
+        PhysicsQuaternion result = multiply(multiply(rotation, v), conjugate(rotation));
+        return new PhysicsVector3(result.x(), result.y(), result.z());
+    }
+
+    private static PhysicsQuaternion multiply(PhysicsQuaternion a, PhysicsQuaternion b) {
+        return new PhysicsQuaternion(
+                (a.w() * b.x()) + (a.x() * b.w()) + (a.y() * b.z()) - (a.z() * b.y()),
+                (a.w() * b.y()) - (a.x() * b.z()) + (a.y() * b.w()) + (a.z() * b.x()),
+                (a.w() * b.z()) + (a.x() * b.y()) - (a.y() * b.x()) + (a.z() * b.w()),
+                (a.w() * b.w()) - (a.x() * b.x()) - (a.y() * b.y()) - (a.z() * b.z()));
+    }
+
+    private static PhysicsQuaternion conjugate(PhysicsQuaternion q) {
+        return new PhysicsQuaternion(-q.x(), -q.y(), -q.z(), q.w());
+    }
+
+    private static PhysicsVector3 add(PhysicsVector3 a, PhysicsVector3 b) {
+        return new PhysicsVector3(a.x() + b.x(), a.y() + b.y(), a.z() + b.z());
+    }
+
+    private static PhysicsVector3 subtract(PhysicsVector3 a, PhysicsVector3 b) {
+        return new PhysicsVector3(a.x() - b.x(), a.y() - b.y(), a.z() - b.z());
+    }
+
+    private static PhysicsVector3 scale(PhysicsVector3 v, double s) {
+        return new PhysicsVector3(v.x() * s, v.y() * s, v.z() * s);
+    }
+
+    private static double dot(PhysicsVector3 a, PhysicsVector3 b) {
+        return (a.x() * b.x()) + (a.y() * b.y()) + (a.z() * b.z());
+    }
+
+    private static double normSquared(PhysicsVector3 v) {
+        return dot(v, v);
+    }
+
+    private static double square(double v) {
+        return v * v;
+    }
+
+    private record RaycastResult(double distance, PhysicsVector3 normal) {
     }
 }

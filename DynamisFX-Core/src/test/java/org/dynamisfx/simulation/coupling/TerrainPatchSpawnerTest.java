@@ -24,14 +24,15 @@ class TerrainPatchSpawnerTest {
     void spawnsExpectedTileGrid() {
         CapturingWorld world = new CapturingWorld();
         TerrainPatchSpec spec = new TerrainPatchSpec(10.0, 10.0, 2.0);
-        List<PhysicsBodyHandle> handles = TerrainPatchSpawner.spawnTiles(
+        TerrainPatchSpawnResult result = TerrainPatchSpawner.spawnTiles(
                 world,
                 ReferenceFrame.WORLD,
                 spec,
                 (x, y) -> x + y,
                 1.5);
 
-        assertEquals(4, handles.size());
+        assertEquals(4, result.tileCount());
+        List<PhysicsBodyHandle> handles = result.tileHandles();
         assertEquals(4, world.created.size());
         PhysicsBodyState first = world.created.get(0).initialState();
         assertEquals(-5.0, first.position().x(), 1e-9);

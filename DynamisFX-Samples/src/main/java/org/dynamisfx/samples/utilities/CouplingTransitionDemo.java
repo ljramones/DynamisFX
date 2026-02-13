@@ -43,6 +43,7 @@ import org.dynamisfx.simulation.coupling.CouplingTelemetryEvent;
 import org.dynamisfx.simulation.coupling.CouplingTransitionApplier;
 import org.dynamisfx.simulation.coupling.DeterministicZoneSelector;
 import org.dynamisfx.simulation.coupling.DockingConstraintController;
+import org.dynamisfx.simulation.coupling.DockingConstraintEvent;
 import org.dynamisfx.simulation.coupling.DefaultCouplingManager;
 import org.dynamisfx.simulation.coupling.MutablePhysicsZone;
 import org.dynamisfx.simulation.coupling.MutableCouplingObservationProvider;
@@ -52,6 +53,7 @@ import org.dynamisfx.simulation.coupling.SimulationStateReconcilerFactory;
 import org.dynamisfx.simulation.coupling.StateHandoffDiagnostics;
 import org.dynamisfx.simulation.coupling.StateHandoffSnapshot;
 import org.dynamisfx.simulation.coupling.TerrainPatchSpawner;
+import org.dynamisfx.simulation.coupling.TerrainPatchSpawnResult;
 import org.dynamisfx.simulation.coupling.TerrainPatchSpec;
 import org.dynamisfx.simulation.coupling.ThresholdTransitionPolicy;
 import org.dynamisfx.simulation.coupling.ZoneGravityProjection;
@@ -106,7 +108,10 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private final SimulationStateBuffers stateBuffers = new SimulationStateBuffers();
     private final ZoneBodyRegistry zoneBodyRegistry = new ZoneBodyRegistry();
     private final ScriptedOrbitalDynamicsEngine orbitalEngine = new ScriptedOrbitalDynamicsEngine();
-    private final DockingConstraintController dockingController = new DockingConstraintController(zoneBodyRegistry);
+    private final List<String> interactionEvents = new ArrayList<>();
+    private final DockingConstraintController dockingController = new DockingConstraintController(
+            zoneBodyRegistry,
+            this::onDockingEvent);
     private CouplingTransitionApplier transitionApplier;
     private CouplingStateReconciler stateReconciler;
     private SimulationOrchestrator orchestrator;
@@ -131,6 +136,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private Label distanceLabel;
     private Label telemetryLabel;
     private Label dockingLabel;
+    private Label interactionLabel;
     private Label handoffDirectionLabel;
     private Label handoffZoneLabel;
     private Label handoffGlobalLabel;
@@ -145,6 +151,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private boolean handoffDiagnosticsEnabled = PREFS.getBoolean(PREF_HANDOFF_DIAGNOSTICS, true);
     private boolean freezeHandoffSelection = PREFS.getBoolean(PREF_FREEZE_SELECTION, false);
     private int handoffHistoryLimit = clampHistoryLimit(PREFS.getInt(PREF_HISTORY_LIMIT, DEFAULT_HANDOFF_HISTORY_LIMIT));
+    private int terrainTileCount;
 
     public static void main(String[] args) {
         launch(args);
@@ -198,12 +205,21 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                         ReferenceFrame.WORLD,
                         PhysicsVector3.ZERO,
                         1.0 / 120.0)));
-        TerrainPatchSpawner.spawnTiles(
-                demoZone.world(),
-                ReferenceFrame.WORLD,
-                new TerrainPatchSpec(2_000.0, 200.0, 80.0),
-                (x, y) -> 20.0 * Math.sin(x * 0.002) * Math.cos(y * 0.002),
-                0.0);
+        interactionEvents.add("cap:joints=" + demoZone.world().capabilities().supportsJoints());
+        interactionEvents.add("cap:queries=" + demoZone.world().capabilities().supportsQueries());
+        if (demoZone.world().capabilities().supportsRigidBodies()) {
+            TerrainPatchSpawnResult terrain = TerrainPatchSpawner.spawnTiles(
+                    demoZone.world(),
+                    ReferenceFrame.WORLD,
+                    new TerrainPatchSpec(2_000.0, 200.0, 80.0),
+                    (x, y) -> 20.0 * Math.sin(x * 0.002) * Math.cos(y * 0.002),
+                    0.0);
+            terrainTileCount = terrain.tileCount();
+            interactionEvents.add("terrain: tiles=" + terrain.tileCount());
+        } else {
+            terrainTileCount = 0;
+            interactionEvents.add("terrain: skipped-rigid-unsupported");
+        }
         dockingTargetHandle = demoZone.world().createBody(new PhysicsBodyDefinition(
                 PhysicsBodyType.STATIC,
                 0.0,
@@ -273,6 +289,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         distanceLabel = new Label("Distance: 2000 m");
         telemetryLabel = new Label("Telemetry: waiting");
         dockingLabel = new Label("Docking: unlocked");
+        interactionLabel = new Label("Interactions: pending");
         handoffDirectionLabel = new Label("Handoff: waiting");
         handoffZoneLabel = new Label("Zone: n/a");
         handoffGlobalLabel = new Label("Global: n/a");
@@ -337,6 +354,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 distanceLabel,
                 telemetryLabel,
                 dockingLabel,
+                interactionLabel,
                 new Label("Handoff Debug"),
                 handoffDirectionLabel,
                 handoffZoneLabel,
@@ -489,6 +507,10 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         if (dockingLabel != null) {
             dockingLabel.setText("Docking: " + (dockingLatched ? "latched" : "unlocked"));
         }
+        if (interactionLabel != null) {
+            String latest = interactionEvents.isEmpty() ? "none" : interactionEvents.get(interactionEvents.size() - 1);
+            interactionLabel.setText("Interactions: tiles=" + terrainTileCount + " latest=" + latest);
+        }
         if (demoZone != null && demoZone.world() != null && dockingTargetHandle != null) {
             PhysicsBodyState dockingState = demoZone.world().getBodyState(dockingTargetHandle);
             dockingTarget.setTranslateX(modeOffset(currentMode));
@@ -497,6 +519,17 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
             dockingTarget.setMaterial(new PhongMaterial(dockingLatched ? Color.ORANGERED : Color.LIGHTGREEN));
         }
         updateHandoffDebugLabels();
+    }
+
+    private void onDockingEvent(DockingConstraintEvent event) {
+        interactionEvents.add(String.format(
+                "dock:%s reason=%s dist=%s",
+                event.type(),
+                event.reason(),
+                Double.isFinite(event.distanceMeters()) ? String.format("%.2f", event.distanceMeters()) : "n/a"));
+        if (interactionEvents.size() > 50) {
+            interactionEvents.remove(0);
+        }
     }
 
     private void updateHandoffDebugLabels() {

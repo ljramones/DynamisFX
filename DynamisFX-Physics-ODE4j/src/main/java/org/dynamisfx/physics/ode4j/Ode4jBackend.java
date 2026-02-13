@@ -14,9 +14,9 @@ public final class Ode4jBackend implements PhysicsBackend {
     private static final PhysicsCapabilities CAPABILITIES = new PhysicsCapabilities(
             true,
             false,
+            true,
             false,
-            false,
-            false);
+            true);
 
     @Override
     public String id() {

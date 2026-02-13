@@ -69,6 +69,22 @@ class DockingConstraintControllerTest {
         assertFalse(controller.isLatched("lander-1"));
     }
 
+    @Test
+    void featureGatesWhenJointsUnsupported() {
+        ZoneBodyRegistry registry = new ZoneBodyRegistry();
+        DockingConstraintController controller = new DockingConstraintController(registry);
+        FakeWorld noJointWorld = new FakeWorld(false);
+        PhysicsZone zone = new StubZone(noJointWorld);
+        PhysicsBodyHandle objectHandle = new PhysicsBodyHandle(1);
+        PhysicsBodyHandle targetHandle = new PhysicsBodyHandle(2);
+        noJointWorld.states.put(objectHandle, stateAt(0.0, 0.0, 0.0));
+        noJointWorld.states.put(targetHandle, stateAt(0.0, 0.0, 0.0));
+        registry.bind("lander-1", zone.zoneId(), objectHandle);
+
+        boolean latched = controller.updateLatch(zone, "lander-1", targetHandle, 1.0, 2.0, false);
+        assertFalse(latched);
+    }
+
     private static PhysicsBodyState stateAt(double x, double y, double z) {
         return new PhysicsBodyState(
                 new PhysicsVector3(x, y, z),
@@ -107,10 +123,19 @@ class DockingConstraintControllerTest {
         private long nextConstraint = 1;
         private int createdConstraints;
         private int removedConstraints;
+        private final boolean supportsJoints;
+
+        private FakeWorld() {
+            this(true);
+        }
+
+        private FakeWorld(boolean supportsJoints) {
+            this.supportsJoints = supportsJoints;
+        }
 
         @Override
         public PhysicsCapabilities capabilities() {
-            return new PhysicsCapabilities(true, false, true, false, false);
+            return new PhysicsCapabilities(true, false, supportsJoints, false, false);
         }
 
         @Override

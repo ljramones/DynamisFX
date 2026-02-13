@@ -2,8 +2,8 @@ package org.dynamisfx.simulation.coupling;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import org.dynamisfx.physics.api.PhysicsBodyHandle;
 import org.dynamisfx.physics.api.PhysicsConstraintDefinition;
 import org.dynamisfx.physics.api.PhysicsConstraintHandle;
@@ -19,9 +19,18 @@ public final class DockingConstraintController {
 
     private final ZoneBodyRegistry bodyRegistry;
     private final Map<String, LatchState> latchesByObjectId = new ConcurrentHashMap<>();
+    private final Consumer<DockingConstraintEvent> diagnosticsSink;
 
     public DockingConstraintController(ZoneBodyRegistry bodyRegistry) {
+        this(bodyRegistry, event -> {
+        });
+    }
+
+    public DockingConstraintController(
+            ZoneBodyRegistry bodyRegistry,
+            Consumer<DockingConstraintEvent> diagnosticsSink) {
         this.bodyRegistry = Objects.requireNonNull(bodyRegistry, "bodyRegistry must not be null");
+        this.diagnosticsSink = Objects.requireNonNull(diagnosticsSink, "diagnosticsSink must not be null");
     }
 
     public boolean updateLatch(
@@ -45,6 +54,13 @@ public final class DockingConstraintController {
 
         RigidBodyWorld world = zone.world();
         if (world == null || !world.capabilities().supportsJoints()) {
+            diagnosticsSink.accept(new DockingConstraintEvent(
+                    DockingConstraintEventType.SKIPPED,
+                    objectId,
+                    zone.zoneId(),
+                    "joints-unsupported",
+                    Double.NaN,
+                    null));
             clearLatch(objectId, world);
             return false;
         }
@@ -54,6 +70,13 @@ public final class DockingConstraintController {
                 .map(ZoneBodyRegistry.ZoneBodyBinding::bodyHandle)
                 .orElse(null);
         if (objectHandle == null) {
+            diagnosticsSink.accept(new DockingConstraintEvent(
+                    DockingConstraintEventType.SKIPPED,
+                    objectId,
+                    zone.zoneId(),
+                    "object-unbound",
+                    Double.NaN,
+                    null));
             clearLatch(objectId, world);
             return false;
         }
@@ -61,6 +84,13 @@ public final class DockingConstraintController {
         PhysicsBodyState objectState = safeGetBodyState(world, objectHandle);
         PhysicsBodyState targetState = safeGetBodyState(world, targetBodyHandle);
         if (objectState == null || targetState == null) {
+            diagnosticsSink.accept(new DockingConstraintEvent(
+                    DockingConstraintEventType.SKIPPED,
+                    objectId,
+                    zone.zoneId(),
+                    "missing-state",
+                    Double.NaN,
+                    null));
             clearLatch(objectId, world);
             return false;
         }
@@ -69,6 +99,13 @@ public final class DockingConstraintController {
         double distance = distance(objectState.position(), targetState.position());
         if (latch == null) {
             if (forceRelease || distance > latchDistanceMeters) {
+                diagnosticsSink.accept(new DockingConstraintEvent(
+                        DockingConstraintEventType.SKIPPED,
+                        objectId,
+                        zone.zoneId(),
+                        forceRelease ? "force-release" : "distance-too-large",
+                        distance,
+                        null));
                 return false;
             }
             PhysicsConstraintHandle handle = world.createConstraint(new PhysicsConstraintDefinition(
@@ -77,16 +114,37 @@ public final class DockingConstraintController {
                     targetBodyHandle,
                     targetState.position()));
             latchesByObjectId.put(objectId, new LatchState(zone.zoneId(), handle, targetBodyHandle));
+            diagnosticsSink.accept(new DockingConstraintEvent(
+                    DockingConstraintEventType.LATCHED,
+                    objectId,
+                    zone.zoneId(),
+                    "distance-threshold",
+                    distance,
+                    handle));
             return true;
         }
 
         if (!zone.zoneId().equals(latch.zoneId) || !targetBodyHandle.equals(latch.targetBodyHandle)) {
+            diagnosticsSink.accept(new DockingConstraintEvent(
+                    DockingConstraintEventType.RELEASED,
+                    objectId,
+                    zone.zoneId(),
+                    "zone-or-target-changed",
+                    distance,
+                    latch.constraintHandle));
             clearLatch(objectId, world);
             return false;
         }
         if (forceRelease || distance >= releaseDistanceMeters) {
             world.removeConstraint(latch.constraintHandle);
             latchesByObjectId.remove(objectId);
+            diagnosticsSink.accept(new DockingConstraintEvent(
+                    DockingConstraintEventType.RELEASED,
+                    objectId,
+                    zone.zoneId(),
+                    forceRelease ? "force-release" : "distance-release",
+                    distance,
+                    latch.constraintHandle));
             return false;
         }
         return true;
