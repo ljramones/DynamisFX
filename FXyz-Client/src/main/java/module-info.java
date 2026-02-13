@@ -27,20 +27,20 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */ 
 
-module org.fxyz3d.client {
+module org.dynamisfx.client {
     requires transitive javafx.controls;
     requires transitive javafx.fxml;
     requires java.logging;
     requires org.controlsfx.controls;
     
-    opens org.fxyz3d to javafx.fxml;
-    opens org.fxyz3d.client to javafx.fxml;
+    opens org.dynamisfx to javafx.fxml;
+    opens org.dynamisfx.client to javafx.fxml;
     
-    uses org.fxyz3d.FXyzSamplerProject;
+    uses org.dynamisfx.DynamisFXSamplerProject;
     
-    exports org.fxyz3d;
-    exports org.fxyz3d.client;
-    exports org.fxyz3d.model;
-    exports org.fxyz3d.util;
+    exports org.dynamisfx;
+    exports org.dynamisfx.client;
+    exports org.dynamisfx.model;
+    exports org.dynamisfx.util;
     
 }

@@ -27,30 +27,30 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */ 
 
-module org.fxyz3d.importers {
-    requires org.fxyz3d.core;
+module org.dynamisfx.importers {
+    requires org.dynamisfx.core;
     requires transitive javafx.graphics;
     requires static javafx.fxml;
     requires java.logging;
 
-    opens org.fxyz3d.importers to javafx.fxml;
+    opens org.dynamisfx.importers to javafx.fxml;
 
-    uses org.fxyz3d.importers.Importer;
+    uses org.dynamisfx.importers.Importer;
 
-    exports org.fxyz3d.importers;
-    exports org.fxyz3d.importers.cad;
-    exports org.fxyz3d.importers.dae;
-    exports org.fxyz3d.importers.dxf;
-    exports org.fxyz3d.importers.fxml;
-    exports org.fxyz3d.importers.gltf;
-    exports org.fxyz3d.importers.maya;
-    exports org.fxyz3d.importers.obj;
-    exports org.fxyz3d.importers.off;
-    exports org.fxyz3d.importers.ply;
-    exports org.fxyz3d.importers.stl;
-    exports org.fxyz3d.importers.tds;
-    exports org.fxyz3d.importers.threemf;
-    exports org.fxyz3d.importers.usd;
-    exports org.fxyz3d.importers.vrml;
-    exports org.fxyz3d.importers.x3d;
+    exports org.dynamisfx.importers;
+    exports org.dynamisfx.importers.cad;
+    exports org.dynamisfx.importers.dae;
+    exports org.dynamisfx.importers.dxf;
+    exports org.dynamisfx.importers.fxml;
+    exports org.dynamisfx.importers.gltf;
+    exports org.dynamisfx.importers.maya;
+    exports org.dynamisfx.importers.obj;
+    exports org.dynamisfx.importers.off;
+    exports org.dynamisfx.importers.ply;
+    exports org.dynamisfx.importers.stl;
+    exports org.dynamisfx.importers.tds;
+    exports org.dynamisfx.importers.threemf;
+    exports org.dynamisfx.importers.usd;
+    exports org.dynamisfx.importers.vrml;
+    exports org.dynamisfx.importers.x3d;
 }

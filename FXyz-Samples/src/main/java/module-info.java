@@ -27,10 +27,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */ 
 
-module org.fxyz3d.samples {
-    requires org.fxyz3d.core;
-    requires org.fxyz3d.importers;
-    requires org.fxyz3d.client;
+module org.dynamisfx.samples {
+    requires org.dynamisfx.core;
+    requires org.dynamisfx.importers;
+    requires org.dynamisfx.client;
     requires transitive javafx.controls;
     requires transitive javafx.fxml;
     requires java.logging;
@@ -42,13 +42,13 @@ module org.fxyz3d.samples {
     requires jfxtras.fxml;
     requires java.scripting;
 
-    opens org.fxyz3d.controls to javafx.fxml;
-    provides org.fxyz3d.FXyzSamplerProject with org.fxyz3d.samples.FXyzProject;
+    opens org.dynamisfx.controls to javafx.fxml;
+    provides org.dynamisfx.DynamisFXSamplerProject with org.dynamisfx.samples.DynamisFXProject;
     
-    exports org.fxyz3d.samples.importers to org.fxyz3d.client, org.fxyz3d.importers;
-    exports org.fxyz3d.samples.shapes.compound to org.fxyz3d.client;
-    exports org.fxyz3d.samples.shapes.texturedmeshes to org.fxyz3d.client;
-    exports org.fxyz3d.samples.utilities to org.fxyz3d.client;
-    exports org.fxyz3d.samples;
+    exports org.dynamisfx.samples.importers to org.dynamisfx.client, org.dynamisfx.importers;
+    exports org.dynamisfx.samples.shapes.compound to org.dynamisfx.client;
+    exports org.dynamisfx.samples.shapes.texturedmeshes to org.dynamisfx.client;
+    exports org.dynamisfx.samples.utilities to org.dynamisfx.client;
+    exports org.dynamisfx.samples;
     
 }

@@ -25,6 +25,18 @@ To deploy it to your local Maven repository, type:
 
 	mvn clean install
 
+## Legacy Compatibility
+
+For transitional support of legacy `org.fxyz3d.*` entry-point types, add:
+
+```xml
+<dependency>
+    <groupId>org.dynamisfx</groupId>
+    <artifactId>dynamisfx-compat</artifactId>
+    <version>0.6.1-SNAPSHOT</version>
+</dependency>
+```
+
 ## Use of DynamisFX Core
 
 With DynamisFX there are many different 3D custom shapes. The following sample makes use of `SpringMesh` to create 
