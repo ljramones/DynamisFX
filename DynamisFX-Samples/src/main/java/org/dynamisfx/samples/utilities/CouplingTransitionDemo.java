@@ -21,6 +21,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
+import org.dynamisfx.physics.api.PhysicsBodyHandle;
 import org.dynamisfx.physics.model.BoxShape;
 import org.dynamisfx.physics.model.PhysicsBodyDefinition;
 import org.dynamisfx.physics.model.PhysicsBodyState;
@@ -41,6 +42,7 @@ import org.dynamisfx.simulation.coupling.CouplingStateReconciler;
 import org.dynamisfx.simulation.coupling.CouplingTelemetryEvent;
 import org.dynamisfx.simulation.coupling.CouplingTransitionApplier;
 import org.dynamisfx.simulation.coupling.DeterministicZoneSelector;
+import org.dynamisfx.simulation.coupling.DockingConstraintController;
 import org.dynamisfx.simulation.coupling.DefaultCouplingManager;
 import org.dynamisfx.simulation.coupling.MutablePhysicsZone;
 import org.dynamisfx.simulation.coupling.MutableCouplingObservationProvider;
@@ -74,6 +76,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private static final double LANDER_WIDTH = 80.0;
     private static final double LANDER_HEIGHT = 40.0;
     private static final double LANDER_DEPTH = 80.0;
+    private static final double DOCKING_TARGET_SIZE = 60.0;
     private static final double DEMO_PLANET_RADIUS_METERS = 1_000.0;
     private static final double SURFACE_PROMOTE_ALTITUDE_METERS = 400.0;
     private static final double SURFACE_DEMOTE_ALTITUDE_METERS = 900.0;
@@ -103,12 +106,16 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private final SimulationStateBuffers stateBuffers = new SimulationStateBuffers();
     private final ZoneBodyRegistry zoneBodyRegistry = new ZoneBodyRegistry();
     private final ScriptedOrbitalDynamicsEngine orbitalEngine = new ScriptedOrbitalDynamicsEngine();
+    private final DockingConstraintController dockingController = new DockingConstraintController(zoneBodyRegistry);
     private CouplingTransitionApplier transitionApplier;
     private CouplingStateReconciler stateReconciler;
     private SimulationOrchestrator orchestrator;
     private MutablePhysicsZone demoZone;
+    private PhysicsBodyHandle dockingTargetHandle;
+    private boolean dockingLatched;
 
     private final Box lander = new Box(LANDER_WIDTH, LANDER_HEIGHT, LANDER_DEPTH);
+    private final Box dockingTarget = new Box(DOCKING_TARGET_SIZE, DOCKING_TARGET_SIZE, DOCKING_TARGET_SIZE);
     private AnimationTimer timer;
     private ObjectSimulationMode lastMode = ObjectSimulationMode.ORBITAL_ONLY;
     private CouplingTelemetryEvent latestTelemetry;
@@ -123,6 +130,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private Label modeLabel;
     private Label distanceLabel;
     private Label telemetryLabel;
+    private Label dockingLabel;
     private Label handoffDirectionLabel;
     private Label handoffZoneLabel;
     private Label handoffGlobalLabel;
@@ -147,7 +155,8 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         camera.setTranslateZ(-900);
 
         lander.setMaterial(materialForMode(lastMode));
-        worldGroup.getChildren().add(lander);
+        dockingTarget.setMaterial(new PhongMaterial(Color.LIGHTGREEN));
+        worldGroup.getChildren().addAll(lander, dockingTarget);
         model = worldGroup;
         entityRegistry.register(OBJECT_ID, lander);
         orbitalEngine.setTrajectory(OBJECT_ID, (time, frame) -> new OrbitalState(
@@ -195,6 +204,17 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 new TerrainPatchSpec(2_000.0, 200.0, 80.0),
                 (x, y) -> 20.0 * Math.sin(x * 0.002) * Math.cos(y * 0.002),
                 0.0);
+        dockingTargetHandle = demoZone.world().createBody(new PhysicsBodyDefinition(
+                PhysicsBodyType.STATIC,
+                0.0,
+                new BoxShape(DOCKING_TARGET_SIZE, DOCKING_TARGET_SIZE, DOCKING_TARGET_SIZE),
+                new PhysicsBodyState(
+                        new PhysicsVector3(120.0, 120.0, 40.0),
+                        PhysicsQuaternion.IDENTITY,
+                        PhysicsVector3.ZERO,
+                        PhysicsVector3.ZERO,
+                        ReferenceFrame.WORLD,
+                        0.0)));
         couplingManager.registerZone(demoZone);
         couplingManager.setMode(OBJECT_ID, lastMode);
         couplingManager.addTelemetryListener(this::onTelemetry);
@@ -252,6 +272,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         modeLabel = new Label("Mode: " + lastMode);
         distanceLabel = new Label("Distance: 2000 m");
         telemetryLabel = new Label("Telemetry: waiting");
+        dockingLabel = new Label("Docking: unlocked");
         handoffDirectionLabel = new Label("Handoff: waiting");
         handoffZoneLabel = new Label("Zone: n/a");
         handoffGlobalLabel = new Label("Global: n/a");
@@ -315,6 +336,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 modeLabel,
                 distanceLabel,
                 telemetryLabel,
+                dockingLabel,
                 new Label("Handoff Debug"),
                 handoffDirectionLabel,
                 handoffZoneLabel,
@@ -410,6 +432,17 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         if (demoZone == null || demoZone.world() == null) {
             return;
         }
+        if (dockingTargetHandle != null) {
+            dockingLatched = dockingController.updateLatch(
+                    demoZone,
+                    OBJECT_ID,
+                    dockingTargetHandle,
+                    90.0,
+                    150.0,
+                    lastMode != ObjectSimulationMode.PHYSICS_ACTIVE);
+        } else {
+            dockingLatched = false;
+        }
         demoZone.world().step(dtSeconds);
         zoneBodyRegistry.bindingForObject(OBJECT_ID).ifPresent(binding -> {
             if (!demoZone.zoneId().equals(binding.zoneId())) {
@@ -452,6 +485,16 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 }));
         if (telemetryLabel != null && latestTelemetry != null) {
             telemetryLabel.setText(formatTelemetry(latestTelemetry));
+        }
+        if (dockingLabel != null) {
+            dockingLabel.setText("Docking: " + (dockingLatched ? "latched" : "unlocked"));
+        }
+        if (demoZone != null && demoZone.world() != null && dockingTargetHandle != null) {
+            PhysicsBodyState dockingState = demoZone.world().getBodyState(dockingTargetHandle);
+            dockingTarget.setTranslateX(modeOffset(currentMode));
+            dockingTarget.setTranslateY(-dockingState.position().z() * 0.12);
+            dockingTarget.setTranslateZ(dockingState.position().x() * 0.15);
+            dockingTarget.setMaterial(new PhongMaterial(dockingLatched ? Color.ORANGERED : Color.LIGHTGREEN));
         }
         updateHandoffDebugLabels();
     }
