@@ -738,13 +738,25 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private static String formatTelemetry(CouplingTelemetryEvent event) {
         String action = event.transitioned() ? "transition" : "hold";
         CouplingDecisionReason reason = event.reason();
+        String zone = event.selectedZoneId().map(ZoneId::value).orElse("none");
+        String frame = event.selectedZoneFrame().map(Enum::name).orElse("UNSPECIFIED");
+        String distance = event.observedDistanceMeters().isPresent()
+                ? String.format("%.1f", event.observedDistanceMeters().orElseThrow())
+                : "n/a";
+        String intercept = event.predictedInterceptSeconds().isPresent()
+                ? String.format("%.2f", event.predictedInterceptSeconds().orElseThrow())
+                : "n/a";
         return String.format(
-                "Telemetry: t=%.2f %s %s -> %s (%s)",
+                "Telemetry: t=%.2f %s %s -> %s (%s) zone=%s frame=%s d=%sm ti=%ss",
                 event.simulationTimeSeconds(),
                 action,
                 event.fromMode(),
                 event.toMode(),
-                reason);
+                reason,
+                zone,
+                frame,
+                distance,
+                intercept);
     }
 
     private static double scenarioOrbitalDistance(double simulationTimeSeconds) {

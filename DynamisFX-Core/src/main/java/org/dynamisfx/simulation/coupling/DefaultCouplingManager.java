@@ -121,16 +121,19 @@ public final class DefaultCouplingManager implements CouplingManager {
                 String objectId = entry.getKey();
                 ObjectSimulationMode currentMode = entry.getValue();
                 double lastTransitionTime = lastTransitionTimeByObjectId.getOrDefault(objectId, -1.0);
+                OptionalDouble predictedIntercept = observationProvider.predictedInterceptSeconds(objectId, zoneSnapshot);
+                OptionalDouble observedDistance = observationProvider.distanceMetersToNearestZone(objectId, zoneSnapshot);
                 CouplingTransitionContext context = new CouplingTransitionContext(
                         objectId,
                         currentMode,
                         simulationTimeSeconds,
                         lastTransitionTime,
-                        observationProvider.predictedInterceptSeconds(objectId, zoneSnapshot),
+                        predictedIntercept,
                         zoneSnapshot);
                 CouplingTransitionDecision decision = transitionPolicy.evaluate(context);
                 ObjectSimulationMode resolvedMode = decision.nextMode().orElse(currentMode);
                 boolean transitioned = resolvedMode != currentMode;
+                Optional<PhysicsZone> selectedZone = DeterministicZoneSelector.select(new ArrayList<>(zoneSnapshot), null, null);
                 if (transitioned) {
                     entry.setValue(resolvedMode);
                     lastTransitionTimeByObjectId.put(objectId, simulationTimeSeconds);
@@ -145,10 +148,17 @@ public final class DefaultCouplingManager implements CouplingManager {
                 telemetryEvents.add(new CouplingTelemetryEvent(
                         simulationTimeSeconds,
                         objectId,
-                        currentMode,
-                        resolvedMode,
-                        transitioned,
-                        decision.reason()));
+                            currentMode,
+                            resolvedMode,
+                            transitioned,
+                            decision.reason(),
+                            lastTransitionTime,
+                            observedDistance,
+                            predictedIntercept,
+                            selectedZone.map(PhysicsZone::zoneId),
+                            selectedZone.map(PhysicsZone::anchorFrame),
+                            zoneSnapshot.stream().map(PhysicsZone::zoneId).toList(),
+                            zoneSnapshot.stream().map(PhysicsZone::anchorFrame).toList()));
             }
             transitionListenerSnapshot = new ArrayList<>(transitionListeners);
             telemetryListenerSnapshot = new ArrayList<>(telemetryListeners);

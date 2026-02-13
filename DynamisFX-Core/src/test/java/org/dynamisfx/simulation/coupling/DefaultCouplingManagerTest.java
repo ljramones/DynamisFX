@@ -132,10 +132,14 @@ class DefaultCouplingManagerTest {
 
     @Test
     void emitsTelemetryEventsWithReason() {
+        MutableCouplingObservationProvider observations = new MutableCouplingObservationProvider();
+        observations.setDistanceMeters("lander-1", 42.0);
+        observations.setPredictedInterceptSeconds("lander-1", 1.25);
         DefaultCouplingManager manager = new DefaultCouplingManager(context ->
                 CouplingTransitionDecision.transitionTo(
                         ObjectSimulationMode.PHYSICS_ACTIVE,
-                        CouplingDecisionReason.PROMOTE_DISTANCE_THRESHOLD));
+                        CouplingDecisionReason.PROMOTE_DISTANCE_THRESHOLD), observations);
+        manager.registerZone(new StubZone(new ZoneId("zone-a")));
         List<CouplingTelemetryEvent> events = new ArrayList<>();
         manager.addTelemetryListener(events::add);
         manager.setMode("lander-1", ObjectSimulationMode.ORBITAL_ONLY);
@@ -148,6 +152,13 @@ class DefaultCouplingManagerTest {
         assertEquals(CouplingDecisionReason.PROMOTE_DISTANCE_THRESHOLD, event.reason());
         assertEquals(ObjectSimulationMode.ORBITAL_ONLY, event.fromMode());
         assertEquals(ObjectSimulationMode.PHYSICS_ACTIVE, event.toMode());
+        assertEquals(-1.0, event.lastTransitionTimeSeconds(), 1e-9);
+        assertEquals(42.0, event.observedDistanceMeters().orElseThrow(), 1e-9);
+        assertEquals(1.25, event.predictedInterceptSeconds().orElseThrow(), 1e-9);
+        assertEquals("zone-a", event.selectedZoneId().orElseThrow().value());
+        assertEquals(ReferenceFrame.WORLD, event.selectedZoneFrame().orElseThrow());
+        assertEquals(1, event.zoneIds().size());
+        assertEquals(1, event.zoneFrames().size());
     }
 
     @Test
@@ -170,6 +181,10 @@ class DefaultCouplingManagerTest {
         assertEquals(ObjectSimulationMode.PHYSICS_ACTIVE, event.toMode());
         assertEquals(CouplingDecisionReason.PROMOTE_DISTANCE_THRESHOLD, event.reason());
         assertEquals(1, event.zones().size());
+        assertEquals("zone-a", event.selectedZoneId().orElseThrow().value());
+        assertEquals(ReferenceFrame.WORLD, event.selectedZoneFrame().orElseThrow());
+        assertEquals(1, event.zoneIds().size());
+        assertEquals(1, event.zoneFrames().size());
     }
 
     @Test

@@ -2,6 +2,8 @@ package org.dynamisfx.simulation.coupling;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import org.dynamisfx.physics.model.ReferenceFrame;
 import org.dynamisfx.simulation.ObjectSimulationMode;
 
 /**
@@ -30,5 +32,21 @@ public record CouplingModeTransitionEvent(
             throw new IllegalArgumentException("fromMode and toMode must differ for transition events");
         }
         zones = List.copyOf(zones);
+    }
+
+    public List<ZoneId> zoneIds() {
+        return zones.stream().map(PhysicsZone::zoneId).toList();
+    }
+
+    public List<ReferenceFrame> zoneFrames() {
+        return zones.stream().map(PhysicsZone::anchorFrame).toList();
+    }
+
+    public Optional<ZoneId> selectedZoneId() {
+        return DeterministicZoneSelector.select(zones, null, null).map(PhysicsZone::zoneId);
+    }
+
+    public Optional<ReferenceFrame> selectedZoneFrame() {
+        return DeterministicZoneSelector.select(zones, null, null).map(PhysicsZone::anchorFrame);
     }
 }

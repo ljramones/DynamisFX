@@ -44,6 +44,8 @@ class Phase1CouplingTelemetrySequenceTest {
         assertEquals(ObjectSimulationMode.PHYSICS_ACTIVE, events.get(0).toMode());
         assertEquals(ObjectSimulationMode.PHYSICS_ACTIVE, events.get(1).toMode());
         assertEquals(ObjectSimulationMode.ORBITAL_ONLY, events.get(2).toMode());
+        assertEquals("zone-a", events.get(0).selectedZoneId().orElseThrow().value());
+        assertEquals(ReferenceFrame.WORLD, events.get(0).selectedZoneFrame().orElseThrow());
     }
 
     private static final class StubZone implements PhysicsZone {
