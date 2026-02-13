@@ -73,6 +73,9 @@ class SimulationStateReconcilerFactoryTest {
         assertThrows(NullPointerException.class, () -> SimulationStateReconcilerFactory.create(
                 buffers, buffers.orbital()::put, id -> {
                 }, null));
+        assertThrows(NullPointerException.class, () -> SimulationStateReconcilerFactory.create(
+                buffers, buffers.orbital()::put, id -> {
+                }, (id, zones) -> Optional.empty(), null));
     }
 
     private record StubZone(PhysicsVector3 anchorPosition) implements PhysicsZone {

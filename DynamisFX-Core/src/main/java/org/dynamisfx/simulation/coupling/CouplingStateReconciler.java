@@ -24,6 +24,7 @@ public final class CouplingStateReconciler implements CouplingTransitionListener
     private final Consumer<String> rigidStateClearer;
     private final Consumer<String> orbitalStateClearer;
     private final BiFunction<String, List<PhysicsZone>, Optional<PhysicsZone>> zoneResolver;
+    private final Consumer<StateHandoffSnapshot> diagnosticsSink;
 
     public CouplingStateReconciler(
             Function<String, Optional<OrbitalState>> orbitalStateSource,
@@ -39,7 +40,9 @@ public final class CouplingStateReconciler implements CouplingTransitionListener
                 },
                 objectId -> {
                 },
-                (objectId, zones) -> zones.isEmpty() ? Optional.empty() : Optional.of(zones.get(0)));
+                (objectId, zones) -> zones.isEmpty() ? Optional.empty() : Optional.of(zones.get(0)),
+                snapshot -> {
+                });
     }
 
     public CouplingStateReconciler(
@@ -50,6 +53,27 @@ public final class CouplingStateReconciler implements CouplingTransitionListener
             Consumer<String> rigidStateClearer,
             Consumer<String> orbitalStateClearer,
             BiFunction<String, List<PhysicsZone>, Optional<PhysicsZone>> zoneResolver) {
+        this(
+                orbitalStateSource,
+                rigidStateSource,
+                rigidStateSink,
+                orbitalStateSink,
+                rigidStateClearer,
+                orbitalStateClearer,
+                zoneResolver,
+                snapshot -> {
+                });
+    }
+
+    public CouplingStateReconciler(
+            Function<String, Optional<OrbitalState>> orbitalStateSource,
+            Function<String, Optional<PhysicsBodyState>> rigidStateSource,
+            BiConsumer<String, PhysicsBodyState> rigidStateSink,
+            BiConsumer<String, OrbitalState> orbitalStateSink,
+            Consumer<String> rigidStateClearer,
+            Consumer<String> orbitalStateClearer,
+            BiFunction<String, List<PhysicsZone>, Optional<PhysicsZone>> zoneResolver,
+            Consumer<StateHandoffSnapshot> diagnosticsSink) {
         this.orbitalStateSource = Objects.requireNonNull(orbitalStateSource, "orbitalStateSource must not be null");
         this.rigidStateSource = Objects.requireNonNull(rigidStateSource, "rigidStateSource must not be null");
         this.rigidStateSink = Objects.requireNonNull(rigidStateSink, "rigidStateSink must not be null");
@@ -57,6 +81,7 @@ public final class CouplingStateReconciler implements CouplingTransitionListener
         this.rigidStateClearer = Objects.requireNonNull(rigidStateClearer, "rigidStateClearer must not be null");
         this.orbitalStateClearer = Objects.requireNonNull(orbitalStateClearer, "orbitalStateClearer must not be null");
         this.zoneResolver = Objects.requireNonNull(zoneResolver, "zoneResolver must not be null");
+        this.diagnosticsSink = Objects.requireNonNull(diagnosticsSink, "diagnosticsSink must not be null");
     }
 
     @Override
@@ -92,6 +117,16 @@ public final class CouplingStateReconciler implements CouplingTransitionListener
                 PhysicsVector3.ZERO,
                 zone.anchorFrame(),
                 simulationTimeSeconds);
+        diagnosticsSink.accept(new StateHandoffSnapshot(
+                StateHandoffDirection.PROMOTE_TO_PHYSICS,
+                simulationTimeSeconds,
+                objectId,
+                zone.zoneId(),
+                zone.anchorPosition(),
+                orbitalState.position(),
+                orbitalState.linearVelocity(),
+                seeded.position(),
+                seeded.linearVelocity()));
         rigidStateSink.accept(objectId, seeded);
         orbitalStateClearer.accept(objectId);
     }
@@ -108,6 +143,16 @@ public final class CouplingStateReconciler implements CouplingTransitionListener
                 rigidState.orientation(),
                 zone.anchorFrame(),
                 simulationTimeSeconds);
+        diagnosticsSink.accept(new StateHandoffSnapshot(
+                StateHandoffDirection.DEMOTE_TO_ORBITAL,
+                simulationTimeSeconds,
+                objectId,
+                zone.zoneId(),
+                zone.anchorPosition(),
+                seeded.position(),
+                seeded.linearVelocity(),
+                rigidState.position(),
+                rigidState.linearVelocity()));
         orbitalStateSink.accept(objectId, seeded);
         rigidStateClearer.accept(objectId);
     }

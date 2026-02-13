@@ -25,7 +25,9 @@ public final class SimulationStateReconcilerFactory {
                 orbitalStateSink,
                 objectId -> {
                 },
-                (objectId, zones) -> zones.isEmpty() ? Optional.empty() : Optional.of(zones.get(0)));
+                (objectId, zones) -> zones.isEmpty() ? Optional.empty() : Optional.of(zones.get(0)),
+                snapshot -> {
+                });
     }
 
     public static CouplingStateReconciler create(
@@ -33,10 +35,21 @@ public final class SimulationStateReconcilerFactory {
             BiConsumer<String, OrbitalState> orbitalStateSink,
             Consumer<String> orbitalStateClearer,
             BiFunction<String, List<PhysicsZone>, Optional<PhysicsZone>> zoneResolver) {
+        return create(stateBuffers, orbitalStateSink, orbitalStateClearer, zoneResolver, snapshot -> {
+        });
+    }
+
+    public static CouplingStateReconciler create(
+            SimulationStateBuffers stateBuffers,
+            BiConsumer<String, OrbitalState> orbitalStateSink,
+            Consumer<String> orbitalStateClearer,
+            BiFunction<String, List<PhysicsZone>, Optional<PhysicsZone>> zoneResolver,
+            Consumer<StateHandoffSnapshot> diagnosticsSink) {
         Objects.requireNonNull(stateBuffers, "stateBuffers must not be null");
         Objects.requireNonNull(orbitalStateSink, "orbitalStateSink must not be null");
         Objects.requireNonNull(orbitalStateClearer, "orbitalStateClearer must not be null");
         Objects.requireNonNull(zoneResolver, "zoneResolver must not be null");
+        Objects.requireNonNull(diagnosticsSink, "diagnosticsSink must not be null");
 
         return new CouplingStateReconciler(
                 stateBuffers.orbital()::get,
@@ -45,6 +58,7 @@ public final class SimulationStateReconcilerFactory {
                 orbitalStateSink,
                 stateBuffers.rigid()::remove,
                 orbitalStateClearer,
-                zoneResolver);
+                zoneResolver,
+                diagnosticsSink);
     }
 }

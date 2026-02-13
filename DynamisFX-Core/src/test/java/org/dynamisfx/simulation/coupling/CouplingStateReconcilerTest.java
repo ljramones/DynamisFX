@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.dynamisfx.physics.model.PhysicsBodyState;
 import org.dynamisfx.physics.model.PhysicsQuaternion;
 import org.dynamisfx.physics.model.PhysicsVector3;
@@ -87,6 +88,57 @@ class CouplingStateReconcilerTest {
         assertEquals(-2.0, seeded.position().z(), 1e-9);
         assertEquals(7.0, seeded.linearVelocity().x(), 1e-9);
         assertTrue(rigidStates.isEmpty());
+    }
+
+    @Test
+    void emitsDiagnosticsSnapshotsForPromoteAndDemote() {
+        Map<String, OrbitalState> orbitalStates = new LinkedHashMap<>();
+        Map<String, PhysicsBodyState> rigidStates = new LinkedHashMap<>();
+        List<StateHandoffSnapshot> snapshots = new CopyOnWriteArrayList<>();
+        CouplingStateReconciler reconciler = new CouplingStateReconciler(
+                objectId -> Optional.ofNullable(orbitalStates.get(objectId)),
+                objectId -> Optional.ofNullable(rigidStates.get(objectId)),
+                rigidStates::put,
+                orbitalStates::put,
+                rigidStates::remove,
+                orbitalStates::remove,
+                (objectId, zones) -> Optional.of(zones.get(0)),
+                snapshots::add);
+        PhysicsZone zone = new StubZone(new PhysicsVector3(100.0, 0.0, 0.0));
+        orbitalStates.put("lander-1", new OrbitalState(
+                new PhysicsVector3(110.0, 0.0, 0.0),
+                new PhysicsVector3(1.0, 0.0, 0.0),
+                PhysicsQuaternion.IDENTITY,
+                ReferenceFrame.WORLD,
+                0.0));
+
+        reconciler.onTransition(new CouplingModeTransitionEvent(
+                1.0,
+                "lander-1",
+                ObjectSimulationMode.ORBITAL_ONLY,
+                ObjectSimulationMode.PHYSICS_ACTIVE,
+                CouplingDecisionReason.PROMOTE_DISTANCE_THRESHOLD,
+                List.of(zone)));
+        rigidStates.put("lander-1", new PhysicsBodyState(
+                new PhysicsVector3(5.0, 0.0, 0.0),
+                PhysicsQuaternion.IDENTITY,
+                PhysicsVector3.ZERO,
+                PhysicsVector3.ZERO,
+                ReferenceFrame.WORLD,
+                1.0));
+        reconciler.onTransition(new CouplingModeTransitionEvent(
+                2.0,
+                "lander-1",
+                ObjectSimulationMode.PHYSICS_ACTIVE,
+                ObjectSimulationMode.ORBITAL_ONLY,
+                CouplingDecisionReason.DEMOTE_DISTANCE_THRESHOLD,
+                List.of(zone)));
+
+        assertEquals(2, snapshots.size());
+        assertEquals(StateHandoffDirection.PROMOTE_TO_PHYSICS, snapshots.get(0).direction());
+        assertEquals(StateHandoffDirection.DEMOTE_TO_ORBITAL, snapshots.get(1).direction());
+        assertEquals(10.0, snapshots.get(0).localPosition().x(), 1e-9);
+        assertEquals(105.0, snapshots.get(1).globalPosition().x(), 1e-9);
     }
 
     private record StubZone(PhysicsVector3 anchorPosition) implements PhysicsZone {
