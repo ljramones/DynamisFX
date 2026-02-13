@@ -13,6 +13,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.control.Spinner;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.VBox;
@@ -51,7 +52,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
 
     private static final Logger LOG = Logger.getLogger(CouplingTransitionDemo.class.getName());
     private static final String OBJECT_ID = "lander-1";
-    private static final int HANDOFF_HISTORY_LIMIT = 10;
+    private static final int DEFAULT_HANDOFF_HISTORY_LIMIT = 10;
 
     private final Group worldGroup = new Group();
     private final MutableCouplingObservationProvider observationProvider = new MutableCouplingObservationProvider();
@@ -87,12 +88,14 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private Label handoffGlobalLabel;
     private Label handoffLocalLabel;
     private ComboBox<String> handoffHistoryBox;
+    private Spinner<Integer> handoffHistoryLimitSpinner;
     private Button copyHandoffButton;
     private Button copyHandoffJsonButton;
     private Button exportHistoryJsonButton;
     private Button clearHandoffHistoryButton;
     private boolean handoffDiagnosticsEnabled = true;
     private boolean freezeHandoffSelection;
+    private int handoffHistoryLimit = DEFAULT_HANDOFF_HISTORY_LIMIT;
 
     public static void main(String[] args) {
         launch(args);
@@ -186,6 +189,14 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         handoffHistoryBox = new ComboBox<>();
         handoffHistoryBox.setPromptText("Select recent handoff");
         handoffHistoryBox.valueProperty().addListener((obs, oldValue, newValue) -> updateHandoffDebugLabels());
+        handoffHistoryLimitSpinner = new Spinner<>(1, 100, DEFAULT_HANDOFF_HISTORY_LIMIT);
+        handoffHistoryLimitSpinner.setEditable(true);
+        handoffHistoryLimitSpinner.valueProperty().addListener((obs, oldValue, newValue) -> {
+            handoffHistoryLimit = newValue;
+            trimHandoffHistoryToLimit();
+            refreshHandoffHistoryControl();
+            updateHandoffDebugLabels();
+        });
         copyHandoffButton = new Button("Copy Handoff Line");
         copyHandoffButton.setOnAction(event -> copyLatestHandoffToClipboard());
         copyHandoffButton.setDisable(true);
@@ -231,6 +242,8 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 handoffZoneLabel,
                 handoffGlobalLabel,
                 handoffLocalLabel,
+                new Label("Max History"),
+                handoffHistoryLimitSpinner,
                 handoffHistoryBox,
                 copyHandoffButton,
                 copyHandoffJsonButton,
@@ -428,11 +441,15 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private void appendHandoffSnapshot(StateHandoffSnapshot snapshot) {
         latestHandoff = snapshot;
         handoffHistory.add(0, snapshot);
-        if (handoffHistory.size() > HANDOFF_HISTORY_LIMIT) {
-            handoffHistory.remove(handoffHistory.size() - 1);
-        }
+        trimHandoffHistoryToLimit();
         refreshHandoffHistoryControl();
         updateHandoffDebugLabels();
+    }
+
+    private void trimHandoffHistoryToLimit() {
+        while (handoffHistory.size() > handoffHistoryLimit) {
+            handoffHistory.remove(handoffHistory.size() - 1);
+        }
     }
 
     private void refreshHandoffHistoryControl() {
