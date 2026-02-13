@@ -3,9 +3,11 @@ package org.dynamisfx.simulation.coupling;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import org.dynamisfx.simulation.ObjectSimulationMode;
 
 /**
@@ -16,10 +18,11 @@ public final class DefaultCouplingManager implements CouplingManager {
     private final Map<ZoneId, PhysicsZone> zones = new LinkedHashMap<>();
     private final Map<String, ObjectSimulationMode> modesByObjectId = new LinkedHashMap<>();
     private final Map<String, Double> lastTransitionTimeByObjectId = new LinkedHashMap<>();
+    private final Set<CouplingTelemetryListener> telemetryListeners = new LinkedHashSet<>();
     private final CouplingTransitionPolicy transitionPolicy;
 
     public DefaultCouplingManager() {
-        this(context -> Optional.empty());
+        this(context -> CouplingTransitionDecision.noChange(CouplingDecisionReason.NO_CHANGE));
     }
 
     public DefaultCouplingManager(CouplingTransitionPolicy transitionPolicy) {
@@ -70,6 +73,16 @@ public final class DefaultCouplingManager implements CouplingManager {
         return Optional.ofNullable(lastTransitionTimeByObjectId.get(objectId));
     }
 
+    public synchronized void addTelemetryListener(CouplingTelemetryListener listener) {
+        Objects.requireNonNull(listener, "listener must not be null");
+        telemetryListeners.add(listener);
+    }
+
+    public synchronized boolean removeTelemetryListener(CouplingTelemetryListener listener) {
+        Objects.requireNonNull(listener, "listener must not be null");
+        return telemetryListeners.remove(listener);
+    }
+
     @Override
     public synchronized void update(double simulationTimeSeconds) {
         if (!Double.isFinite(simulationTimeSeconds)) {
@@ -86,11 +99,29 @@ public final class DefaultCouplingManager implements CouplingManager {
                     simulationTimeSeconds,
                     lastTransitionTime,
                     zoneSnapshot);
-            Optional<ObjectSimulationMode> next = transitionPolicy.evaluate(context);
-            if (next.isPresent() && next.get() != currentMode) {
-                entry.setValue(next.get());
+            CouplingTransitionDecision decision = transitionPolicy.evaluate(context);
+            ObjectSimulationMode resolvedMode = decision.nextMode().orElse(currentMode);
+            boolean transitioned = resolvedMode != currentMode;
+            if (transitioned) {
+                entry.setValue(resolvedMode);
                 lastTransitionTimeByObjectId.put(objectId, simulationTimeSeconds);
             }
+            emitTelemetry(new CouplingTelemetryEvent(
+                    simulationTimeSeconds,
+                    objectId,
+                    currentMode,
+                    resolvedMode,
+                    transitioned,
+                    decision.reason()));
+        }
+    }
+
+    private void emitTelemetry(CouplingTelemetryEvent event) {
+        if (telemetryListeners.isEmpty()) {
+            return;
+        }
+        for (CouplingTelemetryListener listener : telemetryListeners) {
+            listener.onTelemetry(event);
         }
     }
 }

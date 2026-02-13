@@ -1,5 +1,7 @@
 package org.dynamisfx.samples.utilities;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Insets;
@@ -16,6 +18,8 @@ import org.dynamisfx.physics.model.PhysicsVector3;
 import org.dynamisfx.physics.model.ReferenceFrame;
 import org.dynamisfx.simulation.ObjectSimulationMode;
 import org.dynamisfx.simulation.SimulationClock;
+import org.dynamisfx.simulation.coupling.CouplingDecisionReason;
+import org.dynamisfx.simulation.coupling.CouplingTelemetryEvent;
 import org.dynamisfx.simulation.coupling.DefaultCouplingManager;
 import org.dynamisfx.simulation.coupling.MutableCouplingObservationProvider;
 import org.dynamisfx.simulation.coupling.Phase1CouplingBootstrap;
@@ -37,16 +41,19 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private final DefaultCouplingManager couplingManager =
             Phase1CouplingBootstrap.createDefaultManager(observationProvider);
     private final SimulationClock clock = new SimulationClock(0.0, 1.0, false);
+    private final Map<String, Node> entityRegistry = new LinkedHashMap<>();
 
     private final Box lander = new Box(80, 40, 80);
     private AnimationTimer timer;
     private ObjectSimulationMode lastMode = ObjectSimulationMode.ORBITAL_ONLY;
+    private CouplingTelemetryEvent latestTelemetry;
 
     private Slider distanceSlider;
     private CheckBox contactCheck;
     private CheckBox autoScenarioCheck;
     private Label modeLabel;
     private Label distanceLabel;
+    private Label telemetryLabel;
 
     public static void main(String[] args) {
         launch(args);
@@ -59,9 +66,11 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         lander.setMaterial(materialForMode(lastMode));
         worldGroup.getChildren().add(lander);
         model = worldGroup;
+        entityRegistry.put(OBJECT_ID, lander);
 
         couplingManager.registerZone(new DemoZone());
         couplingManager.setMode(OBJECT_ID, lastMode);
+        couplingManager.addTelemetryListener(this::onTelemetry);
     }
 
     @Override
@@ -101,6 +110,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
 
         modeLabel = new Label("Mode: " + lastMode);
         distanceLabel = new Label("Distance: 2000 m");
+        telemetryLabel = new Label("Telemetry: waiting");
 
         distanceSlider = new Slider(0, 3000, 2000);
         distanceSlider.valueProperty().addListener((obs, oldValue, newValue) -> updateDistanceLabel(newValue.doubleValue()));
@@ -113,6 +123,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 new Label("Coupling Transition Demo"),
                 modeLabel,
                 distanceLabel,
+                telemetryLabel,
                 new Label("Distance To Zone (m)"),
                 distanceSlider,
                 contactCheck,
@@ -171,7 +182,13 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         if (modeLabel != null) {
             modeLabel.setText("Mode: " + currentMode);
         }
-        lander.setTranslateX(modeOffset(currentMode));
+        Node entity = entityRegistry.get(OBJECT_ID);
+        if (entity != null) {
+            entity.setTranslateX(modeOffset(currentMode));
+        }
+        if (telemetryLabel != null && latestTelemetry != null) {
+            telemetryLabel.setText(formatTelemetry(latestTelemetry));
+        }
     }
 
     private static PhongMaterial materialForMode(ObjectSimulationMode mode) {
@@ -194,6 +211,27 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         if (distanceLabel != null) {
             distanceLabel.setText(String.format("Distance: %.0f m", distanceMeters));
         }
+    }
+
+    private void onTelemetry(CouplingTelemetryEvent event) {
+        if (OBJECT_ID.equals(event.objectId())) {
+            latestTelemetry = event;
+            if (event.transitioned()) {
+                LOG.info(() -> formatTelemetry(event));
+            }
+        }
+    }
+
+    private static String formatTelemetry(CouplingTelemetryEvent event) {
+        String action = event.transitioned() ? "transition" : "hold";
+        CouplingDecisionReason reason = event.reason();
+        return String.format(
+                "Telemetry: t=%.2f %s %s -> %s (%s)",
+                event.simulationTimeSeconds(),
+                action,
+                event.fromMode(),
+                event.toMode(),
+                reason);
     }
 
     private static final class DemoZone implements PhysicsZone {

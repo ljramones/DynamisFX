@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.OptionalDouble;
 import org.dynamisfx.simulation.ObjectSimulationMode;
 import org.junit.jupiter.api.Test;
@@ -21,9 +20,10 @@ class ThresholdTransitionPolicyTest {
                 150.0,
                 1.0);
 
-        Optional<ObjectSimulationMode> next = policy.evaluate(context(ObjectSimulationMode.ORBITAL_ONLY, 10.0, -1.0));
+        CouplingTransitionDecision next = policy.evaluate(context(ObjectSimulationMode.ORBITAL_ONLY, 10.0, -1.0));
 
-        assertEquals(ObjectSimulationMode.PHYSICS_ACTIVE, next.orElseThrow());
+        assertEquals(ObjectSimulationMode.PHYSICS_ACTIVE, next.nextMode().orElseThrow());
+        assertEquals(CouplingDecisionReason.PROMOTE_DISTANCE_THRESHOLD, next.reason());
     }
 
     @Test
@@ -34,9 +34,10 @@ class ThresholdTransitionPolicyTest {
                 150.0,
                 1.0);
 
-        Optional<ObjectSimulationMode> next = policy.evaluate(context(ObjectSimulationMode.PHYSICS_ACTIVE, 10.0, -1.0));
+        CouplingTransitionDecision next = policy.evaluate(context(ObjectSimulationMode.PHYSICS_ACTIVE, 10.0, -1.0));
 
-        assertEquals(ObjectSimulationMode.ORBITAL_ONLY, next.orElseThrow());
+        assertEquals(ObjectSimulationMode.ORBITAL_ONLY, next.nextMode().orElseThrow());
+        assertEquals(CouplingDecisionReason.DEMOTE_DISTANCE_THRESHOLD, next.reason());
     }
 
     @Test
@@ -47,9 +48,10 @@ class ThresholdTransitionPolicyTest {
                 150.0,
                 1.0);
 
-        Optional<ObjectSimulationMode> next = policy.evaluate(context(ObjectSimulationMode.PHYSICS_ACTIVE, 10.0, -1.0));
+        CouplingTransitionDecision next = policy.evaluate(context(ObjectSimulationMode.PHYSICS_ACTIVE, 10.0, -1.0));
 
-        assertTrue(next.isEmpty());
+        assertTrue(next.nextMode().isEmpty());
+        assertEquals(CouplingDecisionReason.BLOCKED_BY_CONTACT, next.reason());
     }
 
     @Test
@@ -60,13 +62,14 @@ class ThresholdTransitionPolicyTest {
                 150.0,
                 5.0);
 
-        Optional<ObjectSimulationMode> duringCooldown = policy.evaluate(
+        CouplingTransitionDecision duringCooldown = policy.evaluate(
                 context(ObjectSimulationMode.ORBITAL_ONLY, 12.0, 10.0));
-        Optional<ObjectSimulationMode> afterCooldown = policy.evaluate(
+        CouplingTransitionDecision afterCooldown = policy.evaluate(
                 context(ObjectSimulationMode.ORBITAL_ONLY, 16.0, 10.0));
 
-        assertTrue(duringCooldown.isEmpty());
-        assertEquals(ObjectSimulationMode.PHYSICS_ACTIVE, afterCooldown.orElseThrow());
+        assertTrue(duringCooldown.nextMode().isEmpty());
+        assertEquals(CouplingDecisionReason.BLOCKED_BY_COOLDOWN, duringCooldown.reason());
+        assertEquals(ObjectSimulationMode.PHYSICS_ACTIVE, afterCooldown.nextMode().orElseThrow());
     }
 
     @Test

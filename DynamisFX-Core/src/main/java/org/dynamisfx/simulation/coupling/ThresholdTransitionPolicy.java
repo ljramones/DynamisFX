@@ -1,6 +1,5 @@
 package org.dynamisfx.simulation.coupling;
 
-import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.Objects;
 import org.dynamisfx.simulation.ObjectSimulationMode;
@@ -39,15 +38,15 @@ public final class ThresholdTransitionPolicy implements CouplingTransitionPolicy
     }
 
     @Override
-    public Optional<ObjectSimulationMode> evaluate(CouplingTransitionContext context) {
+    public CouplingTransitionDecision evaluate(CouplingTransitionContext context) {
         Objects.requireNonNull(context, "context must not be null");
         if (isInCooldown(context)) {
-            return Optional.empty();
+            return CouplingTransitionDecision.noChange(CouplingDecisionReason.BLOCKED_BY_COOLDOWN);
         }
 
         OptionalDouble distanceMeters = observationProvider.distanceMetersToNearestZone(context.objectId(), context.zones());
         if (distanceMeters.isEmpty()) {
-            return Optional.empty();
+            return CouplingTransitionDecision.noChange(CouplingDecisionReason.MISSING_DISTANCE_OBSERVATION);
         }
         double distance = distanceMeters.orElseThrow();
         if (!Double.isFinite(distance) || distance < 0.0) {
@@ -57,19 +56,26 @@ public final class ThresholdTransitionPolicy implements CouplingTransitionPolicy
         ObjectSimulationMode mode = context.currentMode();
         if (mode == ObjectSimulationMode.ORBITAL_ONLY) {
             if (distance <= promoteDistanceMeters) {
-                return Optional.of(ObjectSimulationMode.PHYSICS_ACTIVE);
+                return CouplingTransitionDecision.transitionTo(
+                        ObjectSimulationMode.PHYSICS_ACTIVE,
+                        CouplingDecisionReason.PROMOTE_DISTANCE_THRESHOLD);
             }
-            return Optional.empty();
+            return CouplingTransitionDecision.noChange(CouplingDecisionReason.NO_CHANGE);
         }
 
         if (mode == ObjectSimulationMode.PHYSICS_ACTIVE) {
-            if (distance >= demoteDistanceMeters && !observationProvider.hasActiveContact(context.objectId())) {
-                return Optional.of(ObjectSimulationMode.ORBITAL_ONLY);
+            if (distance >= demoteDistanceMeters) {
+                if (observationProvider.hasActiveContact(context.objectId())) {
+                    return CouplingTransitionDecision.noChange(CouplingDecisionReason.BLOCKED_BY_CONTACT);
+                }
+                return CouplingTransitionDecision.transitionTo(
+                        ObjectSimulationMode.ORBITAL_ONLY,
+                        CouplingDecisionReason.DEMOTE_DISTANCE_THRESHOLD);
             }
-            return Optional.empty();
+            return CouplingTransitionDecision.noChange(CouplingDecisionReason.NO_CHANGE);
         }
 
-        return Optional.empty();
+        return CouplingTransitionDecision.noChange(CouplingDecisionReason.UNSUPPORTED_MODE);
     }
 
     private boolean isInCooldown(CouplingTransitionContext context) {

@@ -5,7 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 import org.dynamisfx.physics.model.PhysicsVector3;
 import org.dynamisfx.physics.model.ReferenceFrame;
 import org.dynamisfx.simulation.ObjectSimulationMode;
@@ -70,7 +71,9 @@ class DefaultCouplingManagerTest {
             assertEquals("lander-1", context.objectId());
             assertEquals(ObjectSimulationMode.ORBITAL_ONLY, context.currentMode());
             assertEquals(1, context.zones().size());
-            return Optional.of(ObjectSimulationMode.PHYSICS_ACTIVE);
+            return CouplingTransitionDecision.transitionTo(
+                    ObjectSimulationMode.PHYSICS_ACTIVE,
+                    CouplingDecisionReason.PROMOTE_DISTANCE_THRESHOLD);
         };
         DefaultCouplingManager manager = new DefaultCouplingManager(policy);
         manager.registerZone(new StubZone(new ZoneId("zone-a")));
@@ -84,7 +87,8 @@ class DefaultCouplingManagerTest {
 
     @Test
     void doesNotTrackTransitionWhenModeStaysSame() {
-        DefaultCouplingManager manager = new DefaultCouplingManager(context -> Optional.of(context.currentMode()));
+        DefaultCouplingManager manager = new DefaultCouplingManager(context ->
+                CouplingTransitionDecision.transitionTo(context.currentMode(), CouplingDecisionReason.NO_CHANGE));
         manager.setMode("lander-1", ObjectSimulationMode.ORBITAL_ONLY);
 
         manager.update(2.0);
@@ -97,12 +101,16 @@ class DefaultCouplingManagerTest {
     void supportsCooldownStylePolicyWithLastTransitionTimestamp() {
         CouplingTransitionPolicy policy = context -> {
             if (context.lastTransitionTimeSeconds() < 0.0) {
-                return Optional.of(ObjectSimulationMode.PHYSICS_ACTIVE);
+                return CouplingTransitionDecision.transitionTo(
+                        ObjectSimulationMode.PHYSICS_ACTIVE,
+                        CouplingDecisionReason.PROMOTE_DISTANCE_THRESHOLD);
             }
             if (context.simulationTimeSeconds() < context.lastTransitionTimeSeconds() + 5.0) {
-                return Optional.empty();
+                return CouplingTransitionDecision.noChange(CouplingDecisionReason.BLOCKED_BY_COOLDOWN);
             }
-            return Optional.of(ObjectSimulationMode.PHYSICS_ACTIVE);
+            return CouplingTransitionDecision.transitionTo(
+                    ObjectSimulationMode.PHYSICS_ACTIVE,
+                    CouplingDecisionReason.PROMOTE_DISTANCE_THRESHOLD);
         };
         DefaultCouplingManager manager = new DefaultCouplingManager(policy);
         manager.setMode("lander-1", ObjectSimulationMode.ORBITAL_ONLY);
@@ -116,6 +124,26 @@ class DefaultCouplingManagerTest {
 
         manager.update(7.0);
         assertEquals(ObjectSimulationMode.PHYSICS_ACTIVE, manager.modeFor("lander-1").orElseThrow());
+    }
+
+    @Test
+    void emitsTelemetryEventsWithReason() {
+        DefaultCouplingManager manager = new DefaultCouplingManager(context ->
+                CouplingTransitionDecision.transitionTo(
+                        ObjectSimulationMode.PHYSICS_ACTIVE,
+                        CouplingDecisionReason.PROMOTE_DISTANCE_THRESHOLD));
+        List<CouplingTelemetryEvent> events = new ArrayList<>();
+        manager.addTelemetryListener(events::add);
+        manager.setMode("lander-1", ObjectSimulationMode.ORBITAL_ONLY);
+
+        manager.update(5.0);
+
+        assertEquals(1, events.size());
+        CouplingTelemetryEvent event = events.get(0);
+        assertTrue(event.transitioned());
+        assertEquals(CouplingDecisionReason.PROMOTE_DISTANCE_THRESHOLD, event.reason());
+        assertEquals(ObjectSimulationMode.ORBITAL_ONLY, event.fromMode());
+        assertEquals(ObjectSimulationMode.PHYSICS_ACTIVE, event.toMode());
     }
 
     private record StubZone(ZoneId zoneId) implements PhysicsZone {
