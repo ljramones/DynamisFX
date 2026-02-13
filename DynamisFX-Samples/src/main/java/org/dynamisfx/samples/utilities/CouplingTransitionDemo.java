@@ -18,6 +18,7 @@ import org.dynamisfx.physics.model.PhysicsVector3;
 import org.dynamisfx.physics.model.ReferenceFrame;
 import org.dynamisfx.simulation.ObjectSimulationMode;
 import org.dynamisfx.simulation.SimulationClock;
+import org.dynamisfx.simulation.SimulationStateBuffers;
 import org.dynamisfx.simulation.SimulationTransformBridge;
 import org.dynamisfx.simulation.TransformStore;
 import org.dynamisfx.simulation.coupling.CouplingDecisionReason;
@@ -30,10 +31,8 @@ import org.dynamisfx.simulation.coupling.PhysicsZone;
 import org.dynamisfx.simulation.coupling.ZoneId;
 import org.dynamisfx.simulation.entity.SimulationEntityRegistry;
 import org.dynamisfx.simulation.orbital.OrbitalState;
-import org.dynamisfx.simulation.orbital.OrbitalStateBuffer;
 import org.dynamisfx.simulation.orbital.ScriptedOrbitalDynamicsEngine;
 import org.dynamisfx.simulation.rigid.RigidBodyWorld;
-import org.dynamisfx.simulation.rigid.RigidStateBuffer;
 import org.dynamisfx.simulation.runtime.SimulationOrchestrator;
 import org.dynamisfx.samples.shapes.ShapeBaseSample;
 
@@ -54,9 +53,8 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
     private final TransformStore transformStore = new TransformStore(1);
     private final SimulationTransformBridge transformBridge =
             new SimulationTransformBridge(entityRegistry, transformStore);
+    private final SimulationStateBuffers stateBuffers = new SimulationStateBuffers();
     private final ScriptedOrbitalDynamicsEngine orbitalEngine = new ScriptedOrbitalDynamicsEngine();
-    private final OrbitalStateBuffer orbitalStateBuffer = new OrbitalStateBuffer();
-    private final RigidStateBuffer rigidStateBuffer = new RigidStateBuffer();
     private CouplingStateReconciler stateReconciler;
     private SimulationOrchestrator orchestrator;
 
@@ -91,11 +89,11 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 frame,
                 time));
         stateReconciler = new CouplingStateReconciler(
-                orbitalStateBuffer::get,
-                rigidStateBuffer::get,
-                rigidStateBuffer::put,
+                stateBuffers.orbital()::get,
+                stateBuffers.rigid()::get,
+                stateBuffers.rigid()::put,
                 this::seedOrbitalFromPhysics,
-                rigidStateBuffer::remove,
+                stateBuffers.rigid()::remove,
                 objectId -> {
                 },
                 (objectId, zones) -> zones.isEmpty() ? Optional.empty() : Optional.of(zones.get(0)));
@@ -110,7 +108,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 couplingManager,
                 this::stepRigidDemo,
                 transformBridge,
-                rigidStateBuffer::snapshot,
+                stateBuffers.rigid()::snapshot,
                 () -> List.of(OBJECT_ID),
                 ReferenceFrame.WORLD);
     }
@@ -179,7 +177,7 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
                 simulationTimeSeconds,
                 ReferenceFrame.WORLD).get(OBJECT_ID);
         if (state != null) {
-            orbitalStateBuffer.put(OBJECT_ID, state);
+            stateBuffers.orbital().put(OBJECT_ID, state);
         }
         if (autoScenarioCheck != null && autoScenarioCheck.isSelected()) {
             boolean contact = simulationTimeSeconds >= 6.0 && simulationTimeSeconds < 7.5;
@@ -223,11 +221,11 @@ public class CouplingTransitionDemo extends ShapeBaseSample<Group> {
         if (mode != ObjectSimulationMode.PHYSICS_ACTIVE) {
             return;
         }
-        rigidStateBuffer.advanceLinear(OBJECT_ID, dtSeconds, clock.simulationTimeSeconds() + dtSeconds);
+        stateBuffers.rigid().advanceLinear(OBJECT_ID, dtSeconds, clock.simulationTimeSeconds() + dtSeconds);
     }
 
     private void seedOrbitalFromPhysics(String objectId, OrbitalState seededState) {
-        orbitalStateBuffer.put(objectId, seededState);
+        stateBuffers.orbital().put(objectId, seededState);
         orbitalEngine.setTrajectory(objectId, (time, frame) -> new OrbitalState(
                 seededState.position(),
                 seededState.linearVelocity(),
