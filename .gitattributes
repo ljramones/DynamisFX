@@ -1,15 +1,10 @@
-# 3D model/scene files — exclude from GitHub language statistics
+# 3D model/scene files — Git LFS + exclude from GitHub language statistics
 # (.ma is Maya ASCII but Linguist misclassifies it as Mathematica/Wolfram)
-*.ma linguist-vendored
-*.obj linguist-vendored
-*.mtl linguist-vendored
-*.bin linguist-vendored
-*.usda linguist-vendored
-*.obj filter=lfs diff=lfs merge=lfs -text
-*.ma filter=lfs diff=lfs merge=lfs -text
-*.mtl filter=lfs diff=lfs merge=lfs -text
-*.usda filter=lfs diff=lfs merge=lfs -text
-*.bin filter=lfs diff=lfs merge=lfs -text
+*.obj filter=lfs diff=lfs merge=lfs -text linguist-vendored
+*.ma filter=lfs diff=lfs merge=lfs -text linguist-vendored
+*.mtl filter=lfs diff=lfs merge=lfs -text linguist-vendored
+*.usda filter=lfs diff=lfs merge=lfs -text linguist-vendored
+*.bin filter=lfs diff=lfs merge=lfs -text linguist-vendored
 *.3ds filter=lfs diff=lfs merge=lfs -text
 *.glb filter=lfs diff=lfs merge=lfs -text
 *.stl filter=lfs diff=lfs merge=lfs -text
@@ -20,3 +15,8 @@
 *.dxf filter=lfs diff=lfs merge=lfs -text
 *.3mf filter=lfs diff=lfs merge=lfs -text
 *.off filter=lfs diff=lfs merge=lfs -text
+*.obj filter=lfs diff=lfs merge=lfs -text
+*.ma filter=lfs diff=lfs merge=lfs -text
+*.mtl filter=lfs diff=lfs merge=lfs -text
+*.usda filter=lfs diff=lfs merge=lfs -text
+*.bin filter=lfs diff=lfs merge=lfs -text
