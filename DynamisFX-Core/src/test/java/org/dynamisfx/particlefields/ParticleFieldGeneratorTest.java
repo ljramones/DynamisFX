@@ -18,6 +18,7 @@ package org.dynamisfx.particlefields;
 import javafx.scene.paint.Color;
 import org.dynamisfx.particlefields.linear.*;
 import org.dynamisfx.particlefields.orbital.*;
+import org.dynamisfx.particlefields.vortex.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -210,7 +211,243 @@ public class ParticleFieldGeneratorTest {
         }
     }
 
+    // ========== New Linear Generator Tests ==========
+
+    @Nested
+    @DisplayName("SnowGenerator")
+    class Snow {
+        @Test
+        @DisplayName("generates correct type, count, and LINEAR motion")
+        void correctTypeCountAndMotion() {
+            SnowGenerator gen = new SnowGenerator();
+            assertThat(gen.getFieldType(), is(ParticleFieldType.SNOW));
+            List<ParticleFieldElement> elements = generateLinear(ParticleFieldType.SNOW);
+            assertThat(elements, hasSize(TEST_ELEMENT_COUNT));
+            elements.forEach(e -> assertThat(e.getMotionModel(), is(MotionModel.LINEAR)));
+        }
+    }
+
+    @Nested
+    @DisplayName("FogGenerator")
+    class Fog {
+        @Test
+        @DisplayName("generates correct type, count, and LINEAR motion")
+        void correctTypeCountAndMotion() {
+            FogGenerator gen = new FogGenerator();
+            assertThat(gen.getFieldType(), is(ParticleFieldType.FOG));
+            List<ParticleFieldElement> elements = generateLinear(ParticleFieldType.FOG);
+            assertThat(elements, hasSize(TEST_ELEMENT_COUNT));
+            elements.forEach(e -> assertThat(e.getMotionModel(), is(MotionModel.LINEAR)));
+        }
+    }
+
+    @Nested
+    @DisplayName("SmokeGenerator")
+    class Smoke {
+        @Test
+        @DisplayName("generates correct type, count, and LINEAR motion")
+        void correctTypeCountAndMotion() {
+            SmokeGenerator gen = new SmokeGenerator();
+            assertThat(gen.getFieldType(), is(ParticleFieldType.SMOKE));
+            List<ParticleFieldElement> elements = generateLinear(ParticleFieldType.SMOKE);
+            assertThat(elements, hasSize(TEST_ELEMENT_COUNT));
+            elements.forEach(e -> assertThat(e.getMotionModel(), is(MotionModel.LINEAR)));
+        }
+    }
+
+    @Nested
+    @DisplayName("SparksGenerator")
+    class Sparks {
+        @Test
+        @DisplayName("generates correct type, count, and LINEAR motion")
+        void correctTypeCountAndMotion() {
+            SparksGenerator gen = new SparksGenerator();
+            assertThat(gen.getFieldType(), is(ParticleFieldType.SPARKS));
+            List<ParticleFieldElement> elements = generateLinear(ParticleFieldType.SPARKS);
+            assertThat(elements, hasSize(TEST_ELEMENT_COUNT));
+            elements.forEach(e -> assertThat(e.getMotionModel(), is(MotionModel.LINEAR)));
+        }
+    }
+
+    @Nested
+    @DisplayName("LeavesGenerator")
+    class Leaves {
+        @Test
+        @DisplayName("generates correct type, count, and LINEAR motion")
+        void correctTypeCountAndMotion() {
+            LeavesGenerator gen = new LeavesGenerator();
+            assertThat(gen.getFieldType(), is(ParticleFieldType.LEAVES));
+            List<ParticleFieldElement> elements = generateLinear(ParticleFieldType.LEAVES);
+            assertThat(elements, hasSize(TEST_ELEMENT_COUNT));
+            elements.forEach(e -> assertThat(e.getMotionModel(), is(MotionModel.LINEAR)));
+        }
+    }
+
+    @Nested
+    @DisplayName("CloudsGenerator")
+    class Clouds {
+        @Test
+        @DisplayName("generates correct type, count, and LINEAR motion")
+        void correctTypeCountAndMotion() {
+            CloudsGenerator gen = new CloudsGenerator();
+            assertThat(gen.getFieldType(), is(ParticleFieldType.CLOUDS));
+            List<ParticleFieldElement> elements = generateLinear(ParticleFieldType.CLOUDS);
+            assertThat(elements, hasSize(TEST_ELEMENT_COUNT));
+            elements.forEach(e -> assertThat(e.getMotionModel(), is(MotionModel.LINEAR)));
+        }
+    }
+
+    @Nested
+    @DisplayName("LightningGenerator")
+    class Lightning {
+        @Test
+        @DisplayName("generates correct type, count, and LINEAR motion")
+        void correctTypeCountAndMotion() {
+            LightningGenerator gen = new LightningGenerator();
+            assertThat(gen.getFieldType(), is(ParticleFieldType.LIGHTNING));
+            List<ParticleFieldElement> elements = generateLinear(ParticleFieldType.LIGHTNING);
+            assertThat(elements, hasSize(TEST_ELEMENT_COUNT));
+            elements.forEach(e -> assertThat(e.getMotionModel(), is(MotionModel.LINEAR)));
+        }
+    }
+
+    @Nested
+    @DisplayName("WaterSplashGenerator")
+    class WaterSplash {
+        @Test
+        @DisplayName("generates correct type, count, and LINEAR motion")
+        void correctTypeCountAndMotion() {
+            WaterSplashGenerator gen = new WaterSplashGenerator();
+            assertThat(gen.getFieldType(), is(ParticleFieldType.WATER_SPLASH));
+            List<ParticleFieldElement> elements = generateLinear(ParticleFieldType.WATER_SPLASH);
+            assertThat(elements, hasSize(TEST_ELEMENT_COUNT));
+            elements.forEach(e -> assertThat(e.getMotionModel(), is(MotionModel.LINEAR)));
+        }
+    }
+
+    @Nested
+    @DisplayName("ConfettiGenerator")
+    class Confetti {
+        @Test
+        @DisplayName("generates correct type, count, and LINEAR motion")
+        void correctTypeCountAndMotion() {
+            ConfettiGenerator gen = new ConfettiGenerator();
+            assertThat(gen.getFieldType(), is(ParticleFieldType.CONFETTI));
+            List<ParticleFieldElement> elements = generateLinear(ParticleFieldType.CONFETTI);
+            assertThat(elements, hasSize(TEST_ELEMENT_COUNT));
+            elements.forEach(e -> assertThat(e.getMotionModel(), is(MotionModel.LINEAR)));
+        }
+    }
+
+    @Nested
+    @DisplayName("DustMotesGenerator")
+    class DustMotes {
+        @Test
+        @DisplayName("generates correct type, count, and LINEAR motion")
+        void correctTypeCountAndMotion() {
+            DustMotesGenerator gen = new DustMotesGenerator();
+            assertThat(gen.getFieldType(), is(ParticleFieldType.DUST_MOTES));
+            List<ParticleFieldElement> elements = generateLinear(ParticleFieldType.DUST_MOTES);
+            assertThat(elements, hasSize(TEST_ELEMENT_COUNT));
+            elements.forEach(e -> assertThat(e.getMotionModel(), is(MotionModel.LINEAR)));
+        }
+    }
+
+    // ========== Vortex Generator Tests ==========
+
+    @Nested
+    @DisplayName("PortalGenerator")
+    class Portal {
+        @Test
+        @DisplayName("generates correct type, count, and VORTEX motion")
+        void correctTypeCountAndMotion() {
+            PortalGenerator gen = new PortalGenerator();
+            assertThat(gen.getFieldType(), is(ParticleFieldType.PORTAL));
+            List<ParticleFieldElement> elements = generateVortex(ParticleFieldType.PORTAL);
+            assertThat(elements, hasSize(TEST_ELEMENT_COUNT));
+            elements.forEach(e -> assertThat(e.getMotionModel(), is(MotionModel.VORTEX)));
+        }
+    }
+
+    @Nested
+    @DisplayName("MagicAuraGenerator")
+    class MagicAura {
+        @Test
+        @DisplayName("generates correct type, count, and VORTEX motion")
+        void correctTypeCountAndMotion() {
+            MagicAuraGenerator gen = new MagicAuraGenerator();
+            assertThat(gen.getFieldType(), is(ParticleFieldType.MAGIC_AURA));
+            List<ParticleFieldElement> elements = generateVortex(ParticleFieldType.MAGIC_AURA);
+            assertThat(elements, hasSize(TEST_ELEMENT_COUNT));
+            elements.forEach(e -> assertThat(e.getMotionModel(), is(MotionModel.VORTEX)));
+        }
+    }
+
+    @Nested
+    @DisplayName("BubblesGenerator")
+    class Bubbles {
+        @Test
+        @DisplayName("generates correct type, count, and VORTEX motion")
+        void correctTypeCountAndMotion() {
+            BubblesGenerator gen = new BubblesGenerator();
+            assertThat(gen.getFieldType(), is(ParticleFieldType.BUBBLES));
+            List<ParticleFieldElement> elements = generateVortex(ParticleFieldType.BUBBLES);
+            assertThat(elements, hasSize(TEST_ELEMENT_COUNT));
+            elements.forEach(e -> assertThat(e.getMotionModel(), is(MotionModel.VORTEX)));
+        }
+    }
+
+    @Nested
+    @DisplayName("WavesGenerator")
+    class Waves {
+        @Test
+        @DisplayName("generates correct type, count, and VORTEX motion")
+        void correctTypeCountAndMotion() {
+            WavesGenerator gen = new WavesGenerator();
+            assertThat(gen.getFieldType(), is(ParticleFieldType.WAVES));
+            List<ParticleFieldElement> elements = generateVortex(ParticleFieldType.WAVES);
+            assertThat(elements, hasSize(TEST_ELEMENT_COUNT));
+            elements.forEach(e -> assertThat(e.getMotionModel(), is(MotionModel.VORTEX)));
+        }
+    }
+
+    @Nested
+    @DisplayName("EnergyBeamGenerator")
+    class EnergyBeam {
+        @Test
+        @DisplayName("generates correct type, count, and VORTEX motion")
+        void correctTypeCountAndMotion() {
+            EnergyBeamGenerator gen = new EnergyBeamGenerator();
+            assertThat(gen.getFieldType(), is(ParticleFieldType.ENERGY_BEAM));
+            List<ParticleFieldElement> elements = generateVortex(ParticleFieldType.ENERGY_BEAM);
+            assertThat(elements, hasSize(TEST_ELEMENT_COUNT));
+            elements.forEach(e -> assertThat(e.getMotionModel(), is(MotionModel.VORTEX)));
+        }
+    }
+
     // Helper methods
+
+    private List<ParticleFieldElement> generateVortex(ParticleFieldType type) {
+        ParticleFieldConfiguration config = ParticleFieldConfiguration.builder()
+                .type(type)
+                .numElements(TEST_ELEMENT_COUNT)
+                .innerRadius(5)
+                .outerRadius(30)
+                .minSize(0.1)
+                .maxSize(0.5)
+                .primaryColor(Color.WHITE)
+                .secondaryColor(Color.GRAY)
+                .drag(0.1)
+                .minLifetime(1.0)
+                .maxLifetime(3.0)
+                .vortexAngularSpeed(2.0)
+                .vortexRadialSpeed(-1.0)
+                .vortexVerticalSpeed(0.5)
+                .vortexTightness(1.0)
+                .vortexHeight(30)
+                .build();
+        return ParticleFieldFactory.getGenerator(type).generate(config, new Random(42));
+    }
 
     private List<ParticleFieldElement> generateOrbital(ParticleFieldType type) {
         ParticleFieldConfiguration config = ParticleFieldConfiguration.builder()

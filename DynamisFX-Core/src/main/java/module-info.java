@@ -59,4 +59,5 @@ module org.dynamisfx.core {
     exports org.dynamisfx.particlefields;
     exports org.dynamisfx.particlefields.orbital;
     exports org.dynamisfx.particlefields.linear;
+    exports org.dynamisfx.particlefields.vortex;
 }

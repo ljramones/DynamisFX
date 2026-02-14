@@ -220,7 +220,117 @@ public class ParticleFieldElementTest {
         }
     }
 
+    @Nested
+    @DisplayName("Vortex construction")
+    class VortexConstruction {
+        @Test
+        @DisplayName("creates vortex element with correct motion model")
+        void motionModel() {
+            ParticleFieldElement e = createVortexElement();
+            assertThat(e.getMotionModel(), is(MotionModel.VORTEX));
+        }
+
+        @Test
+        @DisplayName("stores vortex parameters")
+        void storesParams() {
+            ParticleFieldElement e = ParticleFieldElement.createVortex(
+                    1.0, 10.0,  // angle, radius
+                    2.0, -0.5, 1.0,  // angularSpeed, radialSpeed, verticalSpeed
+                    5.0, 0.1,   // y, drag
+                    3.0,        // lifetime
+                    0.5,        // size
+                    Color.BLUE
+            );
+            assertThat(e.getVortexAngle(), is(1.0));
+            assertThat(e.getVortexRadius(), is(10.0));
+            assertThat(e.getVortexAngularSpeed(), is(2.0));
+            assertThat(e.getVortexRadialSpeed(), is(-0.5));
+            assertThat(e.getVortexVerticalSpeed(), is(1.0));
+            assertThat(e.getSize(), is(0.5));
+            assertThat(e.getColor(), is(Color.BLUE));
+        }
+
+        @Test
+        @DisplayName("initializes Cartesian position from cylindrical")
+        void initializesPosition() {
+            ParticleFieldElement e = ParticleFieldElement.createVortex(
+                    0, 10.0,    // angle=0, radius=10
+                    1.0, 0, 0,
+                    0, 0, 3.0, 1.0, Color.WHITE
+            );
+            // At angle=0, radius=10: x=10, z=0
+            assertThat(e.getX(), closeTo(10.0, 0.01));
+            assertThat(e.getZ(), closeTo(0.0, 0.01));
+            assertThat(e.getY(), closeTo(0.0, 0.01));
+        }
+    }
+
+    @Nested
+    @DisplayName("Vortex advance")
+    class VortexAdvance {
+        @Test
+        @DisplayName("advance changes angle and position")
+        void advanceChangesPosition() {
+            ParticleFieldElement e = ParticleFieldElement.createVortex(
+                    0, 10.0,
+                    1.0, 0, 0,  // angular speed 1 rad/s, no radial/vertical
+                    0, 0, -1, 1.0, Color.WHITE
+            );
+            double x0 = e.getX();
+            e.advance(1.0);
+            assertThat(e.getX(), not(closeTo(x0, 0.01)));
+        }
+
+        @Test
+        @DisplayName("negative radial speed shrinks radius")
+        void negativeRadialSpeed() {
+            ParticleFieldElement e = ParticleFieldElement.createVortex(
+                    0, 10.0,
+                    0, -2.0, 0,  // radial speed -2
+                    0, 0, -1, 1.0, Color.WHITE
+            );
+            e.advance(1.0);
+            assertThat(e.getVortexRadius(), closeTo(8.0, 0.01));
+        }
+
+        @Test
+        @DisplayName("vertical speed moves y")
+        void verticalSpeedMovesY() {
+            ParticleFieldElement e = ParticleFieldElement.createVortex(
+                    0, 5.0,
+                    0, 0, 3.0,  // vertical speed 3
+                    0, 0, -1, 1.0, Color.WHITE
+            );
+            e.advance(1.0);
+            assertThat(e.getY(), closeTo(3.0, 0.01));
+        }
+
+        @Test
+        @DisplayName("vortex particle dies after lifetime")
+        void vortexLifetime() {
+            ParticleFieldElement e = ParticleFieldElement.createVortex(
+                    0, 5.0,
+                    1.0, 0, 0,
+                    0, 0, 2.0, 1.0, Color.WHITE
+            );
+            assertThat(e.isAlive(), is(true));
+            e.advance(1.0);
+            assertThat(e.isAlive(), is(true));
+            e.advance(1.5);
+            assertThat(e.isAlive(), is(false));
+        }
+    }
+
     // Helper methods
+
+    private ParticleFieldElement createVortexElement() {
+        return ParticleFieldElement.createVortex(
+                0, 10.0,
+                1.0, -0.5, 0.5,
+                0, 0.1,
+                5.0, 0.5, Color.PURPLE
+        );
+    }
 
     private ParticleFieldElement createOrbitalElement(double semiMajorAxis, double eccentricity, double inclination) {
         return new ParticleFieldElement(

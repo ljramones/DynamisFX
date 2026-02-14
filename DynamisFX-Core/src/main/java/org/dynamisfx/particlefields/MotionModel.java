@@ -32,7 +32,14 @@ public enum MotionModel {
      * finite lifetimes and are respawned when expired.
      * Used for rain, fire, explosions, swarms, starfields.
      */
-    LINEAR("Linear", "Velocity-based motion with finite lifetime");
+    LINEAR("Linear", "Velocity-based motion with finite lifetime"),
+
+    /**
+     * Cylindrical-coordinate spiraling motion. Particles spiral around a
+     * vertical axis using angle, radius, and vertical position. Finite lifetime
+     * with respawning. Used for portals, magic auras, bubbles, waves, energy beams.
+     */
+    VORTEX("Vortex", "Cylindrical-coordinate spiraling motion with finite lifetime");
 
     private final String displayName;
     private final String description;

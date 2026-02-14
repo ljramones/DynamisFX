@@ -36,7 +36,7 @@ public class ParticleFieldFactoryTest {
     @DisplayName("Generator registry")
     class GeneratorRegistry {
         @Test
-        @DisplayName("has generators for all 10 types")
+        @DisplayName("has generators for all 25 types")
         void allTypesRegistered() {
             for (ParticleFieldType type : ParticleFieldType.values()) {
                 ParticleFieldGenerator gen = ParticleFieldFactory.getGenerator(type);
@@ -50,10 +50,10 @@ public class ParticleFieldFactoryTest {
     @DisplayName("Presets")
     class Presets {
         @Test
-        @DisplayName("has 18 preset names")
+        @DisplayName("has 33 preset names")
         void hasAllPresets() {
             String[] names = ParticleFieldFactory.getPresetNames();
-            assertThat(names, arrayWithSize(18));
+            assertThat(names, arrayWithSize(33));
         }
 
         @Test
@@ -89,10 +89,21 @@ public class ParticleFieldFactoryTest {
         @DisplayName("linear presets are subset")
         void linearPresetsSubset() {
             String[] linearPresets = ParticleFieldFactory.getLinearPresetNames();
-            assertThat(linearPresets, arrayWithSize(5));
+            assertThat(linearPresets, arrayWithSize(15));
             for (String name : linearPresets) {
                 ParticleFieldConfiguration config = ParticleFieldFactory.getPreset(name);
                 assertThat(config.type().getMotionModel(), is(MotionModel.LINEAR));
+            }
+        }
+
+        @Test
+        @DisplayName("vortex presets are subset")
+        void vortexPresetsSubset() {
+            String[] vortexPresets = ParticleFieldFactory.getVortexPresetNames();
+            assertThat(vortexPresets, arrayWithSize(5));
+            for (String name : vortexPresets) {
+                ParticleFieldConfiguration config = ParticleFieldFactory.getPreset(name);
+                assertThat(config.type().getMotionModel(), is(MotionModel.VORTEX));
             }
         }
     }

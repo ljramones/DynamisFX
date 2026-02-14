@@ -1,0 +1,102 @@
+/*
+ * Copyright 2024-2026 DynamisFX Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.dynamisfx.particlefields.vortex;
+
+import javafx.scene.paint.Color;
+import org.dynamisfx.particlefields.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+/**
+ * Generates expanding concentric ring waves that radiate outward from the center
+ * with minimal angular or vertical movement, using primary-to-secondary color
+ * interpolation for a ripple effect.
+ */
+public class WavesGenerator implements ParticleFieldGenerator {
+
+    @Override
+    public List<ParticleFieldElement> generate(ParticleFieldConfiguration config, Random random) {
+        List<ParticleFieldElement> elements = new ArrayList<>();
+        double lifetimeRange = config.maxLifetime() - config.minLifetime();
+        double sizeRange = config.maxSize() - config.minSize();
+
+        for (int i = 0; i < config.numElements(); i++) {
+            double angle = random.nextDouble() * 2.0 * Math.PI;
+
+            // Start very near center
+            double radius = random.nextDouble() * config.innerRadius() * 0.5;
+
+            // Nearly zero angular speed for ring shape
+            double angularSpeed = config.vortexAngularSpeed() * 0.1 * random.nextDouble();
+
+            // Expanding outward
+            double radialSpeed = config.vortexRadialSpeed() + 2.0 + random.nextDouble() * 1.0;
+
+            // Zero or near-zero vertical speed
+            double verticalSpeed = random.nextDouble() * 0.1;
+
+            // Flat plane with tiny jitter
+            double y = (random.nextDouble() - 0.5) * 0.1;
+
+            // Low drag for sustained expansion
+            double drag = config.drag() * 0.3;
+
+            double lifetime = config.minLifetime() + random.nextDouble() * lifetimeRange;
+
+            // Small, uniform size
+            double size = config.minSize() + random.nextDouble() * sizeRange * 0.3;
+
+            double t = random.nextDouble();
+            double opacity = 0.3 + random.nextDouble() * 0.3;
+            Color color = interpolateColor(config.primaryColor(), config.secondaryColor(), t, opacity);
+
+            elements.add(ParticleFieldElement.createVortex(
+                    angle, radius,
+                    angularSpeed, radialSpeed, verticalSpeed,
+                    y, drag,
+                    lifetime,
+                    size,
+                    color
+            ));
+        }
+
+        return elements;
+    }
+
+    @Override
+    public ParticleFieldType getFieldType() {
+        return ParticleFieldType.WAVES;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Expanding concentric wave rings radiating outward from the center, " +
+                "creating a ripple effect with smooth primary-to-secondary color transitions.";
+    }
+
+    private Color interpolateColor(Color from, Color to, double t, double opacity) {
+        double r = from.getRed() + (to.getRed() - from.getRed()) * t;
+        double g = from.getGreen() + (to.getGreen() - from.getGreen()) * t;
+        double b = from.getBlue() + (to.getBlue() - from.getBlue()) * t;
+        return new Color(
+                Math.max(0, Math.min(1, r)),
+                Math.max(0, Math.min(1, g)),
+                Math.max(0, Math.min(1, b)),
+                Math.max(0, Math.min(1, opacity))
+        );
+    }
+}

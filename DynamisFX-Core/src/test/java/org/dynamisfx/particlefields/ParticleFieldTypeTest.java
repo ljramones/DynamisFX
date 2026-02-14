@@ -32,9 +32,9 @@ public class ParticleFieldTypeTest {
     @DisplayName("Enum values")
     class EnumValues {
         @Test
-        @DisplayName("has all 10 types")
+        @DisplayName("has all 25 types")
         void hasAllTypes() {
-            assertThat(ParticleFieldType.values(), arrayWithSize(10));
+            assertThat(ParticleFieldType.values(), arrayWithSize(25));
         }
 
         @Test
@@ -55,6 +55,31 @@ public class ParticleFieldTypeTest {
             assertThat(ParticleFieldType.valueOf("EXPLOSION"), notNullValue());
             assertThat(ParticleFieldType.valueOf("STARFIELD"), notNullValue());
             assertThat(ParticleFieldType.valueOf("SWARM"), notNullValue());
+        }
+
+        @Test
+        @DisplayName("new linear types exist")
+        void newLinearTypesExist() {
+            assertThat(ParticleFieldType.valueOf("SNOW"), notNullValue());
+            assertThat(ParticleFieldType.valueOf("FOG"), notNullValue());
+            assertThat(ParticleFieldType.valueOf("SMOKE"), notNullValue());
+            assertThat(ParticleFieldType.valueOf("SPARKS"), notNullValue());
+            assertThat(ParticleFieldType.valueOf("LEAVES"), notNullValue());
+            assertThat(ParticleFieldType.valueOf("CLOUDS"), notNullValue());
+            assertThat(ParticleFieldType.valueOf("LIGHTNING"), notNullValue());
+            assertThat(ParticleFieldType.valueOf("WATER_SPLASH"), notNullValue());
+            assertThat(ParticleFieldType.valueOf("CONFETTI"), notNullValue());
+            assertThat(ParticleFieldType.valueOf("DUST_MOTES"), notNullValue());
+        }
+
+        @Test
+        @DisplayName("vortex types exist")
+        void vortexTypesExist() {
+            assertThat(ParticleFieldType.valueOf("PORTAL"), notNullValue());
+            assertThat(ParticleFieldType.valueOf("MAGIC_AURA"), notNullValue());
+            assertThat(ParticleFieldType.valueOf("BUBBLES"), notNullValue());
+            assertThat(ParticleFieldType.valueOf("WAVES"), notNullValue());
+            assertThat(ParticleFieldType.valueOf("ENERGY_BEAM"), notNullValue());
         }
     }
 
@@ -80,6 +105,16 @@ public class ParticleFieldTypeTest {
             assertThat(ParticleFieldType.STARFIELD.getDisplayName(), is("Starfield"));
             assertThat(ParticleFieldType.SWARM.getDisplayName(), is("Swarm"));
         }
+
+        @Test
+        @DisplayName("vortex types have display names")
+        void vortexDisplayNames() {
+            assertThat(ParticleFieldType.PORTAL.getDisplayName(), is("Portal"));
+            assertThat(ParticleFieldType.MAGIC_AURA.getDisplayName(), is("Magic Aura"));
+            assertThat(ParticleFieldType.BUBBLES.getDisplayName(), is("Bubbles"));
+            assertThat(ParticleFieldType.WAVES.getDisplayName(), is("Waves"));
+            assertThat(ParticleFieldType.ENERGY_BEAM.getDisplayName(), is("Energy Beam"));
+        }
     }
 
     @Nested
@@ -103,6 +138,31 @@ public class ParticleFieldTypeTest {
             assertThat(ParticleFieldType.EXPLOSION.getMotionModel(), is(MotionModel.LINEAR));
             assertThat(ParticleFieldType.STARFIELD.getMotionModel(), is(MotionModel.LINEAR));
             assertThat(ParticleFieldType.SWARM.getMotionModel(), is(MotionModel.LINEAR));
+        }
+
+        @Test
+        @DisplayName("new linear types map to LINEAR")
+        void newLinearTypesMapToLinear() {
+            assertThat(ParticleFieldType.SNOW.getMotionModel(), is(MotionModel.LINEAR));
+            assertThat(ParticleFieldType.FOG.getMotionModel(), is(MotionModel.LINEAR));
+            assertThat(ParticleFieldType.SMOKE.getMotionModel(), is(MotionModel.LINEAR));
+            assertThat(ParticleFieldType.SPARKS.getMotionModel(), is(MotionModel.LINEAR));
+            assertThat(ParticleFieldType.LEAVES.getMotionModel(), is(MotionModel.LINEAR));
+            assertThat(ParticleFieldType.CLOUDS.getMotionModel(), is(MotionModel.LINEAR));
+            assertThat(ParticleFieldType.LIGHTNING.getMotionModel(), is(MotionModel.LINEAR));
+            assertThat(ParticleFieldType.WATER_SPLASH.getMotionModel(), is(MotionModel.LINEAR));
+            assertThat(ParticleFieldType.CONFETTI.getMotionModel(), is(MotionModel.LINEAR));
+            assertThat(ParticleFieldType.DUST_MOTES.getMotionModel(), is(MotionModel.LINEAR));
+        }
+
+        @Test
+        @DisplayName("vortex types map to VORTEX")
+        void vortexTypesMapToVortex() {
+            assertThat(ParticleFieldType.PORTAL.getMotionModel(), is(MotionModel.VORTEX));
+            assertThat(ParticleFieldType.MAGIC_AURA.getMotionModel(), is(MotionModel.VORTEX));
+            assertThat(ParticleFieldType.BUBBLES.getMotionModel(), is(MotionModel.VORTEX));
+            assertThat(ParticleFieldType.WAVES.getMotionModel(), is(MotionModel.VORTEX));
+            assertThat(ParticleFieldType.ENERGY_BEAM.getMotionModel(), is(MotionModel.VORTEX));
         }
     }
 }

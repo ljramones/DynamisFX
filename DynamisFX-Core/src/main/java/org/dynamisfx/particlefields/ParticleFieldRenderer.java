@@ -548,8 +548,8 @@ public class ParticleFieldRenderer {
             ParticleFieldElement element = elements.get(i);
             element.advance(timeScale);
 
-            // Respawn expired LINEAR particles
-            if (element.getMotionModel() == MotionModel.LINEAR && !element.isAlive()) {
+            // Respawn expired non-ORBITAL particles (LINEAR and VORTEX)
+            if (element.getMotionModel() != MotionModel.ORBITAL && !element.isAlive()) {
                 ParticleFieldElement replacement = generator.generateOne(config, respawnRandom);
                 if (replacement != null) {
                     elements.set(i, replacement);

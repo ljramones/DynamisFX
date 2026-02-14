@@ -83,7 +83,56 @@ public enum ParticleFieldType {
      * Swarm: erratic grouped particles with randomized velocity changes.
      * Moderate lifetime. Particles cluster around a center.
      */
-    SWARM("Swarm", MotionModel.LINEAR);
+    SWARM("Swarm", MotionModel.LINEAR),
+
+    // ===== Additional Linear types =====
+
+    /** Snow: slow falling particles with gentle wind drift and varied sizes. */
+    SNOW("Snow", MotionModel.LINEAR),
+
+    /** Fog: dense, slow, semi-transparent particles near ground level. */
+    FOG("Fog", MotionModel.LINEAR),
+
+    /** Smoke: rising, fading, spreading particles with drag. */
+    SMOKE("Smoke", MotionModel.LINEAR),
+
+    /** Sparks: short-lived, fast particles with upward bias. */
+    SPARKS("Sparks", MotionModel.LINEAR),
+
+    /** Leaves: fluttering particles with irregular lateral paths. */
+    LEAVES("Leaves", MotionModel.LINEAR),
+
+    /** Clouds: large, slow, morphing particle clusters. */
+    CLOUDS("Clouds", MotionModel.LINEAR),
+
+    /** Lightning: fractal-path placed particles, very short lifetime, flickering. */
+    LIGHTNING("Lightning", MotionModel.LINEAR),
+
+    /** Water splash: upward arcs with gravity pullback. */
+    WATER_SPLASH("Water Splash", MotionModel.LINEAR),
+
+    /** Confetti: colorful fluttering particles falling from above. */
+    CONFETTI("Confetti", MotionModel.LINEAR),
+
+    /** Dust motes: tiny floating particles with Brownian-like motion. */
+    DUST_MOTES("Dust Motes", MotionModel.LINEAR),
+
+    // ===== Vortex types =====
+
+    /** Portal: inward spiraling particles with mystical colors. */
+    PORTAL("Portal", MotionModel.VORTEX),
+
+    /** Magic aura: slow outward spiral with ethereal glow. */
+    MAGIC_AURA("Magic Aura", MotionModel.VORTEX),
+
+    /** Bubbles: rising spiral with expanding radius. */
+    BUBBLES("Bubbles", MotionModel.VORTEX),
+
+    /** Waves: expanding concentric rings from center. */
+    WAVES("Waves", MotionModel.VORTEX),
+
+    /** Energy beam: tight spiral along a beam axis. */
+    ENERGY_BEAM("Energy Beam", MotionModel.VORTEX);
 
     private final String displayName;
     private final MotionModel motionModel;

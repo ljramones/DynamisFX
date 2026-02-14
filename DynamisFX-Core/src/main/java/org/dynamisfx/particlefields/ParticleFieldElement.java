@@ -53,6 +53,13 @@ public class ParticleFieldElement {
     private double lifetime;
     private double age;
 
+    // === VORTEX fields (cylindrical coordinates) ===
+    private double vortexAngle;
+    private double vortexRadius;
+    private double vortexAngularSpeed;
+    private double vortexRadialSpeed;
+    private double vortexVerticalSpeed;
+
     /**
      * Orbital constructor - creates a particle with Keplerian orbital mechanics.
      */
@@ -142,6 +149,65 @@ public class ParticleFieldElement {
     }
 
     /**
+     * Creates a vortex particle with cylindrical spiraling motion.
+     *
+     * @param angle         initial angle in radians around the vertical axis
+     * @param radius        initial radial distance from the axis
+     * @param angularSpeed  rotation speed in radians per time unit
+     * @param radialSpeed   rate of change of radius (positive = outward)
+     * @param verticalSpeed vertical movement speed (positive = upward)
+     * @param y             initial vertical position
+     * @param drag          velocity damping factor (0 = none, 1 = full)
+     * @param lifetime      seconds before expiry (-1 = infinite)
+     * @param size          particle size
+     * @param color         particle color
+     * @return a new vortex particle element
+     */
+    public static ParticleFieldElement createVortex(
+            double angle, double radius,
+            double angularSpeed, double radialSpeed, double verticalSpeed,
+            double y, double drag,
+            double lifetime,
+            double size,
+            Color color
+    ) {
+        ParticleFieldElement e = new ParticleFieldElement(MotionModel.VORTEX, size, color);
+        e.vortexAngle = angle;
+        e.vortexRadius = radius;
+        e.vortexAngularSpeed = angularSpeed;
+        e.vortexRadialSpeed = radialSpeed;
+        e.vortexVerticalSpeed = verticalSpeed;
+        e.drag = drag;
+        e.lifetime = lifetime;
+        e.age = 0;
+
+        // Convert cylindrical to Cartesian
+        e.x = radius * Math.cos(angle);
+        e.y = y;
+        e.z = radius * Math.sin(angle);
+        return e;
+    }
+
+    /**
+     * Private constructor for factory methods.
+     */
+    private ParticleFieldElement(MotionModel motionModel, double size, Color color) {
+        this.motionModel = motionModel;
+        this.size = size;
+        this.color = color;
+        this.semiMajorAxis = 0;
+        this.eccentricity = 0;
+        this.inclination = 0;
+        this.argumentOfPeriapsis = 0;
+        this.longitudeOfAscendingNode = 0;
+        this.angularSpeed = 0;
+        this.heightOffset = 0;
+        this.currentAngle = 0;
+        this.lifetime = -1;
+        this.age = 0;
+    }
+
+    /**
      * Advances the element's position by the given time scale.
      * Dispatches to the appropriate motion model.
      *
@@ -150,6 +216,8 @@ public class ParticleFieldElement {
     public void advance(double timeScale) {
         if (motionModel == MotionModel.ORBITAL) {
             advanceOrbital(timeScale);
+        } else if (motionModel == MotionModel.VORTEX) {
+            advanceVortex(timeScale);
         } else {
             advanceLinear(timeScale);
         }
@@ -179,6 +247,30 @@ public class ParticleFieldElement {
         x += vx * timeScale;
         y += vy * timeScale;
         z += vz * timeScale;
+
+        // Update age
+        age += timeScale;
+    }
+
+    private void advanceVortex(double timeScale) {
+        // Apply drag to speeds
+        if (drag > 0) {
+            double dampFactor = 1.0 - drag * timeScale;
+            if (dampFactor < 0) dampFactor = 0;
+            vortexAngularSpeed *= dampFactor;
+            vortexRadialSpeed *= dampFactor;
+            vortexVerticalSpeed *= dampFactor;
+        }
+
+        // Update cylindrical coordinates
+        vortexAngle += vortexAngularSpeed * timeScale;
+        vortexRadius += vortexRadialSpeed * timeScale;
+        if (vortexRadius < 0) vortexRadius = 0;
+        y += vortexVerticalSpeed * timeScale;
+
+        // Convert cylindrical to Cartesian
+        x = vortexRadius * Math.cos(vortexAngle);
+        z = vortexRadius * Math.sin(vortexAngle);
 
         // Update age
         age += timeScale;
@@ -258,6 +350,13 @@ public class ParticleFieldElement {
     public double getDrag() { return drag; }
     public double getLifetime() { return lifetime; }
     public double getAge() { return age; }
+
+    // === Getters for vortex properties ===
+    public double getVortexAngle() { return vortexAngle; }
+    public double getVortexRadius() { return vortexRadius; }
+    public double getVortexAngularSpeed() { return vortexAngularSpeed; }
+    public double getVortexRadialSpeed() { return vortexRadialSpeed; }
+    public double getVortexVerticalSpeed() { return vortexVerticalSpeed; }
 
     /**
      * Sets the position directly (used by physics engines or respawning).

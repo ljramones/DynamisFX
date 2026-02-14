@@ -132,7 +132,24 @@ public record ParticleFieldConfiguration(
         double spreadAngle,
 
         /** Emitter dimensions {width, height, depth}, default {0,0,0} (point) */
-        double[] emitterSize
+        double[] emitterSize,
+
+        // ==================== Vortex Motion Parameters ====================
+
+        /** Base angular speed for vortex particles (radians per time unit) */
+        double vortexAngularSpeed,
+
+        /** Radial expansion/contraction speed (positive = outward) */
+        double vortexRadialSpeed,
+
+        /** Vertical movement speed for vortex particles */
+        double vortexVerticalSpeed,
+
+        /** Controls how tightly particles spiral (multiplier for angular speed variance) */
+        double vortexTightness,
+
+        /** Vertical extent of vortex particle spawning */
+        double vortexHeight
 ) {
     /**
      * Builder for creating ParticleFieldConfiguration instances with defaults.
@@ -179,6 +196,13 @@ public record ParticleFieldConfiguration(
         private double maxSpeed = 0;
         private double spreadAngle = 0;
         private double[] emitterSize = new double[]{0, 0, 0};
+
+        // Vortex motion defaults
+        private double vortexAngularSpeed = 2.0;
+        private double vortexRadialSpeed = 0.0;
+        private double vortexVerticalSpeed = 0.0;
+        private double vortexTightness = 1.0;
+        private double vortexHeight = 50.0;
 
         public Builder type(ParticleFieldType type) { this.type = type; return this; }
         public Builder innerRadius(double innerRadius) { this.innerRadius = innerRadius; return this; }
@@ -234,6 +258,11 @@ public record ParticleFieldConfiguration(
             }
             return this;
         }
+        public Builder vortexAngularSpeed(double vortexAngularSpeed) { this.vortexAngularSpeed = vortexAngularSpeed; return this; }
+        public Builder vortexRadialSpeed(double vortexRadialSpeed) { this.vortexRadialSpeed = vortexRadialSpeed; return this; }
+        public Builder vortexVerticalSpeed(double vortexVerticalSpeed) { this.vortexVerticalSpeed = vortexVerticalSpeed; return this; }
+        public Builder vortexTightness(double vortexTightness) { this.vortexTightness = vortexTightness; return this; }
+        public Builder vortexHeight(double vortexHeight) { this.vortexHeight = vortexHeight; return this; }
 
         public ParticleFieldConfiguration build() {
             return new ParticleFieldConfiguration(
@@ -245,7 +274,9 @@ public record ParticleFieldConfiguration(
                     noisePersistence, noiseLacunarity, filamentAnisotropy,
                     seed, glowEnabled, glowIntensity,
                     gravity, wind, drag, minLifetime, maxLifetime,
-                    minSpeed, maxSpeed, spreadAngle, emitterSize
+                    minSpeed, maxSpeed, spreadAngle, emitterSize,
+                    vortexAngularSpeed, vortexRadialSpeed, vortexVerticalSpeed,
+                    vortexTightness, vortexHeight
             );
         }
     }
@@ -267,7 +298,9 @@ public record ParticleFieldConfiguration(
                 noisePersistence, noiseLacunarity, filamentAnisotropy,
                 newSeed, glowEnabled, glowIntensity,
                 gravity, wind, drag, minLifetime, maxLifetime,
-                minSpeed, maxSpeed, spreadAngle, emitterSize
+                minSpeed, maxSpeed, spreadAngle, emitterSize,
+                vortexAngularSpeed, vortexRadialSpeed, vortexVerticalSpeed,
+                vortexTightness, vortexHeight
         );
     }
 
@@ -284,7 +317,9 @@ public record ParticleFieldConfiguration(
                 noisePersistence, noiseLacunarity, filamentAnisotropy,
                 seed, glowEnabled, glowIntensity,
                 gravity, wind, drag, minLifetime, maxLifetime,
-                minSpeed, maxSpeed, spreadAngle, emitterSize
+                minSpeed, maxSpeed, spreadAngle, emitterSize,
+                vortexAngularSpeed, vortexRadialSpeed, vortexVerticalSpeed,
+                vortexTightness, vortexHeight
         );
     }
 
@@ -301,7 +336,9 @@ public record ParticleFieldConfiguration(
                 noisePersistence, noiseLacunarity, filamentAnisotropy,
                 seed, enabled, intensity,
                 gravity, wind, drag, minLifetime, maxLifetime,
-                minSpeed, maxSpeed, spreadAngle, emitterSize
+                minSpeed, maxSpeed, spreadAngle, emitterSize,
+                vortexAngularSpeed, vortexRadialSpeed, vortexVerticalSpeed,
+                vortexTightness, vortexHeight
         );
     }
 
@@ -318,7 +355,9 @@ public record ParticleFieldConfiguration(
                 noisePersistence, noiseLacunarity, filamentAnisotropy,
                 seed, glowEnabled, glowIntensity,
                 gravity, wind, drag, minLifetime, maxLifetime,
-                minSpeed, maxSpeed, spreadAngle, emitterSize
+                minSpeed, maxSpeed, spreadAngle, emitterSize,
+                vortexAngularSpeed, vortexRadialSpeed, vortexVerticalSpeed,
+                vortexTightness, vortexHeight
         );
     }
 
@@ -335,7 +374,9 @@ public record ParticleFieldConfiguration(
                 noisePersistence, noiseLacunarity, filamentAnisotropy,
                 seed, glowEnabled, glowIntensity,
                 gravity, wind, drag, minLifetime, maxLifetime,
-                minSpeed, maxSpeed, spreadAngle, emitterSize
+                minSpeed, maxSpeed, spreadAngle, emitterSize,
+                vortexAngularSpeed, vortexRadialSpeed, vortexVerticalSpeed,
+                vortexTightness, vortexHeight
         );
     }
 }

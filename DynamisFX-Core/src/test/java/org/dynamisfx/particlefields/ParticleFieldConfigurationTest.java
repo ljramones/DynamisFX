@@ -59,6 +59,17 @@ public class ParticleFieldConfigurationTest {
         }
 
         @Test
+        @DisplayName("default vortex values")
+        void defaultVortexValues() {
+            ParticleFieldConfiguration config = ParticleFieldConfiguration.builder().build();
+            assertThat(config.vortexAngularSpeed(), is(2.0));
+            assertThat(config.vortexRadialSpeed(), is(0.0));
+            assertThat(config.vortexVerticalSpeed(), is(0.0));
+            assertThat(config.vortexTightness(), is(1.0));
+            assertThat(config.vortexHeight(), is(50.0));
+        }
+
+        @Test
         @DisplayName("default nebula values")
         void defaultNebulaValues() {
             ParticleFieldConfiguration config = ParticleFieldConfiguration.builder().build();
@@ -99,6 +110,26 @@ public class ParticleFieldConfigurationTest {
             assertThat(config.minLifetime(), is(1.0));
             assertThat(config.maxLifetime(), is(3.0));
             assertThat(config.spreadAngle(), is(15.0));
+        }
+
+        @Test
+        @DisplayName("builder sets vortex fields")
+        void builderSetsVortexFields() {
+            ParticleFieldConfiguration config = ParticleFieldConfiguration.builder()
+                    .type(ParticleFieldType.PORTAL)
+                    .vortexAngularSpeed(5.0)
+                    .vortexRadialSpeed(-1.5)
+                    .vortexVerticalSpeed(2.0)
+                    .vortexTightness(0.8)
+                    .vortexHeight(30.0)
+                    .build();
+
+            assertThat(config.type(), is(ParticleFieldType.PORTAL));
+            assertThat(config.vortexAngularSpeed(), is(5.0));
+            assertThat(config.vortexRadialSpeed(), is(-1.5));
+            assertThat(config.vortexVerticalSpeed(), is(2.0));
+            assertThat(config.vortexTightness(), is(0.8));
+            assertThat(config.vortexHeight(), is(30.0));
         }
     }
 
