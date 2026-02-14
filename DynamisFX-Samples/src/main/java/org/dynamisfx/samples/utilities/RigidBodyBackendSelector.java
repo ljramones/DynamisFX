@@ -17,35 +17,61 @@ final class RigidBodyBackendSelector {
     static final String BACKEND_PROPERTY = "dynamisfx.samples.physics.backend";
     static final String BACKEND_ODE4J = "ode4j";
     static final String BACKEND_JOLT = "jolt";
+    static final String FORCE_JOLT_FAILURE_PROPERTY = "dynamisfx.samples.physics.forceJoltFailure";
+    private static volatile BackendSelection lastSelection =
+            new BackendSelection(BACKEND_ODE4J, BACKEND_ODE4J, false, "default");
 
     private RigidBodyBackendSelector() {
     }
 
     static PhysicsBackend createBackend() {
         String configured = System.getProperty(BACKEND_PROPERTY, BACKEND_ODE4J).trim().toLowerCase();
-        return switch (configured) {
-            case BACKEND_ODE4J -> requireBackend(new Ode4jBackendFactory().createBackend(), BACKEND_ODE4J);
-            case BACKEND_JOLT -> createJoltOrFallbackToOde4j();
+        PhysicsBackend backend = switch (configured) {
+            case BACKEND_ODE4J -> createOde4j(configured);
+            case BACKEND_JOLT -> createJoltOrFallbackToOde4j(configured);
             default -> throw new IllegalArgumentException(
                     "Unsupported backend '" + configured + "'. Use '" + BACKEND_ODE4J + "' or '" + BACKEND_JOLT + "'.");
         };
+        return backend;
     }
 
     static RigidBodyWorld createRigidWorld(PhysicsWorldConfiguration configuration) {
         return new BackendRigidBodyWorldAdapter(createBackend(), configuration);
     }
 
-    private static PhysicsBackend createJoltOrFallbackToOde4j() {
+    static BackendSelection selectionSnapshot() {
+        return lastSelection;
+    }
+
+    private static PhysicsBackend createJoltOrFallbackToOde4j(String configured) {
+        if (Boolean.getBoolean(FORCE_JOLT_FAILURE_PROPERTY)) {
+            LOG.warning("Forced Jolt failure property is enabled; falling back to ODE4j.");
+            return createOde4jFallback(configured, "forced-failure-property");
+        }
         try {
             PhysicsBackend jolt = new JoltBackendFactory().createBackend();
             if (jolt != null) {
+                lastSelection = new BackendSelection(configured, BACKEND_JOLT, false, null);
                 return jolt;
             }
             LOG.warning("Jolt backend returned null; falling back to ODE4j.");
+            return createOde4jFallback(configured, "jolt-returned-null");
         } catch (RuntimeException ex) {
             LOG.log(Level.WARNING, "Failed to initialize Jolt backend; falling back to ODE4j.", ex);
+            return createOde4jFallback(configured, ex.getClass().getSimpleName());
         }
-        return requireBackend(new Ode4jBackendFactory().createBackend(), BACKEND_ODE4J);
+    }
+
+    private static PhysicsBackend createOde4j(String configured) {
+        PhysicsBackend backend = requireBackend(new Ode4jBackendFactory().createBackend(), BACKEND_ODE4J);
+        lastSelection = new BackendSelection(configured, BACKEND_ODE4J, false, null);
+        return backend;
+    }
+
+    private static PhysicsBackend createOde4jFallback(String configured, String reason) {
+        PhysicsBackend backend = requireBackend(new Ode4jBackendFactory().createBackend(), BACKEND_ODE4J);
+        lastSelection = new BackendSelection(configured, BACKEND_ODE4J, true, reason);
+        return backend;
     }
 
     private static PhysicsBackend requireBackend(PhysicsBackend backend, String backendName) {
@@ -53,5 +79,8 @@ final class RigidBodyBackendSelector {
             throw new IllegalStateException("Backend factory returned null for '" + backendName + "'.");
         }
         return backend;
+    }
+
+    record BackendSelection(String requested, String resolved, boolean fallbackUsed, String fallbackReason) {
     }
 }

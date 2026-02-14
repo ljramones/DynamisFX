@@ -29,7 +29,15 @@ jobs:
         run: mvn -B -DskipTests compile
 
       - name: Sampler smoke tests
-        run: mvn -B -pl DynamisFX-Samples test -Dtest=ServiceDiscoverySmokeTest,RigidBodyBackendSelectorTest
+        run: >
+          mvn -B -pl DynamisFX-Samples test
+          -Dtest=org.dynamisfx.samples.utilities.ServiceDiscoverySmokeTest,org.dynamisfx.samples.utilities.RigidBodyBackendSelectorTest
+
+      - name: Jolt forced-fallback smoke
+        run: >
+          mvn -B -pl DynamisFX-Samples test
+          -Dtest=RigidBodyBackendSelectorTest#joltForcedFailureFallsBackToOde4j
+          -Ddynamisfx.samples.physics.forceJoltFailure=true
 
       - name: SLF4J dependency sanity
         run: |

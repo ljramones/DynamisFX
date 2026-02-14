@@ -126,6 +126,14 @@ public class Ode4jPhysicsSyncSample extends ShapeBaseSample<Group> {
         root.setPadding(new Insets(8));
         String backendId = backend != null ? backend.id() : "unavailable";
         root.getChildren().add(new Label("Runtime Tuning (" + backendId + ")"));
+        RigidBodyBackendSelector.BackendSelection selection = RigidBodyBackendSelector.selectionSnapshot();
+        if (selection.fallbackUsed()) {
+            root.getChildren().add(new Label("Selection: " + selection.requested()
+                    + " -> " + selection.resolved()
+                    + " (fallback: " + selection.fallbackReason() + ")"));
+        } else {
+            root.getChildren().add(new Label("Selection: " + selection.requested() + " -> " + selection.resolved()));
+        }
 
         GridPane grid = new GridPane();
         grid.setHgap(8);
