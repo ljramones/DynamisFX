@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * This file contains code derived from FXyz (https://github.com/FXyz/FXyz),
- * originally licensed under the BSD 3-Clause License.
- * Copyright (c) 2013-2019, F(X)yz. All rights reserved.
  */
 
 package org.dynamisfx.scene.paint;
