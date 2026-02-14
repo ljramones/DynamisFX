@@ -83,6 +83,8 @@ Open the welcome page and inspect **Runtime Diagnostics**:
 
 ## Release gate
 
+Use `docs/Release_Candidate_Checklist.md` as the per-cut execution template.
+
 Before release, confirm:
 
 1. CI matrix passes on Linux and macOS with JDK 25.
