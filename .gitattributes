@@ -1,3 +1,10 @@
+# 3D model/scene files — exclude from GitHub language statistics
+# (.ma is Maya ASCII but Linguist misclassifies it as Mathematica/Wolfram)
+*.ma linguist-vendored
+*.obj linguist-vendored
+*.mtl linguist-vendored
+*.bin linguist-vendored
+*.usda linguist-vendored
 *.obj filter=lfs diff=lfs merge=lfs -text
 *.ma filter=lfs diff=lfs merge=lfs -text
 *.mtl filter=lfs diff=lfs merge=lfs -text
