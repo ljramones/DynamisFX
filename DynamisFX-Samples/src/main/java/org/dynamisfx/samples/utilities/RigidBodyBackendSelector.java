@@ -32,6 +32,14 @@ final class RigidBodyBackendSelector {
             default -> throw new IllegalArgumentException(
                     "Unsupported backend '" + configured + "'. Use '" + BACKEND_ODE4J + "' or '" + BACKEND_JOLT + "'.");
         };
+        BackendSelection selection = lastSelection;
+        LOG.info(() -> "Rigid backend selection requested="
+                + selection.requested()
+                + ", resolved="
+                + selection.resolved()
+                + ", fallback="
+                + selection.fallbackUsed()
+                + (selection.fallbackReason() == null ? "" : ", reason=" + selection.fallbackReason()));
         return backend;
     }
 

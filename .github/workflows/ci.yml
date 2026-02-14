@@ -28,6 +28,9 @@ jobs:
       - name: Build (compile)
         run: mvn -B -DskipTests compile
 
+      - name: Jolt diagnostics test
+        run: mvn -B -pl DynamisFX-Physics-Jolt test -Dtest=JoltRuntimeDiagnosticsTest
+
       - name: Sampler smoke tests
         run: >
           mvn -B -pl DynamisFX-Samples test
@@ -47,3 +50,7 @@ jobs:
             cat slf4j-tree.txt
             exit 1
           fi
+
+      - name: JavaFX jlink smoke (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: mvn -B -pl DynamisFX-Samples -DskipTests clean package javafx:jlink
