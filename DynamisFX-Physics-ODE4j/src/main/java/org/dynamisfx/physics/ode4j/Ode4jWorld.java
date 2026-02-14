@@ -1,3 +1,19 @@
+/*
+ * Copyright 2024-2026 DynamisFX Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.dynamisfx.physics.ode4j;
 
 import java.util.Collection;
@@ -9,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import org.dynamisfx.physics.api.ConstraintCapability;
 import org.dynamisfx.physics.api.OverlapSphereQuery;
 import org.dynamisfx.physics.api.PhysicsBodyHandle;
 import org.dynamisfx.physics.api.PhysicsCapabilities;
@@ -70,6 +87,7 @@ public final class Ode4jWorld implements PhysicsWorld {
     private final DSpace space;
     private final DJointGroup contactGroup;
     private final QueryCapability queryCapability = new Ode4jQueryCapability();
+    private final ConstraintCapability constraintCapability = new Ode4jConstraintCapability();
     private PhysicsRuntimeTuning runtimeTuning;
     private long nextHandleValue;
     private long nextConstraintHandleValue;
@@ -258,6 +276,12 @@ public final class Ode4jWorld implements PhysicsWorld {
     public Optional<QueryCapability> queryCapability() {
         ensureOpen();
         return Optional.of(queryCapability);
+    }
+
+    @Override
+    public Optional<ConstraintCapability> constraintCapability() {
+        ensureOpen();
+        return Optional.of(constraintCapability);
     }
 
     @Override
@@ -474,7 +498,108 @@ public final class Ode4jWorld implements PhysicsWorld {
         }
     }
 
-    private record ConstraintRecord(PhysicsConstraintDefinition definition, DJoint joint) {
+    private static final class ConstraintRecord {
+        private final PhysicsConstraintDefinition definition;
+        private final DJoint joint;
+        private double motorVelocity;
+        private double motorMaxForce;
+
+        ConstraintRecord(PhysicsConstraintDefinition definition, DJoint joint) {
+            this.definition = definition;
+            this.joint = joint;
+        }
+
+        PhysicsConstraintDefinition definition() {
+            return definition;
+        }
+
+        DJoint joint() {
+            return joint;
+        }
+    }
+
+    private ConstraintRecord requireConstraintRecord(PhysicsConstraintHandle handle) {
+        if (handle == null) {
+            throw new IllegalArgumentException("handle must not be null");
+        }
+        ConstraintRecord record = constraints.get(handle);
+        if (record == null) {
+            throw new IllegalArgumentException("unknown constraint handle: " + handle.value());
+        }
+        return record;
+    }
+
+    private final class Ode4jConstraintCapability implements ConstraintCapability {
+
+        @Override
+        public boolean supportsConstraintMotors() {
+            return true;
+        }
+
+        @Override
+        public boolean supportsConstraintLimitUpdates() {
+            return true;
+        }
+
+        @Override
+        public void setMotorVelocity(PhysicsConstraintHandle handle, double velocity) {
+            ensureOpen();
+            ConstraintRecord record = requireConstraintRecord(handle);
+            DJoint joint = record.joint();
+
+            if (joint instanceof DHingeJoint hinge) {
+                hinge.setParamVel(velocity);
+                record.motorVelocity = velocity;
+            } else if (joint instanceof DSliderJoint slider) {
+                slider.setParamVel(velocity);
+                record.motorVelocity = velocity;
+            } else {
+                throw new IllegalArgumentException("Motor not supported for constraint type: "
+                        + record.definition().type());
+            }
+        }
+
+        @Override
+        public void setMotorMaxForce(PhysicsConstraintHandle handle, double maxForce) {
+            ensureOpen();
+            ConstraintRecord record = requireConstraintRecord(handle);
+            DJoint joint = record.joint();
+
+            if (joint instanceof DHingeJoint hinge) {
+                hinge.setParamFMax(maxForce);
+                record.motorMaxForce = maxForce;
+            } else if (joint instanceof DSliderJoint slider) {
+                slider.setParamFMax(maxForce);
+                record.motorMaxForce = maxForce;
+            } else {
+                throw new IllegalArgumentException("Motor not supported for constraint type: "
+                        + record.definition().type());
+            }
+        }
+
+        @Override
+        public double getMotorVelocity(PhysicsConstraintHandle handle) {
+            ensureOpen();
+            ConstraintRecord record = requireConstraintRecord(handle);
+            DJoint joint = record.joint();
+
+            if (joint instanceof DHingeJoint || joint instanceof DSliderJoint) {
+                return record.motorVelocity;
+            }
+            return 0.0;
+        }
+
+        @Override
+        public double getMotorMaxForce(PhysicsConstraintHandle handle) {
+            ensureOpen();
+            ConstraintRecord record = requireConstraintRecord(handle);
+            DJoint joint = record.joint();
+
+            if (joint instanceof DHingeJoint || joint instanceof DSliderJoint) {
+                return record.motorMaxForce;
+            }
+            return 0.0;
+        }
     }
 
     private final class Ode4jQueryCapability implements QueryCapability {

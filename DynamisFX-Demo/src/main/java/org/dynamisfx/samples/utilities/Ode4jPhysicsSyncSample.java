@@ -1,9 +1,26 @@
+/*
+ * Copyright 2024-2026 DynamisFX Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.dynamisfx.samples.utilities;
 
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.AmbientLight;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.input.KeyCode;
@@ -63,10 +80,11 @@ public class Ode4jPhysicsSyncSample extends ShapeBaseSample<Group> {
                 1.0 / 120.0));
         sceneSync = new PhysicsSceneSync<>((node, state) -> {
             node.setTranslateX(state.position().x());
-            node.setTranslateY(state.position().y());
+            node.setTranslateY(-state.position().y());
             node.setTranslateZ(state.position().z());
         });
         accumulator = new FixedStepAccumulator(1.0 / 120.0, 8);
+        worldGroup.getChildren().add(new AmbientLight(Color.color(0.45, 0.45, 0.45)));
 
         createFloor();
         createDynamicBox(0, 170, 0, 70, 70, 70, Color.CORNFLOWERBLUE);
@@ -153,7 +171,7 @@ public class Ode4jPhysicsSyncSample extends ShapeBaseSample<Group> {
     private void createFloor() {
         Box floor = new Box(700, 40, 700);
         floor.setMaterial(new PhongMaterial(Color.DIMGRAY));
-        floor.setTranslateY(-220);
+        floor.setTranslateY(220);
         worldGroup.getChildren().add(floor);
 
         PhysicsBodyHandle handle = world.createBody(new PhysicsBodyDefinition(
@@ -176,6 +194,9 @@ public class Ode4jPhysicsSyncSample extends ShapeBaseSample<Group> {
             Color color) {
         Box box = new Box(sx, sy, sz);
         box.setMaterial(new PhongMaterial(color));
+        box.setTranslateX(x);
+        box.setTranslateY(-y);
+        box.setTranslateZ(z);
         worldGroup.getChildren().add(box);
 
         PhysicsBodyHandle handle = world.createBody(new PhysicsBodyDefinition(

@@ -1,6 +1,23 @@
+/*
+ * Copyright 2024-2026 DynamisFX Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.dynamisfx.samples.utilities;
 
 import javafx.animation.AnimationTimer;
+import javafx.scene.AmbientLight;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
@@ -98,7 +115,7 @@ public class HybridPhysicsCoordinatorSample extends ShapeBaseSample<Group> {
                     PhysicsBodyState state = snapshot.generalStates().get(generalBody);
                     if (state != null) {
                         satNode.setTranslateX(state.position().x() / 10_000.0);
-                        satNode.setTranslateY(state.position().y() / 10_000.0);
+                        satNode.setTranslateY(-state.position().y() / 10_000.0);
                         satNode.setTranslateZ(state.position().z() / 10_000.0);
                     }
                 }
@@ -124,6 +141,7 @@ public class HybridPhysicsCoordinatorSample extends ShapeBaseSample<Group> {
         Sphere central = new Sphere(30);
         central.setMaterial(new PhongMaterial(Color.CADETBLUE));
         worldGroup.getChildren().add(central);
+        worldGroup.getChildren().add(new AmbientLight(Color.color(0.45, 0.45, 0.45)));
 
         satNode = new Box(16, 16, 16);
         ((Box) satNode).setMaterial(new PhongMaterial(Color.ORANGE));

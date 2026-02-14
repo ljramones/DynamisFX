@@ -1,3 +1,19 @@
+/*
+ * Copyright 2024-2026 DynamisFX Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.dynamisfx.samples.utilities;
 
 import java.util.logging.Level;
@@ -11,7 +27,7 @@ import org.dynamisfx.simulation.rigid.RigidBodyWorld;
 /**
  * Selects rigid-body backend for samples using a simple runtime property.
  */
-final class RigidBodyBackendSelector {
+public final class RigidBodyBackendSelector {
     private static final Logger LOG = Logger.getLogger(RigidBodyBackendSelector.class.getName());
 
     static final String BACKEND_PROPERTY = "dynamisfx.samples.physics.backend";
@@ -28,7 +44,7 @@ final class RigidBodyBackendSelector {
     private RigidBodyBackendSelector() {
     }
 
-    static PhysicsBackend createBackend() {
+    public static PhysicsBackend createBackend() {
         String configured = System.getProperty(BACKEND_PROPERTY, BACKEND_ODE4J).trim().toLowerCase();
         PhysicsBackend backend = switch (configured) {
             case BACKEND_ODE4J -> createOde4j(configured);
@@ -48,11 +64,11 @@ final class RigidBodyBackendSelector {
         return backend;
     }
 
-    static RigidBodyWorld createRigidWorld(PhysicsWorldConfiguration configuration) {
+    public static RigidBodyWorld createRigidWorld(PhysicsWorldConfiguration configuration) {
         return new BackendRigidBodyWorldAdapter(createBackend(), configuration);
     }
 
-    static BackendSelection selectionSnapshot() {
+    public static BackendSelection selectionSnapshot() {
         return lastSelection;
     }
 
@@ -105,6 +121,6 @@ final class RigidBodyBackendSelector {
         }
     }
 
-    record BackendSelection(String requested, String resolved, boolean fallbackUsed, String fallbackReason) {
+    public record BackendSelection(String requested, String resolved, boolean fallbackUsed, String fallbackReason) {
     }
 }

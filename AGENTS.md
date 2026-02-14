@@ -2,27 +2,27 @@
 
 ## Project Structure & Module Organization
 This is a multi-module Maven build for the DynamisFX JavaFX library. Main modules live at the repo root:
-- `DynamisFX-Core/` provides core 3D shapes, utilities, and geometry types under `src/main/java/org/fxyz3d`.
+- `DynamisFX-Core/` provides core 3D shapes, utilities, and geometry types under `src/main/java/org/dynamisfx`.
 - `DynamisFX-Importers/` contains model importers and related tests.
 - `DynamisFX-Client/` provides the sampler client UI.
-- `DynamisFX-Samples/` contains sample applications, FXML, and resources.
+- `DynamisFX-Demo/` contains sample applications, FXML, and resources.
 Parent and module build configuration is defined in `pom.xml` files. Images and docs live under `resources/`.
 
 ## Build, Test, and Development Commands
 Use JDK 25 with Maven:
 - `mvn clean install`: build all modules.
-- `mvn -pl DynamisFX-Samples -DskipTests javafx:run`: launch the DynamisFX sampler.
-- `mvn -pl DynamisFX-Samples -DskipTests clean package javafx:jlink`: produce a custom runtime image.
+- `mvn -pl DynamisFX-Demo -DskipTests javafx:run`: launch the DynamisFX sampler.
+- `mvn -pl DynamisFX-Demo -DskipTests clean package javafx:jlink`: produce a custom runtime image.
 
 ## Coding Style & Naming Conventions
-Code is Java, organized by package `org.fxyz3d`. Follow standard Java conventions: 4-space indentation, `UpperCamelCase` for classes, `lowerCamelCase` for methods/fields, and `UPPER_SNAKE_CASE` for constants. Keep new classes in the module-appropriate package; e.g., shapes in `DynamisFX-Core/src/main/java/org/fxyz3d/shapes/`.
+Code is Java, organized by package `org.dynamisfx`. Follow standard Java conventions: 4-space indentation, `UpperCamelCase` for classes, `lowerCamelCase` for methods/fields, and `UPPER_SNAKE_CASE` for constants. Keep new classes in the module-appropriate package; e.g., shapes in `DynamisFX-Core/src/main/java/org/dynamisfx/shapes/`.
 
 ## Testing Guidelines
-Unit tests live beside modules in `src/test/java`. Example: `DynamisFX-Core/src/test/java/org/fxyz3d/geometry/Point3DTest.java`. Run tests with `mvn test` (or module-scoped Maven test commands). Prefer naming tests `*Test.java` and mirroring the package of the class under test.
+Unit tests live beside modules in `src/test/java`. Example: `DynamisFX-Core/src/test/java/org/dynamisfx/geometry/Point3DTest.java`. Run tests with `mvn test` (or module-scoped Maven test commands). Prefer naming tests `*Test.java` and mirroring the package of the class under test.
 
 ## Commit & Pull Request Guidelines
 No Git history is available in this workspace, so commit message conventions cannot be inferred. Use clear, imperative subject lines (e.g., "Add Spheroid mesh defaults").
-For PRs, include a short summary, note impacted modules (e.g., `DynamisFX-Core`), and attach screenshots when UI behavior changes (FXyz sampler or sample apps).
+For PRs, include a short summary, note impacted modules (e.g., `DynamisFX-Core`), and attach screenshots when UI behavior changes (DynamisFX sampler or sample apps).
 
 ## Configuration Notes
 This repo targets Java 25 and JavaFX 21. If you add new samples or resources, place them in the module-specific `src/main/resources` directories and register any new samples with the sampler when applicable.

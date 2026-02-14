@@ -27,10 +27,10 @@ mvn test -pl DynamisFX-Core
 
 ## Module Structure
 
-- **DynamisFX-Core** - Core 3D shapes, geometry, and utilities (`org.fxyz3d.shapes`, `org.fxyz3d.geometry`, `org.fxyz3d.utils`)
+- **DynamisFX-Core** - Core 3D shapes, geometry, and utilities (`org.dynamisfx.shapes`, `org.dynamisfx.geometry`, `org.dynamisfx.utils`)
 - **DynamisFX-Importers** - 3D model format importers
-- **DynamisFX-Client** - FXSampler UI framework
-- **DynamisFX-Samples** - Sample applications and demos (entry point: `Launcher` → `FXyzClient`)
+- **DynamisFX-Client** - DynamisFX Sampler UI framework
+- **DynamisFX-Demo** - Sample applications and demos (entry point: `Launcher` → `DynamisFXClient`)
 
 ## Architecture Notes
 
@@ -42,9 +42,9 @@ mvn test -pl DynamisFX-Core
 
 ## Coding Conventions
 
-- Package root: `org.fxyz3d`
+- Package root: `org.dynamisfx`
 - 4-space indentation
 - Standard Java naming: `UpperCamelCase` for classes, `lowerCamelCase` for methods/fields
-- New shapes go in `DynamisFX-Core/src/main/java/org/fxyz3d/shapes/`
+- New shapes go in `DynamisFX-Core/src/main/java/org/dynamisfx/shapes/`
 - Tests mirror source package structure in `src/test/java/`
 - BSD 3-Clause license headers required on all source files

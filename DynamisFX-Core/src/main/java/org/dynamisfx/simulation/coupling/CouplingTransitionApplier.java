@@ -1,3 +1,19 @@
+/*
+ * Copyright 2024-2026 DynamisFX Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.dynamisfx.simulation.coupling;
 
 import java.util.List;
@@ -86,7 +102,19 @@ public final class CouplingTransitionApplier implements CouplingTransitionListen
         PhysicsBodyHandle handle;
         if (existing != null) {
             handle = existing.bodyHandle();
-            zone.world().setBodyState(handle, seedState);
+            try {
+                zone.world().setBodyState(handle, seedState);
+            } catch (IllegalArgumentException ex) {
+                // Stale binding (body already removed externally): recreate from seed.
+                registry.unbind(event.objectId());
+                existing = null;
+                PhysicsBodyDefinition definition = bodyDefinitionProvider.createBodyDefinition(
+                        event.objectId(),
+                        event,
+                        zone,
+                        seedState);
+                handle = zone.world().createBody(definition);
+            }
         } else {
             PhysicsBodyDefinition definition = bodyDefinitionProvider.createBodyDefinition(
                     event.objectId(),
@@ -108,8 +136,12 @@ public final class CouplingTransitionApplier implements CouplingTransitionListen
             registry.unbind(event.objectId());
             return;
         }
-        PhysicsBodyState live = zone.world().getBodyState(binding.bodyHandle());
-        stateBuffers.rigid().put(event.objectId(), live);
+        try {
+            PhysicsBodyState live = zone.world().getBodyState(binding.bodyHandle());
+            stateBuffers.rigid().put(event.objectId(), live);
+        } catch (IllegalArgumentException ex) {
+            // Body was already removed; continue with cleanup.
+        }
         zone.world().removeBody(binding.bodyHandle());
         registry.unbind(event.objectId());
     }

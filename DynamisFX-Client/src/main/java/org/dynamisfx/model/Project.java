@@ -1,31 +1,22 @@
-/**
- * Project.java
+/*
+ * Copyright 2024-2026 DynamisFX Contributors
  *
- * Copyright (c) 2013-2016, F(X)yz
- * All rights reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *     * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in the
- * documentation and/or other materials provided with the distribution.
- *     * Neither the name of F(X)yz, any associated website, nor the
- * names of its contributors may be used to endorse or promote products
- * derived from this software without specific prior written permission.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL F(X)yz BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */ 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * This file contains code derived from FXyz (https://github.com/FXyz/FXyz),
+ * originally licensed under the BSD 3-Clause License.
+ * Copyright (c) 2013-2019, F(X)yz. All rights reserved.
+ */
 
 package org.dynamisfx.model;
 
@@ -57,7 +48,37 @@ public class Project {
             Map.entry("HybridPhysicsCoordinatorSample", new String[]{"Pipeline Physics"}),
             Map.entry("CouplingTransitionDemo", new String[]{"Pipeline Physics"}),
             Map.entry("OrekitOrbitSyncSample", new String[]{"Pipeline Physics"}),
-            Map.entry("CollisionPipelineMonitorDemo", new String[]{"Pipeline Physics"}));
+            Map.entry("CollisionPipelineMonitorDemo", new String[]{"Pipeline Physics"}),
+            // ODE4j Demo ports - Phase 2
+            Map.entry("Ode4jBoxstackDemo", new String[]{"Physics", "ODE4J Demos"}),
+            Map.entry("Ode4jChainDemo", new String[]{"Physics", "ODE4J Demos"}),
+            Map.entry("Ode4jHingeDemo", new String[]{"Physics", "ODE4J Demos"}),
+            Map.entry("Ode4jSliderDemo", new String[]{"Physics", "ODE4J Demos"}),
+            Map.entry("Ode4jFrictionDemo", new String[]{"Physics", "ODE4J Demos"}),
+            Map.entry("Ode4jKinematicDemo", new String[]{"Physics", "ODE4J Demos"}),
+            Map.entry("Ode4jCardsDemo", new String[]{"Physics", "ODE4J Demos"}),
+            Map.entry("Ode4jGyroscopicDemo", new String[]{"Physics", "ODE4J Demos"}),
+            // ODE4j Demo ports - Phase 3
+            Map.entry("Ode4jDominoDemo", new String[]{"Physics", "ODE4J Demos"}),
+            Map.entry("Ode4jNewtonsCradleDemo", new String[]{"Physics", "ODE4J Demos"}),
+            Map.entry("Ode4jWreckingBallDemo", new String[]{"Physics", "ODE4J Demos"}),
+            Map.entry("Ode4jBridgeDemo", new String[]{"Physics", "ODE4J Demos"}),
+            Map.entry("Ode4jPendulumWaveDemo", new String[]{"Physics", "ODE4J Demos"}),
+            Map.entry("Ode4jStackChallengeDemo", new String[]{"Physics", "ODE4J Demos"}),
+            // ODE4j Demo ports - Phase 4 (Motor-driven)
+            Map.entry("Ode4jMotorDemo", new String[]{"Physics", "ODE4J Demos"}),
+            Map.entry("Ode4jCraneDemo", new String[]{"Physics", "ODE4J Demos"}),
+            Map.entry("Ode4jBuggyDemo", new String[]{"Physics", "ODE4J Demos"}),
+            Map.entry("Ode4jRagdollDemo", new String[]{"Physics", "ODE4J Demos"}),
+            // ODE4j Demo ports - Phase 5 (Interactive)
+            Map.entry("Ode4jSeesawDemo", new String[]{"Physics", "ODE4J Demos"}),
+            Map.entry("Ode4jPinballDemo", new String[]{"Physics", "ODE4J Demos"}),
+            Map.entry("Ode4jCatapultDemo", new String[]{"Physics", "ODE4J Demos"}),
+            Map.entry("Ode4jWindmillDemo", new String[]{"Physics", "ODE4J Demos"}),
+            Map.entry("Ode4jElevatorDemo", new String[]{"Physics", "ODE4J Demos"}),
+            Map.entry("Ode4jMarbleRunDemo", new String[]{"Physics", "ODE4J Demos"}),
+            Map.entry("Ode4jBalancingDemo", new String[]{"Physics", "ODE4J Demos"}),
+            Map.entry("Ode4jConveyorDemo", new String[]{"Physics", "ODE4J Demos"}));
     
     private final String name;
     
@@ -77,7 +98,8 @@ public class Project {
 
     public void addSample(String packagePath, DynamisFXSample sample) {
         String[] overridePath = SAMPLE_CATEGORY_OVERRIDES.get(sample.getClass().getSimpleName());
-        if (overridePath != null && packagePath.startsWith("org.dynamisfx.samples.utilities")) {
+        if (overridePath != null && (packagePath.startsWith("org.dynamisfx.samples.utilities")
+                || packagePath.startsWith("org.dynamisfx.samples.physics"))) {
             sampleTree.addSample(overridePath, sample);
             return;
         }
