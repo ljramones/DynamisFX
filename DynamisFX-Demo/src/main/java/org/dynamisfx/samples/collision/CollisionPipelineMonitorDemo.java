@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.dynamisfx.samples.utilities;
+package org.dynamisfx.samples.collision;
 
 import java.util.ArrayList;
 import java.util.List;

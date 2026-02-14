@@ -57,4 +57,6 @@ module org.dynamisfx.core {
     exports org.dynamisfx.utils;
     exports org.dynamisfx.utils.geom;
     exports org.dynamisfx.particlefields;
+    exports org.dynamisfx.particlefields.orbital;
+    exports org.dynamisfx.particlefields.linear;
 }

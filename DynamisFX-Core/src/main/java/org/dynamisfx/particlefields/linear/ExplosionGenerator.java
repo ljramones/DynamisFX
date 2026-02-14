@@ -13,61 +13,60 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.dynamisfx.particlefields;
+package org.dynamisfx.particlefields.linear;
 
 import javafx.scene.paint.Color;
+import org.dynamisfx.particlefields.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 /**
- * Generator for swarm particles.
+ * Generator for explosion particles.
  * <p>
- * Erratic grouped particles with randomized velocity changes.
- * Moderate lifetime. Configurable colors.
- * Particles cluster around a center with occasional darting movements.
+ * Radial burst from center point. High initial speed, strong drag for deceleration.
+ * Short lifetime. Orange/yellow sparks fading to gray.
  */
-public class SwarmGenerator implements ParticleFieldGenerator {
+public class ExplosionGenerator implements ParticleFieldGenerator {
 
     @Override
     public List<ParticleFieldElement> generate(ParticleFieldConfiguration config, Random random) {
         List<ParticleFieldElement> elements = new ArrayList<>(config.numElements());
 
         double sizeRange = config.maxSize() - config.minSize();
-        double clusterRadius = config.outerRadius() * 0.3;
         double lifetimeRange = config.maxLifetime() - config.minLifetime();
         double speedRange = config.maxSpeed() - config.minSpeed();
 
         for (int i = 0; i < config.numElements(); i++) {
-            // Cluster around center with Gaussian distribution
-            double x = random.nextGaussian() * clusterRadius;
-            double y = random.nextGaussian() * clusterRadius;
-            double z = random.nextGaussian() * clusterRadius;
+            // All start at or near center
+            double x = (random.nextGaussian()) * 0.5;
+            double y = (random.nextGaussian()) * 0.5;
+            double z = (random.nextGaussian()) * 0.5;
 
-            // Erratic velocity - random direction with moderate speed
+            // Radial velocity - random direction, high speed
             double speed = config.minSpeed() + random.nextDouble() * speedRange;
+            // Uniform random direction on sphere
             double theta = random.nextDouble() * 2 * Math.PI;
             double phi = Math.acos(2 * random.nextDouble() - 1);
             double vx = speed * Math.sin(phi) * Math.cos(theta);
             double vy = speed * Math.sin(phi) * Math.sin(theta);
             double vz = speed * Math.cos(phi);
 
-            // Slight centering acceleration (swarm cohesion)
-            double dist = Math.sqrt(x * x + y * y + z * z);
-            double cohesion = 0.5;
-            double ax = dist > 0 ? -x / dist * cohesion : 0;
-            double ay = dist > 0 ? -y / dist * cohesion : 0;
-            double az = dist > 0 ? -z / dist * cohesion : 0;
+            // Gravity pulls down slightly
+            double[] gravity = config.gravity();
+            double ax = gravity[0];
+            double ay = gravity[1] * 0.3; // reduced gravity for explosions
+            double az = gravity[2];
 
             double lifetime = config.minLifetime() + random.nextDouble() * lifetimeRange;
             double size = config.minSize() + random.nextDouble() * sizeRange;
 
+            // Orange/yellow sparks
             Color color = interpolateColor(config.primaryColor(), config.secondaryColor(),
                     random.nextDouble());
-            // Slight glow/transparency
             color = Color.color(color.getRed(), color.getGreen(), color.getBlue(),
-                    0.5 + random.nextDouble() * 0.5);
+                    0.7 + random.nextDouble() * 0.3);
 
             elements.add(new ParticleFieldElement(
                     x, y, z, vx, vy, vz, ax, ay, az,
@@ -80,12 +79,12 @@ public class SwarmGenerator implements ParticleFieldGenerator {
 
     @Override
     public ParticleFieldType getFieldType() {
-        return ParticleFieldType.SWARM;
+        return ParticleFieldType.EXPLOSION;
     }
 
     @Override
     public String getDescription() {
-        return "Swarm generator - erratic clustered particles with cohesion";
+        return "Explosion generator - radial burst with high speed and strong drag";
     }
 
     private Color interpolateColor(Color c1, Color c2, double t) {

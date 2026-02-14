@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.dynamisfx.samples.shapes.compound;
+package org.dynamisfx.samples.particlefields;
 
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Insets;

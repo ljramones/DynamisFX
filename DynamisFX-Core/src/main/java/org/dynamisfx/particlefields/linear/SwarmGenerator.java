@@ -13,61 +13,62 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.dynamisfx.particlefields;
+package org.dynamisfx.particlefields.linear;
 
 import javafx.scene.paint.Color;
+import org.dynamisfx.particlefields.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 /**
- * Generator for rain particles.
+ * Generator for swarm particles.
  * <p>
- * Particles spawn at the top plane (emitter width/depth), fall with gravity
- * plus slight random wind sway. Short lifetime. Blue/gray colors.
+ * Erratic grouped particles with randomized velocity changes.
+ * Moderate lifetime. Configurable colors.
+ * Particles cluster around a center with occasional darting movements.
  */
-public class RainGenerator implements ParticleFieldGenerator {
+public class SwarmGenerator implements ParticleFieldGenerator {
 
     @Override
     public List<ParticleFieldElement> generate(ParticleFieldConfiguration config, Random random) {
         List<ParticleFieldElement> elements = new ArrayList<>(config.numElements());
 
         double sizeRange = config.maxSize() - config.minSize();
-        double[] emitter = config.emitterSize();
-        double halfW = emitter[0] / 2.0;
-        double halfD = emitter[2] / 2.0;
-        double spawnHeight = emitter[1] > 0 ? emitter[1] : config.outerRadius();
-
-        double[] gravity = config.gravity();
-        double[] wind = config.wind();
+        double clusterRadius = config.outerRadius() * 0.3;
         double lifetimeRange = config.maxLifetime() - config.minLifetime();
+        double speedRange = config.maxSpeed() - config.minSpeed();
 
         for (int i = 0; i < config.numElements(); i++) {
-            // Spawn at top plane with random XZ within emitter
-            double x = (random.nextDouble() - 0.5) * 2 * halfW;
-            double y = random.nextDouble() * spawnHeight; // stagger start heights
-            double z = (random.nextDouble() - 0.5) * 2 * halfD;
+            // Cluster around center with Gaussian distribution
+            double x = random.nextGaussian() * clusterRadius;
+            double y = random.nextGaussian() * clusterRadius;
+            double z = random.nextGaussian() * clusterRadius;
 
-            // Slight initial downward velocity with wind sway
-            double speed = config.minSpeed() + random.nextDouble() * (config.maxSpeed() - config.minSpeed());
-            double vx = wind[0] + (random.nextDouble() - 0.5) * 0.5;
-            double vy = -speed; // falling
-            double vz = wind[2] + (random.nextDouble() - 0.5) * 0.5;
+            // Erratic velocity - random direction with moderate speed
+            double speed = config.minSpeed() + random.nextDouble() * speedRange;
+            double theta = random.nextDouble() * 2 * Math.PI;
+            double phi = Math.acos(2 * random.nextDouble() - 1);
+            double vx = speed * Math.sin(phi) * Math.cos(theta);
+            double vy = speed * Math.sin(phi) * Math.sin(theta);
+            double vz = speed * Math.cos(phi);
 
-            double ax = wind[0] * 0.1;
-            double ay = gravity[1];
-            double az = wind[2] * 0.1;
+            // Slight centering acceleration (swarm cohesion)
+            double dist = Math.sqrt(x * x + y * y + z * z);
+            double cohesion = 0.5;
+            double ax = dist > 0 ? -x / dist * cohesion : 0;
+            double ay = dist > 0 ? -y / dist * cohesion : 0;
+            double az = dist > 0 ? -z / dist * cohesion : 0;
 
             double lifetime = config.minLifetime() + random.nextDouble() * lifetimeRange;
             double size = config.minSize() + random.nextDouble() * sizeRange;
 
-            // Blue/gray color variation
             Color color = interpolateColor(config.primaryColor(), config.secondaryColor(),
                     random.nextDouble());
-            // Rain drops are semi-transparent
+            // Slight glow/transparency
             color = Color.color(color.getRed(), color.getGreen(), color.getBlue(),
-                    0.4 + random.nextDouble() * 0.4);
+                    0.5 + random.nextDouble() * 0.5);
 
             elements.add(new ParticleFieldElement(
                     x, y, z, vx, vy, vz, ax, ay, az,
@@ -80,12 +81,12 @@ public class RainGenerator implements ParticleFieldGenerator {
 
     @Override
     public ParticleFieldType getFieldType() {
-        return ParticleFieldType.RAIN;
+        return ParticleFieldType.SWARM;
     }
 
     @Override
     public String getDescription() {
-        return "Rain generator - falling particles with gravity and wind sway";
+        return "Swarm generator - erratic clustered particles with cohesion";
     }
 
     private Color interpolateColor(Color c1, Color c2, double t) {

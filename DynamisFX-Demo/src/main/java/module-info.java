@@ -40,6 +40,8 @@ module org.dynamisfx.samples {
     exports org.dynamisfx.samples.shapes.compound to org.dynamisfx.client;
     exports org.dynamisfx.samples.shapes.texturedmeshes to org.dynamisfx.client;
     exports org.dynamisfx.samples.utilities to org.dynamisfx.client;
+    exports org.dynamisfx.samples.particlefields to org.dynamisfx.client;
+    exports org.dynamisfx.samples.collision to org.dynamisfx.client;
     exports org.dynamisfx.samples.physics.ode4j to org.dynamisfx.client;
     exports org.dynamisfx.samples;
     

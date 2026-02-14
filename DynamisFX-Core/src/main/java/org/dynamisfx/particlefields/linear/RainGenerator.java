@@ -13,59 +13,62 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.dynamisfx.particlefields;
+package org.dynamisfx.particlefields.linear;
 
 import javafx.scene.paint.Color;
+import org.dynamisfx.particlefields.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 /**
- * Generator for explosion particles.
+ * Generator for rain particles.
  * <p>
- * Radial burst from center point. High initial speed, strong drag for deceleration.
- * Short lifetime. Orange/yellow sparks fading to gray.
+ * Particles spawn at the top plane (emitter width/depth), fall with gravity
+ * plus slight random wind sway. Short lifetime. Blue/gray colors.
  */
-public class ExplosionGenerator implements ParticleFieldGenerator {
+public class RainGenerator implements ParticleFieldGenerator {
 
     @Override
     public List<ParticleFieldElement> generate(ParticleFieldConfiguration config, Random random) {
         List<ParticleFieldElement> elements = new ArrayList<>(config.numElements());
 
         double sizeRange = config.maxSize() - config.minSize();
+        double[] emitter = config.emitterSize();
+        double halfW = emitter[0] / 2.0;
+        double halfD = emitter[2] / 2.0;
+        double spawnHeight = emitter[1] > 0 ? emitter[1] : config.outerRadius();
+
+        double[] gravity = config.gravity();
+        double[] wind = config.wind();
         double lifetimeRange = config.maxLifetime() - config.minLifetime();
-        double speedRange = config.maxSpeed() - config.minSpeed();
 
         for (int i = 0; i < config.numElements(); i++) {
-            // All start at or near center
-            double x = (random.nextGaussian()) * 0.5;
-            double y = (random.nextGaussian()) * 0.5;
-            double z = (random.nextGaussian()) * 0.5;
+            // Spawn at top plane with random XZ within emitter
+            double x = (random.nextDouble() - 0.5) * 2 * halfW;
+            double y = random.nextDouble() * spawnHeight; // stagger start heights
+            double z = (random.nextDouble() - 0.5) * 2 * halfD;
 
-            // Radial velocity - random direction, high speed
-            double speed = config.minSpeed() + random.nextDouble() * speedRange;
-            // Uniform random direction on sphere
-            double theta = random.nextDouble() * 2 * Math.PI;
-            double phi = Math.acos(2 * random.nextDouble() - 1);
-            double vx = speed * Math.sin(phi) * Math.cos(theta);
-            double vy = speed * Math.sin(phi) * Math.sin(theta);
-            double vz = speed * Math.cos(phi);
+            // Slight initial downward velocity with wind sway
+            double speed = config.minSpeed() + random.nextDouble() * (config.maxSpeed() - config.minSpeed());
+            double vx = wind[0] + (random.nextDouble() - 0.5) * 0.5;
+            double vy = -speed; // falling
+            double vz = wind[2] + (random.nextDouble() - 0.5) * 0.5;
 
-            // Gravity pulls down slightly
-            double[] gravity = config.gravity();
-            double ax = gravity[0];
-            double ay = gravity[1] * 0.3; // reduced gravity for explosions
-            double az = gravity[2];
+            double ax = wind[0] * 0.1;
+            double ay = gravity[1];
+            double az = wind[2] * 0.1;
 
             double lifetime = config.minLifetime() + random.nextDouble() * lifetimeRange;
             double size = config.minSize() + random.nextDouble() * sizeRange;
 
-            // Orange/yellow sparks
+            // Blue/gray color variation
             Color color = interpolateColor(config.primaryColor(), config.secondaryColor(),
                     random.nextDouble());
+            // Rain drops are semi-transparent
             color = Color.color(color.getRed(), color.getGreen(), color.getBlue(),
-                    0.7 + random.nextDouble() * 0.3);
+                    0.4 + random.nextDouble() * 0.4);
 
             elements.add(new ParticleFieldElement(
                     x, y, z, vx, vy, vz, ax, ay, az,
@@ -78,12 +81,12 @@ public class ExplosionGenerator implements ParticleFieldGenerator {
 
     @Override
     public ParticleFieldType getFieldType() {
-        return ParticleFieldType.EXPLOSION;
+        return ParticleFieldType.RAIN;
     }
 
     @Override
     public String getDescription() {
-        return "Explosion generator - radial burst with high speed and strong drag";
+        return "Rain generator - falling particles with gravity and wind sway";
     }
 
     private Color interpolateColor(Color c1, Color c2, double t) {

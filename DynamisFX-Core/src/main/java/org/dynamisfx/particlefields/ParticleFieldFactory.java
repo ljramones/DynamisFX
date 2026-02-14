@@ -16,6 +16,8 @@
 package org.dynamisfx.particlefields;
 
 import javafx.scene.paint.Color;
+import org.dynamisfx.particlefields.linear.*;
+import org.dynamisfx.particlefields.orbital.*;
 
 import java.util.EnumMap;
 import java.util.List;

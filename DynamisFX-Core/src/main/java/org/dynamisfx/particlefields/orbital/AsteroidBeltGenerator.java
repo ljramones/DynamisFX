@@ -13,26 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.dynamisfx.particlefields;
+package org.dynamisfx.particlefields.orbital;
 
 import javafx.scene.paint.Color;
+import org.dynamisfx.particlefields.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 /**
- * Generator for debris disks (protoplanetary or collision remnants).
+ * Generator for asteroid belts (Main belt-like).
  *
  * Characteristics:
- * - Moderate thickness (between planetary ring and asteroid belt)
- * - Mix of circular and slightly eccentric orbits
- * - Moderate inclination
- * - Mix of dust and larger planetesimals
- * - May show density variations (forming structures)
- * - Dusty composition (browns, tans, subtle reds)
+ * - Thick vertical distribution
+ * - Moderate eccentricity (elliptical orbits)
+ * - Significant orbital inclination variation
+ * - Sparse distribution (large gaps between bodies)
+ * - Large rocky bodies
+ * - Slower rotation than planetary rings
+ * - Rocky composition (grays, browns, dark colors)
  */
-public class DebrisDiskGenerator implements ParticleFieldGenerator {
+public class AsteroidBeltGenerator implements ParticleFieldGenerator {
 
     @Override
     public List<ParticleFieldElement> generate(ParticleFieldConfiguration config, Random random) {
@@ -42,51 +44,38 @@ public class DebrisDiskGenerator implements ParticleFieldGenerator {
         double sizeRange = config.maxSize() - config.minSize();
 
         for (int i = 0; i < config.numElements(); i++) {
-            // Radial distribution with some clumping (density waves)
-            double baseRadius = random.nextDouble();
-            // Add subtle spiral/wave structure
-            double waveOffset = 0.05 * Math.sin(baseRadius * 8 * Math.PI + random.nextDouble() * Math.PI);
-            double radialFactor = Math.max(0, Math.min(1, baseRadius + waveOffset));
-            double semiMajorAxis = config.innerRadius() + radialFactor * radialRange;
+            // Radial distribution - more uniform than planetary rings
+            double semiMajorAxis = config.innerRadius() + random.nextDouble() * radialRange;
 
-            // Mix of circular and eccentric orbits
-            double eccentricity;
-            if (random.nextDouble() < 0.6) {
-                // Mostly circular (dust settles)
-                eccentricity = random.nextDouble() * config.maxEccentricity() * 0.3;
-            } else {
-                // Some eccentric (recent collisions)
-                eccentricity = random.nextDouble() * config.maxEccentricity();
-            }
+            // Moderate eccentricity - elliptical orbits
+            double eccentricity = random.nextDouble() * config.maxEccentricity();
 
-            // Moderate inclination
+            // Significant inclination variation
             double maxIncRad = Math.toRadians(config.maxInclinationDeg());
-            double inclination = random.nextGaussian() * 0.4 * maxIncRad;
+            double inclination = (random.nextDouble() - 0.5) * 2 * maxIncRad;
 
             // Random orbital angles
             double argumentOfPeriapsis = random.nextDouble() * 2 * Math.PI;
             double longitudeOfAscendingNode = random.nextDouble() * 2 * Math.PI;
             double initialAngle = random.nextDouble() * 2 * Math.PI;
 
-            // Keplerian speed
+            // Keplerian speed with more variation
             double speedFactor = Math.sqrt(config.innerRadius() / semiMajorAxis);
             double angularSpeed = config.baseAngularSpeed() * speedFactor;
-            angularSpeed *= (0.9 + random.nextDouble() * 0.2);
+            // More random variation than planetary rings
+            angularSpeed *= (0.8 + random.nextDouble() * 0.4);
 
-            // Moderate vertical distribution
-            double heightOffset = random.nextGaussian() * 0.4 * config.thickness();
+            // Thick vertical distribution
+            double heightOffset = (random.nextDouble() - 0.5) * config.thickness();
 
-            // Bimodal size distribution - lots of dust, some larger bodies
-            double size;
-            if (random.nextDouble() < 0.8) {
-                // Dust particles (small)
-                size = config.minSize() + random.nextDouble() * sizeRange * 0.3;
-            } else {
-                // Planetesimals (larger)
-                size = config.minSize() + (0.5 + random.nextDouble() * 0.5) * sizeRange;
+            // Larger particles with more size variation
+            double size = config.minSize() + random.nextDouble() * sizeRange;
+            // Bias toward medium sizes (fewer very large or very small)
+            if (random.nextDouble() < 0.7) {
+                size = config.minSize() + (0.3 + random.nextDouble() * 0.4) * sizeRange;
             }
 
-            // Color - dusty browns and tans
+            // Color variation - rocky grays and browns
             Color color = interpolateColor(config.primaryColor(), config.secondaryColor(),
                     random.nextDouble());
 
@@ -102,12 +91,12 @@ public class DebrisDiskGenerator implements ParticleFieldGenerator {
 
     @Override
     public ParticleFieldType getFieldType() {
-        return ParticleFieldType.DEBRIS_DISK;
+        return ParticleFieldType.ASTEROID_BELT;
     }
 
     @Override
     public String getDescription() {
-        return "Debris disk generator - moderate thickness, dusty with planetesimals";
+        return "Asteroid belt generator - thick, sparse, eccentric rocky bodies";
     }
 
     private Color interpolateColor(Color c1, Color c2, double t) {
