@@ -37,6 +37,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.dynamisfx.DynamisFXSamplerProject;
@@ -48,6 +49,13 @@ import org.dynamisfx.model.WelcomePage;
  */
 public class DynamisFXProject implements DynamisFXSamplerProject {
     private static final String LEGACY_CONTROLS_THEME_PROPERTY = "dynamisfx.client.legacyControlsTheme";
+    private static final String BACKEND_PROPERTY = "dynamisfx.samples.physics.backend";
+    private static final String BACKEND_ODE4J = "ode4j";
+    private static final String BACKEND_JOLT = "jolt";
+    private static final String DIAG_REQUESTED_PROPERTY = "dynamisfx.samples.physics.resolution.requested";
+    private static final String DIAG_RESOLVED_PROPERTY = "dynamisfx.samples.physics.resolution.resolved";
+    private static final String DIAG_FALLBACK_USED_PROPERTY = "dynamisfx.samples.physics.resolution.fallbackUsed";
+    private static final String DIAG_FALLBACK_REASON_PROPERTY = "dynamisfx.samples.physics.resolution.fallbackReason";
     
          
     @Override
@@ -91,7 +99,20 @@ public class DynamisFXProject implements DynamisFXSamplerProject {
         lCon.setPadding(new Insets(10));
         lCon.getChildren().add(label);
         lCon.setMaxWidth(label.getPrefWidth());
-        vBox.getChildren().addAll(pane, lCon);
+        TextArea diagnostics = new TextArea(buildRuntimeDiagnostics());
+        diagnostics.setEditable(false);
+        diagnostics.setWrapText(true);
+        diagnostics.setPrefColumnCount(90);
+        diagnostics.setPrefRowCount(7);
+        diagnostics.setFocusTraversable(false);
+
+        Label diagnosticsLabel = new Label("Runtime Diagnostics");
+        diagnosticsLabel.setStyle("-fx-font-size: 1.05em; -fx-padding: 8 0 0 0;");
+        VBox diagnosticsBox = new VBox(6, diagnosticsLabel, diagnostics);
+        diagnosticsBox.setMaxWidth(760);
+        diagnosticsBox.setPadding(new Insets(0, 10, 10, 10));
+
+        vBox.getChildren().addAll(pane, lCon, diagnosticsBox);
         vBox.setAlignment(Pos.CENTER);
         WelcomePage wPage = new WelcomePage("Welcome to DynamisFX!", vBox);
         
@@ -105,6 +126,49 @@ public class DynamisFXProject implements DynamisFXSamplerProject {
         });
         
         return wPage;
+    }
+
+    private static String buildRuntimeDiagnostics() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("java=").append(System.getProperty("java.version", "unknown"));
+        sb.append(" | javafx=").append(System.getProperty("javafx.version", "unknown"));
+        sb.append(" | os=").append(System.getProperty("os.name", "unknown"))
+                .append("/")
+                .append(System.getProperty("os.arch", "unknown"));
+
+        String requested = System.getProperty(
+                DIAG_REQUESTED_PROPERTY,
+                System.getProperty(BACKEND_PROPERTY, BACKEND_ODE4J));
+        String resolved = System.getProperty(DIAG_RESOLVED_PROPERTY, "unknown");
+        String fallback = System.getProperty(DIAG_FALLBACK_USED_PROPERTY, "false");
+        String fallbackReason = System.getProperty(DIAG_FALLBACK_REASON_PROPERTY, "n/a");
+
+        sb.append("\nrigid-backend requested=").append(requested)
+                .append(" resolved=").append(resolved)
+                .append(" fallback=").append(fallback)
+                .append(" reason=").append(fallbackReason);
+
+        sb.append("\nscript-engine enabled=")
+                .append(System.getProperty("dynamisfx.samples.scriptEngine.enabled", "false"))
+                .append(" available=")
+                .append(System.getProperty("dynamisfx.samples.scriptEngine.available", "false"))
+                .append(" (set -Ddynamisfx.samples.enableScriptEngine=true to enable probing)");
+
+        if (BACKEND_JOLT.equalsIgnoreCase(requested)
+                || BACKEND_JOLT.equalsIgnoreCase(resolved)) {
+            sb.append("\njolt: ").append(resolveJoltRuntimeDiagnostics());
+        }
+        return sb.toString();
+    }
+
+    private static String resolveJoltRuntimeDiagnostics() {
+        try {
+            Class<?> diagnosticsType = Class.forName("org.dynamisfx.physics.jolt.JoltRuntimeDiagnostics");
+            Object value = diagnosticsType.getMethod("report").invoke(null);
+            return String.valueOf(value);
+        } catch (ReflectiveOperationException ex) {
+            return "runtime-diagnostics-unavailable (" + ex.getClass().getSimpleName() + ")";
+        }
     }
     
 }

@@ -9,9 +9,17 @@ import javax.script.ScriptEngineManager;
 final class ScriptEngineSupport {
     private static final Logger LOG = Logger.getLogger(ScriptEngineSupport.class.getName());
     private static final String SCRIPT_ENGINE_ENABLED_PROPERTY = "dynamisfx.samples.enableScriptEngine";
+    static final String DIAG_SCRIPT_ENABLED_PROPERTY = "dynamisfx.samples.scriptEngine.enabled";
+    static final String DIAG_SCRIPT_AVAILABLE_PROPERTY = "dynamisfx.samples.scriptEngine.available";
     private static final List<String> ENGINE_NAMES = List.of("graal.js", "js", "JavaScript", "javascript");
     private static final AtomicBoolean NO_ENGINE_LOGGED = new AtomicBoolean(false);
     private static final ScriptEngine SHARED_ENGINE = createEngine();
+
+    static {
+        boolean enabled = Boolean.getBoolean(SCRIPT_ENGINE_ENABLED_PROPERTY);
+        System.setProperty(DIAG_SCRIPT_ENABLED_PROPERTY, Boolean.toString(enabled));
+        System.setProperty(DIAG_SCRIPT_AVAILABLE_PROPERTY, Boolean.toString(SHARED_ENGINE != null));
+    }
 
     private ScriptEngineSupport() {
     }

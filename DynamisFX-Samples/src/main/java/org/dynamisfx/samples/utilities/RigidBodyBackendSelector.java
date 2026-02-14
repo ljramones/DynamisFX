@@ -18,6 +18,10 @@ final class RigidBodyBackendSelector {
     static final String BACKEND_ODE4J = "ode4j";
     static final String BACKEND_JOLT = "jolt";
     static final String FORCE_JOLT_FAILURE_PROPERTY = "dynamisfx.samples.physics.forceJoltFailure";
+    static final String DIAG_REQUESTED_PROPERTY = "dynamisfx.samples.physics.resolution.requested";
+    static final String DIAG_RESOLVED_PROPERTY = "dynamisfx.samples.physics.resolution.resolved";
+    static final String DIAG_FALLBACK_USED_PROPERTY = "dynamisfx.samples.physics.resolution.fallbackUsed";
+    static final String DIAG_FALLBACK_REASON_PROPERTY = "dynamisfx.samples.physics.resolution.fallbackReason";
     private static volatile BackendSelection lastSelection =
             new BackendSelection(BACKEND_ODE4J, BACKEND_ODE4J, false, "default");
 
@@ -33,6 +37,7 @@ final class RigidBodyBackendSelector {
                     "Unsupported backend '" + configured + "'. Use '" + BACKEND_ODE4J + "' or '" + BACKEND_JOLT + "'.");
         };
         BackendSelection selection = lastSelection;
+        publishSelection(selection);
         LOG.info(() -> "Rigid backend selection requested="
                 + selection.requested()
                 + ", resolved="
@@ -87,6 +92,17 @@ final class RigidBodyBackendSelector {
             throw new IllegalStateException("Backend factory returned null for '" + backendName + "'.");
         }
         return backend;
+    }
+
+    private static void publishSelection(BackendSelection selection) {
+        System.setProperty(DIAG_REQUESTED_PROPERTY, selection.requested());
+        System.setProperty(DIAG_RESOLVED_PROPERTY, selection.resolved());
+        System.setProperty(DIAG_FALLBACK_USED_PROPERTY, Boolean.toString(selection.fallbackUsed()));
+        if (selection.fallbackReason() == null) {
+            System.clearProperty(DIAG_FALLBACK_REASON_PROPERTY);
+        } else {
+            System.setProperty(DIAG_FALLBACK_REASON_PROPERTY, selection.fallbackReason());
+        }
     }
 
     record BackendSelection(String requested, String resolved, boolean fallbackUsed, String fallbackReason) {
