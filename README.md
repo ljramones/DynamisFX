@@ -189,6 +189,18 @@ Special Thanks go to ControlsFX for providing the FXSampler framework.
 http://fxexperience.com/controlsfx/
 Our Sampler uses a heavily modified version, due to being 3D.
 
+## Runtime Stabilization Highlights (2026)
+
+Recent stabilization work focused on Java 25 / JavaFX 21 runtime reliability:
+
+- sampler startup and sample discovery hardening
+- robust backend selection with deterministic Jolt -> ODE4j fallback path
+- script-control null safety when script engine is unavailable
+- physics sample lifecycle fixes for repeated sample switching
+- CI matrix with sampler smoke checks and JavaFX `jlink` smoke packaging
+
+Operational runbook: `docs/Runtime_Diagnostics_Runbook.md`
+
 ## Code Quality Improvements (2026)
 
 A comprehensive code quality review was performed on DynamisFX-Core, addressing 20 issues across critical, high, medium, and low priorities. All 534 unit tests pass.
