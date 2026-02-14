@@ -1,6 +1,6 @@
 # Collision Package Layout
 
-Collision code is organized by responsibility while keeping package names stable (`org.fxyz3d.collision`).
+Collision code is organized by responsibility while keeping package names stable (`org.dynamisfx.collision`).
 
 ## Main Source Folders
 
@@ -19,4 +19,4 @@ Collision code is organized by responsibility while keeping package names stable
 
 ## Test Source Mirrors
 
-Tests under `DynamisFX-Core/src/test/java/org/fxyz3d/collision/` mirror the same folder structure for easier navigation.
+Tests under `DynamisFX-Core/src/test/java/org/dynamisfx/collision/` mirror the same folder structure for easier navigation.
