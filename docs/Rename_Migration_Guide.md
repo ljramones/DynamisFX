@@ -36,7 +36,7 @@ It includes:
 - New: `org.dynamisfx:dynamisfx-physics-orekit`
 
 - Old: `org.fxyz3d:fxyz3d-samples`
-- New: `org.dynamisfx:dynamisfx-samples`
+- New: `org.dynamisfx:dynamisfx-demo`
 
 ## Package Migration
 

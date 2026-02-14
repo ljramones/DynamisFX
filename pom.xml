@@ -18,7 +18,7 @@
         <module>DynamisFX-Importers</module>
         <module>DynamisFX-Client</module>
         <module>DynamisFX-Compat</module>
-        <module>DynamisFX-Samples</module>
+        <module>DynamisFX-Demo</module>
     </modules>
 
     <properties>

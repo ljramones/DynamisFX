@@ -128,13 +128,35 @@ Use `CollisionPipeline` to filter broad-phase candidate pairs with narrow-phase 
   - per-item bounds
   - per-contact points with event type and manifold metadata
 - This is intended for debug overlays, instrumentation, and diagnostics tools.
-- `DynamisFX-Samples` includes `org.dynamisfx.samples.utilities.CollisionDebugWorld`:
+- `DynamisFX-Demo` includes `org.dynamisfx.samples.utilities.CollisionDebugWorld`:
   - moving-body collision world demo
   - wireframe AABB overlays
   - contact-point markers (`ENTER`/`STAY`/`EXIT`)
   - controls:
     - `D` toggle debug overlay
     - `SPACE` pause/resume simulation
+
+## Demo Coverage (DynamisFX-Demo)
+
+Sampler divisions in `DynamisFX-Client` route collision demos into:
+
+- `Collision Detection`
+- `Collision Detection Solver`
+- `Pipeline Physics`
+
+Implemented demos currently include:
+
+- `BroadPhaseComparisonDemo` (spatial hash vs sweep-and-prune, stats overlays)
+- `GjkEpaVisualizerDemo` (GJK simplex and EPA penetration visualization)
+- `Sat2dPolygonPlaygroundDemo` (2D SAT axes and MTV behavior)
+- `CcdTunnelingDemo` (discrete vs swept vs CCD TOI behavior)
+- `ContactSolverStackingDemo` (solver iterations, warm start, friction/baumgarte tuning)
+- `RayCastingSceneDemo` (single ray/flashlight, brute force vs broad-phase culling)
+- `CollisionFilterLayerDemo` (layer matrix filtering with pair counters)
+- `BoundingVolumeComparisonDemo` (AABB vs sphere vs convex/GJK comparison)
+- `CollisionPipelineMonitorDemo` (broad/filter/narrow/manifold flow monitoring)
+- `MixedPrimitiveStressTestDemo` (AABB/AABB, sphere/sphere, sphere/AABB cost mix)
+- `ManifoldPersistenceVisualizerDemo` (contact age and warm-start persistence)
 
 ## Benchmark Harness
 

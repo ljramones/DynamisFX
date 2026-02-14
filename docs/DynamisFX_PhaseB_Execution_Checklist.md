@@ -40,7 +40,7 @@ Validation:
 - `mvn -pl DynamisFX-Core -DskipTests compile`
 - `mvn -pl DynamisFX-Importers -DskipTests compile`
 - `mvn -pl DynamisFX-Client -DskipTests compile`
-- `mvn -pl DynamisFX-Samples -DskipTests compile`
+- `mvn -pl DynamisFX-Demo -DskipTests compile`
 
 ## Step 2 - JPMS module rename
 
@@ -76,7 +76,7 @@ Validation:
 
 Validation:
 
-- launch `DynamisFX-Samples` and verify major sample pages
+- launch `DynamisFX-Demo` and verify major sample pages
 - importer/exporter smoke checks
 
 ## Step 5 - Documentation and migration guide

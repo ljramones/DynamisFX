@@ -98,7 +98,7 @@ public class Text3D extends GroupOfTexturedMeshSample{
             }
         }
     };
-    private final StringProperty text3D = new SimpleStringProperty(model, "Text3D", "F(X)yz") {
+    private final StringProperty text3D = new SimpleStringProperty(model, "Text3D", "DynamisFX") {
         @Override
         protected void invalidated() {
             super.invalidated(); 

@@ -60,7 +60,7 @@ public class DynamisFXProject implements DynamisFXSamplerProject {
          
     @Override
     public final String getProjectName() {
-        return "DynamisFX-Samples";
+        return "DynamisFX-Demo";
     }
 
     @Override
@@ -87,7 +87,7 @@ public class DynamisFXProject implements DynamisFXSamplerProject {
         label.setWrapText(true);
         lCon.getStyleClass().add("fxyz3d-welcome-label");
         StringBuilder desc = new StringBuilder();
-        desc.append("F(X)yz is an open source project for JavaFX that aims ");
+        desc.append("DynamisFX is an open source project for JavaFX that aims ");
         desc.append("to provide really high quality UI controls and other tools to ");
         desc.append("complement the core JavaFX 3D distribution.");
         desc.append("\n\n");

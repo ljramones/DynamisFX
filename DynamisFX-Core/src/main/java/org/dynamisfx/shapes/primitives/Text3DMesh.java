@@ -72,7 +72,7 @@ import org.dynamisfx.shapes.primitives.helper.TextureMode;
  */
 public class Text3DMesh extends Group implements TextureMode {
     
-    private final static String DEFAULT_TEXT3D = "F(X)yz 3D";
+    private final static String DEFAULT_TEXT3D = "DynamisFX 3D";
     private final static String DEFAULT_FONT = "Arial";
     private final static int DEFAULT_FONT_SIZE = 100;
     private final static double DEFAULT_HEIGHT = 10d;

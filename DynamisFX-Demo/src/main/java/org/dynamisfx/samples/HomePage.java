@@ -38,11 +38,11 @@ import org.dynamisfx.model.WelcomePage;
  */
 public class HomePage extends WelcomePage{
     
-    private static final String fxyzSamplesTitle = "F(X)yz Samples";
+    private static final String dynamisFxDemoTitle = "DynamisFX Demo";
     private static final Node homePageContent = buildHomePageContent();
     
     public HomePage() {
-        this(fxyzSamplesTitle, homePageContent);
+        this(dynamisFxDemoTitle, homePageContent);
     }
 
     private HomePage(String title, Node content) {

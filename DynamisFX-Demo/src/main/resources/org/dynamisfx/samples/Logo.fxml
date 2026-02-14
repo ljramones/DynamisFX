@@ -13,7 +13,7 @@
 
 <Group cache="true" cacheHint="SPEED" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <Text cache="true" cacheHint="SPEED" depthTest="DISABLE" fill="AQUA" fontSmoothingType="LCD" stroke="TRANSPARENT" strokeType="OUTSIDE" strokeWidth="0.0" text="F(X)yz">
+      <Text cache="true" cacheHint="SPEED" depthTest="DISABLE" fill="AQUA" fontSmoothingType="LCD" stroke="TRANSPARENT" strokeType="OUTSIDE" strokeWidth="0.0" text="DynamisFX">
          <font>
             <Font name="MV Boli" size="96.0" />
          </font>

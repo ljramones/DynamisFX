@@ -73,7 +73,7 @@ public abstract class DynamisFXSample extends DynamisFXSampleBase {
     
     @Override
     public String getProjectName() {
-        return "DynamisFX-Samples";
+        return "DynamisFX-Demo";
     }
 
     @Override

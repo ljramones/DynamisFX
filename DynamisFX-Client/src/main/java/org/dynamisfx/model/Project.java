@@ -29,6 +29,7 @@
 
 package org.dynamisfx.model;
 
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.dynamisfx.DynamisFXSample;
@@ -38,6 +39,25 @@ import org.dynamisfx.DynamisFXSample;
  */
 public class Project {
     private static final Logger LOG = Logger.getLogger(Project.class.getName());
+    private static final Map<String, String[]> SAMPLE_CATEGORY_OVERRIDES = Map.ofEntries(
+            Map.entry("CollisionDebugWorld", new String[]{"Collision Detection"}),
+            Map.entry("RayIntersections", new String[]{"Collision Detection"}),
+            Map.entry("RayShooting", new String[]{"Collision Detection"}),
+            Map.entry("BroadPhaseComparisonDemo", new String[]{"Collision Detection"}),
+            Map.entry("GjkEpaVisualizerDemo", new String[]{"Collision Detection"}),
+            Map.entry("Sat2dPolygonPlaygroundDemo", new String[]{"Collision Detection"}),
+            Map.entry("RayCastingSceneDemo", new String[]{"Collision Detection"}),
+            Map.entry("BoundingVolumeComparisonDemo", new String[]{"Collision Detection"}),
+            Map.entry("Ode4jPhysicsSyncSample", new String[]{"Collision Detection Solver"}),
+            Map.entry("CcdTunnelingDemo", new String[]{"Collision Detection Solver"}),
+            Map.entry("ContactSolverStackingDemo", new String[]{"Collision Detection Solver"}),
+            Map.entry("CollisionFilterLayerDemo", new String[]{"Collision Detection Solver"}),
+            Map.entry("MixedPrimitiveStressTestDemo", new String[]{"Collision Detection Solver"}),
+            Map.entry("ManifoldPersistenceVisualizerDemo", new String[]{"Collision Detection Solver"}),
+            Map.entry("HybridPhysicsCoordinatorSample", new String[]{"Pipeline Physics"}),
+            Map.entry("CouplingTransitionDemo", new String[]{"Pipeline Physics"}),
+            Map.entry("OrekitOrbitSyncSample", new String[]{"Pipeline Physics"}),
+            Map.entry("CollisionPipelineMonitorDemo", new String[]{"Pipeline Physics"}));
     
     private final String name;
     
@@ -56,6 +76,12 @@ public class Project {
     }
 
     public void addSample(String packagePath, DynamisFXSample sample) {
+        String[] overridePath = SAMPLE_CATEGORY_OVERRIDES.get(sample.getClass().getSimpleName());
+        if (overridePath != null && packagePath.startsWith("org.dynamisfx.samples.utilities")) {
+            sampleTree.addSample(overridePath, sample);
+            return;
+        }
+
         // convert something like 'org.controlsfx.samples.actions' to 'samples.actions'
         String packagesWithoutBase = "";
         try {
@@ -85,7 +111,7 @@ public class Project {
         // tree in the appropriate place
         sampleTree.addSample(packages, sample);
     }
-    
+
     public SampleTree getSampleTree() {
         return sampleTree;
     }

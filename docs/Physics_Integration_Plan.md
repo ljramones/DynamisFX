@@ -38,9 +38,9 @@ Status: `COMPLETE`
 
 Deliverables:
 
-- `org.fxyz3d.physics.api` interfaces for backends/worlds.
-- `org.fxyz3d.physics.model` immutable state/config records.
-- `org.fxyz3d.physics.sync` node/body binding and state-application helpers.
+- `org.dynamisfx.physics.api` interfaces for backends/worlds.
+- `org.dynamisfx.physics.model` immutable state/config records.
+- `org.dynamisfx.physics.sync` node/body binding and state-application helpers.
 - Fixed-step accumulator utility.
 - Unit tests for determinism, binding/sync behavior, and validation.
 
@@ -82,7 +82,7 @@ Current kickoff progress:
   - SPI: `PhysicsConstraintDefinition` (`FIXED`, `BALL`)
   - ODE4j world create/remove/list support
 - DynamisFX sample integration added:
-  - `org.fxyz3d.samples.utilities.Ode4jPhysicsSyncSample`
+  - `org.dynamisfx.samples.utilities.Ode4jPhysicsSyncSample`
 - World-level tuning parameters added in core model config and wired to ODE4j:
   - solver iterations
   - friction
@@ -127,7 +127,7 @@ Current kickoff progress:
   - `timeScale()`
 - Runtime tuning plumbing preserved through the shared SPI for consistency.
 - Sample integration added:
-  - `org.fxyz3d.samples.utilities.OrekitOrbitSyncSample`
+  - `org.dynamisfx.samples.utilities.OrekitOrbitSyncSample`
 - Initial regression tests added for:
   - backend factory + capabilities
   - basic orbital stepping behavior
@@ -153,7 +153,7 @@ Exit criteria:
 Current kickoff progress:
 
 - New core coordinator package:
-  - `org.fxyz3d.physics.hybrid`
+  - `org.dynamisfx.physics.hybrid`
   - `HybridPhysicsCoordinator`
   - `HybridBodyLink`
   - `HybridOwnership`
@@ -187,8 +187,8 @@ Current kickoff progress:
   - interpolation alpha
   - extrapolation seconds
 - Coordinator can update render metadata from accumulator output after stepping.
-- Hybrid sample wiring added in `DynamisFX-Samples`:
-  - `org.fxyz3d.samples.utilities.HybridPhysicsCoordinatorSample`
+- Hybrid sample wiring added in `DynamisFX-Demo`:
+  - `org.dynamisfx.samples.utilities.HybridPhysicsCoordinatorSample`
 
 ### Phase 5 - Hardening
 

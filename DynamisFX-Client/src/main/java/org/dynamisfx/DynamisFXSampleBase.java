@@ -79,7 +79,7 @@ public abstract class DynamisFXSampleBase extends Application implements Dynamis
     /** {@inheritDoc}
      * @return  */
     @Override public String getProjectName() {
-        return "DynamisFX-Samples";
+        return "DynamisFX-Demo";
     }
     
     /**

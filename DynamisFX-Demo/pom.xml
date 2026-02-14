@@ -10,8 +10,8 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>dynamisfx-samples</artifactId>
-    <name>DynamisFX-Samples</name>
+    <artifactId>dynamisfx-demo</artifactId>
+    <name>DynamisFX-Demo</name>
 
     <properties>
         <samples.main.class>org.dynamisfx.samples.Launcher</samples.main.class>
@@ -155,7 +155,7 @@
                     <archive>
                         <manifestEntries>
                             <Main-Class>${samples.main.class}</Main-Class>
-                            <Implementation-Title>DynamisFX-Samples</Implementation-Title>
+                            <Implementation-Title>DynamisFX-Demo</Implementation-Title>
                         </manifestEntries>
                     </archive>
                 </configuration>

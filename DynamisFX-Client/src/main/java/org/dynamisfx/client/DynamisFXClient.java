@@ -312,7 +312,7 @@ public class DynamisFXClient extends Application {
     protected final void buildProjectTree(String searchText) {
         // rebuild the whole tree (it isn't memory intensive - we only scan
         // classes once at startup)
-        root = new TreeItem<>(new EmptySample("DynamisFX-Samples"));
+        root = new TreeItem<>(new EmptySample("DynamisFX-Demo"));
         root.setExpanded(true);
 
         for (String projectName : projectsMap.keySet()) {

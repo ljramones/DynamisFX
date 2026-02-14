@@ -13,13 +13,13 @@ This runbook captures the runtime knobs and verification commands for DynamisFX 
 - Run sampler (default backend path):
 
   ```bash
-  mvn -pl DynamisFX-Samples -DskipTests javafx:run
+  mvn -pl DynamisFX-Demo -DskipTests javafx:run
   ```
 
 - Run sampler with explicit backend:
 
   ```bash
-  mvn -pl DynamisFX-Samples -DskipTests javafx:run -Ddynamisfx.samples.physics.backend=jolt
+  mvn -pl DynamisFX-Demo -DskipTests javafx:run -Ddynamisfx.samples.physics.backend=jolt
   ```
 
 ## Runtime switches
@@ -55,13 +55,13 @@ Open the welcome page and inspect **Runtime Diagnostics**:
 - Sampler service discovery + backend fallback tests:
 
   ```bash
-  mvn -pl DynamisFX-Samples test -Dtest=org.dynamisfx.samples.utilities.ServiceDiscoverySmokeTest,org.dynamisfx.samples.utilities.RigidBodyBackendSelectorTest
+  mvn -pl DynamisFX-Demo test -Dtest=org.dynamisfx.samples.utilities.ServiceDiscoverySmokeTest,org.dynamisfx.samples.utilities.RigidBodyBackendSelectorTest
   ```
 
 - Forced-fallback path only:
 
   ```bash
-  mvn -pl DynamisFX-Samples test -Dtest=RigidBodyBackendSelectorTest#joltForcedFailureFallsBackToOde4j -Ddynamisfx.samples.physics.forceJoltFailure=true
+  mvn -pl DynamisFX-Demo test -Dtest=RigidBodyBackendSelectorTest#joltForcedFailureFallsBackToOde4j -Ddynamisfx.samples.physics.forceJoltFailure=true
   ```
 
 - Jolt runtime diagnostics unit test:
@@ -73,7 +73,7 @@ Open the welcome page and inspect **Runtime Diagnostics**:
 - jlink smoke package:
 
   ```bash
-  mvn -pl DynamisFX-Samples -DskipTests clean package javafx:jlink
+  mvn -pl DynamisFX-Demo -DskipTests clean package javafx:jlink
   ```
 
 ## Known non-fatal warnings

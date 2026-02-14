@@ -30,7 +30,7 @@ Explicitly out of scope for MVP:
 USD files are not parsed directly by DynamisFX at first. Instead:
 1. Extract USD -> `TUF v1` (TRIPSUSD binary format).
 2. Java importer reads `TUF v1`.
-3. Java adapter maps payload to FXyz/JavaFX mesh types.
+3. Java adapter maps payload to DynamisFX/JavaFX mesh types.
 
 Later, extraction backend swaps from Python to native C++ while preserving exact `TUF v1` bytes/semantics.
 
@@ -150,7 +150,7 @@ Maintain a defensive Java reader that:
 - Produces neutral `MeshPayload`
 - Adapts payload to DynamisFX mesh creation in a dedicated adapter method
 
-FXyz adapter expectations:
+DynamisFX adapter expectations:
 - `positions` -> `TriangleMesh` points
 - `uvs` -> tex coords (or dummy `[0f,0f]`)
 - `indices` -> JavaFX face format (`p0,t0,p1,t1,p2,t2`)

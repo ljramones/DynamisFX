@@ -1,11 +1,11 @@
 # Physics Migration Guide (2026)
 
-This guide summarizes migration to the current physics architecture in FXyz:
+This guide summarizes migration to the current physics architecture in DynamisFX:
 
-- engine-neutral SPI in `org.fxyz3d.physics.api`
-- ODE4j backend module (`fxyz3d-physics-ode4j`)
-- Orekit backend module (`fxyz3d-physics-orekit`)
-- hybrid coordination in `org.fxyz3d.physics.hybrid`
+- engine-neutral SPI in `org.dynamisfx.physics.api`
+- ODE4j backend module (`dynamisfx-physics-ode4j`)
+- Orekit backend module (`dynamisfx-physics-orekit`)
+- hybrid coordination in `org.dynamisfx.physics.hybrid`
 
 ## 1) Use `PhysicsWorld` Instead of Engine-Specific World Types
 

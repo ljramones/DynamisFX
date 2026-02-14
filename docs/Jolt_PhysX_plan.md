@@ -37,13 +37,13 @@ Exit criteria:
 
 - Written benchmark and behavior criteria are agreed before backend coding starts.
 
-## Phase 1 - Jolt Backend MVP (`FXyz-Physics-Jolt`)
+## Phase 1 - Jolt Backend MVP (`DynamisFX-Physics-Jolt`)
 
 Status: `PLANNED`
 
 Deliverables:
 
-- New module: `FXyz-Physics-Jolt`
+- New module: `DynamisFX-Physics-Jolt`
 - SPI implementation parity for current scope:
   - body create/remove/list
   - body state read/write
@@ -96,7 +96,7 @@ Status: `PLANNED`
 
 Deliverables:
 
-- New module: `FXyz-Physics-PhysX`
+- New module: `DynamisFX-Physics-PhysX`
 - Same SPI contract and comparable feature slice as Jolt MVP.
 - Reuse same regression/benchmark suites for apples-to-apples comparison.
 - Capability matrix update with concrete strengths/limitations.
@@ -127,6 +127,6 @@ Exit criteria:
 
 ## Immediate Next Slice
 
-1. Create `FXyz-Physics-Jolt` module scaffold.
+1. Create `DynamisFX-Physics-Jolt` module scaffold.
 2. Wire Maven + backend factory + empty world implementation.
 3. Add lifecycle/capability tests and one minimal sample.

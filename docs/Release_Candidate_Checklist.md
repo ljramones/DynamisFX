@@ -20,7 +20,7 @@ Use this checklist for each release candidate.
 
 3. Sampler smoke
 - [ ] Sampler launches:
-  - [ ] `mvn -pl DynamisFX-Samples -DskipTests javafx:run`
+  - [ ] `mvn -pl DynamisFX-Demo -DskipTests javafx:run`
 - [ ] Sample tree is populated.
 - [ ] Selecting multiple samples rapidly does not crash.
 
@@ -30,14 +30,14 @@ Use this checklist for each release candidate.
 - [ ] Jolt path works or falls back deterministically:
   - [ ] `-Ddynamisfx.samples.physics.backend=jolt`
   - [ ] Forced fallback test:
-    - [ ] `mvn -pl DynamisFX-Samples test -Dtest=RigidBodyBackendSelectorTest#joltForcedFailureFallsBackToOde4j -Ddynamisfx.samples.physics.forceJoltFailure=true`
+    - [ ] `mvn -pl DynamisFX-Demo test -Dtest=RigidBodyBackendSelectorTest#joltForcedFailureFallsBackToOde4j -Ddynamisfx.samples.physics.forceJoltFailure=true`
 
 5. Jolt diagnostics
 - [ ] `mvn -pl DynamisFX-Physics-Jolt test -Dtest=JoltRuntimeDiagnosticsTest` passes.
 - [ ] Jolt diagnostics line is visible in sampler runtime diagnostics (when Jolt requested/resolved).
 
 6. Packaging smoke
-- [ ] `mvn -pl DynamisFX-Samples -DskipTests clean package javafx:jlink` passes.
+- [ ] `mvn -pl DynamisFX-Demo -DskipTests clean package javafx:jlink` passes.
 
 ## Dependency and logging hygiene
 

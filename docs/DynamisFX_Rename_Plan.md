@@ -24,7 +24,7 @@ Rename targets:
   - `fxyz3d-importers` -> `dynamisfx-importers`
   - `fxyz3d-physics-ode4j` -> `dynamisfx-physics-ode4j`
   - `fxyz3d-physics-orekit` -> `dynamisfx-physics-orekit`
-  - `fxyz3d-samples` -> `dynamisfx-samples`
+  - `fxyz3d-samples` -> `dynamisfx-demo`
 - JPMS module names (where applicable): `org.fxyz3d.*` -> `org.dynamisfx.*`
 - Root packages: `org.fxyz3d` -> `org.dynamisfx`
 - Class names containing product prefix (example: `FXyzClient` -> `DynamisFXClient`)
@@ -177,7 +177,7 @@ Must ship with rename:
 - `org.fxyz3d:fxyz3d-importers` -> `org.dynamisfx:dynamisfx-importers`
 - `org.fxyz3d:fxyz3d-physics-ode4j` -> `org.dynamisfx:dynamisfx-physics-ode4j`
 - `org.fxyz3d:fxyz3d-physics-orekit` -> `org.dynamisfx:dynamisfx-physics-orekit`
-- `org.fxyz3d:fxyz3d-samples` -> `org.dynamisfx:dynamisfx-samples`
+- `org.fxyz3d:fxyz3d-samples` -> `org.dynamisfx:dynamisfx-demo`
 
 ### Packages
 

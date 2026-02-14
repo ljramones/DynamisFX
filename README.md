@@ -84,7 +84,7 @@ If you have a Maven project, edit the `pom.xml` file and add:
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>${javafx.maven.plugin.version}</version>
                 <configuration>
-                    <mainClass>org.fxyz3d.Sample</mainClass>
+                    <mainClass>org.dynamisfx.Sample</mainClass>
                 </configuration>
             </plugin>
         </plugins>
@@ -94,10 +94,10 @@ If you have a Maven project, edit the `pom.xml` file and add:
 
 #### Application class
 
-Then create a JavaFX Application class `Sample` under the `org.fxyz3d` package: 
+Then create a JavaFX Application class `Sample` under the `org.dynamisfx` package: 
 
 ```java
-package org.fxyz3d;
+package org.dynamisfx;
 
 import javafx.application.Application;
 import javafx.scene.Group;
@@ -107,8 +107,8 @@ import javafx.scene.SceneAntialiasing;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.CullFace;
 import javafx.stage.Stage;
-import org.fxyz3d.shapes.primitives.SpringMesh;
-import org.fxyz3d.utils.CameraTransformer;
+import org.dynamisfx.shapes.primitives.SpringMesh;
+import org.dynamisfx.utils.CameraTransformer;
 
 public class Sample extends Application {
 
@@ -157,11 +157,11 @@ and you should see the result:
 
 Note: For more information on JavaFX, check this [link](https://openjfx.io).
 
-### FXSampler
+### DynamisFX Sampler
 
-To use the FXSampler and visualize all the samples and the different options available, run:
+To use the DynamisFX Sampler and visualize all the samples and the different options available, run:
 
-    mvn -pl DynamisFX-Samples -DskipTests javafx:run
+    mvn -pl DynamisFX-Demo -DskipTests javafx:run
     
 There is a hidden side popup menu at the left, from where different samples can be selected. From the right panels different options can be applied dynamically to the 3D shape.
 
@@ -179,13 +179,13 @@ Useful runtime switches for backend/script diagnostics:
 
 You can create a custom image for your platform running:
 
-    mvn -pl DynamisFX-Samples -DskipTests clean package javafx:jlink
+    mvn -pl DynamisFX-Demo -DskipTests clean package javafx:jlink
 
 And you can run it with Java 25 on your platform:
 
-    DynamisFX-Samples/build/FXyz/bin/FXyzSamples
+    DynamisFX-Demo/build/bin/DynamisFXDemo
 
-Special Thanks go to ControlsFX for providing the FXSampler framework.
+Special Thanks go to ControlsFX for providing the DynamisFX Sampler framework.
 http://fxexperience.com/controlsfx/
 Our Sampler uses a heavily modified version, due to being 3D.
 
@@ -266,9 +266,9 @@ DynamisFX-Core now includes a reusable picking/selection system for 3D scene nod
 
 ### Core API
 
-- `org.fxyz3d.scene.selection.SelectionModel3D`
-- `org.fxyz3d.scene.selection.PickSelectionHandler`
-- `org.fxyz3d.scene.selection.SelectableGroup3D`
+- `org.dynamisfx.scene.selection.SelectionModel3D`
+- `org.dynamisfx.scene.selection.PickSelectionHandler`
+- `org.dynamisfx.scene.selection.SelectableGroup3D`
 
 `SelectableGroup3D` installs click-based picking and selection by default and exposes:
 
@@ -292,7 +292,7 @@ The following core scene components now inherit from `SelectableGroup3D`:
 - Primary-click selects picked nodes.
 - `Shift`/platform shortcut key toggles selection in multi-select mode.
 - Selection state is also reflected via:
-  - node property key: `org.fxyz3d.scene.selection.selected`
+  - node property key: `org.dynamisfx.scene.selection.selected`
   - pseudo-class: `:selected`
 
 ### Example
@@ -309,7 +309,7 @@ viewer.getSelectionModel().getSelectedNodes().addListener((change) -> {
 
 ## Collision Foundations (2026)
 
-DynamisFX-Core now includes a baseline collision package: `org.fxyz3d.collision`.
+DynamisFX-Core now includes a baseline collision package: `org.dynamisfx.collision`.
 
 ### Core API
 
@@ -382,7 +382,7 @@ Both are broad-phase only and should be followed by narrow-phase validation.
 
 ### Collision Debug Sample
 
-`DynamisFX-Samples` includes `org.fxyz3d.samples.utilities.CollisionDebugWorld` for collision diagnostics:
+`DynamisFX-Demo` includes `org.dynamisfx.samples.utilities.CollisionDebugWorld` for collision diagnostics:
 
 - Animated moving boxes in a bounded world
 - Live wireframe AABB overlays
@@ -405,7 +405,7 @@ Both are broad-phase only and should be followed by narrow-phase validation.
 
 For local performance comparisons of broad-phase strategies, use:
 
-- `DynamisFX-Core/src/test/java/org/fxyz3d/collision/BroadPhase3DBenchmark.java`
+- `DynamisFX-Core/src/test/java/org/dynamisfx/collision/BroadPhase3DBenchmark.java`
 
 This compares `SpatialHash3D` and `SweepAndPrune3D` on generated AABB scenes.
 
@@ -415,7 +415,7 @@ See `docs/Core_Collision.md` for details.
 
 DynamisFX-Core now includes an engine-agnostic physics scaffolding layer intended to make Orekit and ODE4j integration modular:
 
-- `org.fxyz3d.physics.api`
+- `org.dynamisfx.physics.api`
   - `PhysicsBackendFactory`
   - `PhysicsBackend`
   - `PhysicsWorld`
@@ -427,7 +427,7 @@ DynamisFX-Core now includes an engine-agnostic physics scaffolding layer intende
   - runtime tuning on `PhysicsWorld`:
     - `runtimeTuning()`
     - `setRuntimeTuning(...)`
-- `org.fxyz3d.physics.model`
+- `org.dynamisfx.physics.model`
   - immutable state/config/shape records (`PhysicsBodyState`, `PhysicsBodyDefinition`, `PhysicsWorldConfiguration`, etc.)
   - explicit reference frames via `ReferenceFrame`
   - world configuration includes solver/contact tunables:
@@ -436,9 +436,9 @@ DynamisFX-Core now includes an engine-agnostic physics scaffolding layer intende
     - `contactBounce`
     - `contactSoftCfm`
     - `contactBounceVelocity`
-- `org.fxyz3d.physics.sync`
+- `org.dynamisfx.physics.sync`
   - `PhysicsSceneSync<N>` for backend state -> scene node synchronization
-- `org.fxyz3d.physics.step`
+- `org.dynamisfx.physics.step`
   - `FixedStepAccumulator` + `FixedStepResult` for deterministic stepping
 
 Roadmap and phased execution details:
@@ -458,7 +458,7 @@ Current status:
 - Contact resolution is enabled via ODE4j space-collide + contact joints.
 - Minimal cross-backend constraint API is available (`BALL`, `FIXED`, `HINGE`, `SLIDER`) and mapped in ODE4j world.
 - Sample integration is available in:
-  - `org.fxyz3d.samples.utilities.Ode4jPhysicsSyncSample`
+  - `org.dynamisfx.samples.utilities.Ode4jPhysicsSyncSample`
 
 Phase 3 kickoff is also now in progress with:
 
@@ -466,7 +466,7 @@ Phase 3 kickoff is also now in progress with:
   - `OrekitBackendFactory`
   - `OrekitBackend`
   - `OrekitWorld`
-  - sample: `org.fxyz3d.samples.utilities.OrekitOrbitSyncSample`
+  - sample: `org.dynamisfx.samples.utilities.OrekitOrbitSyncSample`
 
 Current Orekit module scope/shortcomings:
 
@@ -479,7 +479,7 @@ Current Orekit module scope/shortcomings:
 
 Phase 4 kickoff is now in progress in `DynamisFX-Core` with a hybrid coordinator layer:
 
-- `org.fxyz3d.physics.hybrid.HybridPhysicsCoordinator`
+- `org.dynamisfx.physics.hybrid.HybridPhysicsCoordinator`
 - ownership model via `HybridOwnership`
 - handoff strategy via `StateHandoffMode`
 - conflict handling via `ConflictPolicy`
@@ -500,7 +500,7 @@ Phase 4 kickoff is now in progress in `DynamisFX-Core` with a hybrid coordinator
 
 Sample wiring:
 
-- `org.fxyz3d.samples.utilities.HybridPhysicsCoordinatorSample`
+- `org.dynamisfx.samples.utilities.HybridPhysicsCoordinatorSample`
 
 Phase 5 hardening progress (in core):
 
@@ -540,8 +540,8 @@ Migration reference:
 ### Import Example
 
 ```java
-import org.fxyz3d.importers.Importer3D;
-import org.fxyz3d.importers.Model3D;
+import org.dynamisfx.importers.Importer3D;
+import org.dynamisfx.importers.Model3D;
 
 // Import any supported format - the loader is auto-detected from extension
 Model3D model = Importer3D.load(new File("model.glb").toURI().toURL());
@@ -565,11 +565,11 @@ sceneRoot.getChildren().add(model.getRoot());
 ### Export Examples
 
 ```java
-import org.fxyz3d.importers.Exporter3D;
-import org.fxyz3d.importers.stl.StlExporter;
-import org.fxyz3d.importers.gltf.GltfExporter;
-import org.fxyz3d.importers.obj.ObjExporter;
-import org.fxyz3d.importers.off.OffExporter;
+import org.dynamisfx.importers.Exporter3D;
+import org.dynamisfx.importers.stl.StlExporter;
+import org.dynamisfx.importers.gltf.GltfExporter;
+import org.dynamisfx.importers.obj.ObjExporter;
+import org.dynamisfx.importers.off.OffExporter;
 
 // Unified export API - format auto-detected from file extension
 Exporter3D.export(triangleMesh, new File("model.stl"));
