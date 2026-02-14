@@ -47,4 +47,4 @@ mvn test -pl DynamisFX-Core
 - Standard Java naming: `UpperCamelCase` for classes, `lowerCamelCase` for methods/fields
 - New shapes go in `DynamisFX-Core/src/main/java/org/dynamisfx/shapes/`
 - Tests mirror source package structure in `src/test/java/`
-- BSD 3-Clause license headers required on all source files
+- Apache 2.0 license headers required on all source files
