@@ -240,6 +240,7 @@
                     <version>${maven.surefire.plugin.version}</version>
                     <configuration>
                         <useModulePath>false</useModulePath>
+                        <argLine>--enable-native-access=ALL-UNNAMED</argLine>
                     </configuration>
                 </plugin>
                 <plugin>

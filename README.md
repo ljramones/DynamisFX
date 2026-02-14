@@ -167,6 +167,14 @@ There is a hidden side popup menu at the left, from where different samples can 
 
 ![](/resources/fxsampler.png)
 
+#### Runtime diagnostics properties
+
+Useful runtime switches for backend/script diagnostics:
+
+- `-Ddynamisfx.samples.physics.backend=ode4j|jolt`
+- `-Ddynamisfx.samples.physics.forceJoltFailure=true` (forces Jolt -> ODE4j fallback for testing)
+- `-Ddynamisfx.samples.enableScriptEngine=true` (enables script engine probing; off by default)
+
  #### Custom image
 
 You can create a custom image for your platform running:

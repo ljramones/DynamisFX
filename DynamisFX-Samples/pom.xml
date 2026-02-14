@@ -166,6 +166,7 @@
                 <configuration>
                     <mainClass>${samples.main.class}</mainClass>
                     <options>
+                        <option>--enable-native-access=ALL-UNNAMED</option>
                         <option>--enable-native-access=javafx.graphics</option>
                         <option>--add-exports=javafx.base/com.sun.javafx.runtime=ALL-UNNAMED</option>
                         <option>--add-exports=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED</option>
