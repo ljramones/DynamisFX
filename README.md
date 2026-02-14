@@ -4,11 +4,7 @@ A JavaFX 3D Visualization, Physics, and Component Library
 
 [![Apache-2.0 license](https://img.shields.io/badge/license-Apache--2.0-%23D22128.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
-| Module | Maven Central |
-|--------|---------------|
-| DynamisFX Core | [![Download](http://img.shields.io/maven-central/v/org.dynamisfx/dynamisfx-core.svg?color=%234DC71F)](https://search.maven.org/search?q=g:org.dynamisfx%20AND%20a:dynamisfx-core) |
-| DynamisFX Client | [![Download](https://img.shields.io/maven-central/v/org.dynamisfx/dynamisfx-client.svg?color=%234DC71F)](https://search.maven.org/search?q=g:org.dynamisfx%20AND%20a:dynamisfx-client) |
-| DynamisFX Importers | [![Download](https://img.shields.io/maven-central/v/org.dynamisfx/dynamisfx-importers.svg?color=%234DC71F)](https://search.maven.org/search?q=g:org.dynamisfx%20AND%20a:dynamisfx-importers) |
+> **Note:** Maven Central artifacts are not yet published. Build from source for now (see [Quick Start](#quick-start)).
 
 ---
 
