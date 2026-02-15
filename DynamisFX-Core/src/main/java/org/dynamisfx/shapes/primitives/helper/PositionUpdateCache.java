@@ -208,6 +208,63 @@ public class PositionUpdateCache {
     }
 
     /**
+     * Updates particle positions and texture coordinates (opacity) efficiently.
+     * Updates both vertex positions (via delta) and the v component of tex coords
+     * to reflect per-particle dynamic opacity.
+     *
+     * @param newPositions the new positions (with updated opacity field)
+     * @param mesh the triangle mesh to update
+     * @return true if efficient update was used
+     */
+    public boolean updatePositionsAndAttributes(List<Point3D> newPositions, TriangleMesh mesh) {
+        if (!canUseEfficientUpdate(newPositions) || mesh == null) {
+            return false;
+        }
+
+        ObservableFloatArray points = mesh.getPoints();
+        ObservableFloatArray texCoords = mesh.getTexCoords();
+
+        for (int p = 0; p < newPositions.size(); p++) {
+            Point3D oldPos = cachedPositions.get(p);
+            Point3D newPos = newPositions.get(p);
+
+            float dx = newPos.x - oldPos.x;
+            float dy = newPos.y - oldPos.y;
+            float dz = newPos.z - oldPos.z;
+
+            // Update positions
+            if (dx != 0 || dy != 0 || dz != 0) {
+                int baseIdx = p * verticesPerMarker * 3;
+                for (int v = 0; v < verticesPerMarker; v++) {
+                    int idx = baseIdx + v * 3;
+                    points.set(idx, points.get(idx) + dx);
+                    points.set(idx + 1, points.get(idx + 1) + dy);
+                    points.set(idx + 2, points.get(idx + 2) + dz);
+                }
+            }
+
+            // Update tex coord v component (opacity) for this particle
+            // Each particle has one (u, v) pair; v = opacity
+            int texIdx = p * 2 + 1;
+            if (texIdx < texCoords.size()) {
+                texCoords.set(texIdx, newPos.opacity);
+            }
+        }
+
+        // Update cached positions
+        for (int i = 0; i < newPositions.size(); i++) {
+            Point3D newPos = newPositions.get(i);
+            Point3D cached = cachedPositions.get(i);
+            cached.x = newPos.x;
+            cached.y = newPos.y;
+            cached.z = newPos.z;
+            cached.opacity = newPos.opacity;
+        }
+
+        return true;
+    }
+
+    /**
      * Checks if efficient position update can be used.
      *
      * @param newPositions the proposed new positions

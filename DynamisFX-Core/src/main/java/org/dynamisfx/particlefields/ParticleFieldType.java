@@ -90,10 +90,18 @@ public enum ParticleFieldType {
     /** Snow: slow falling particles with gentle wind drift and varied sizes. */
     SNOW("Snow", MotionModel.LINEAR),
 
-    /** Fog: dense, slow, semi-transparent particles near ground level. */
+    /**
+     * Fog: stylized ground-hugging haze built from sprite-like particles.
+     * <p>
+     * Note: this is an artistic approximation, not physically based volumetric fog.
+     */
     FOG("Fog", MotionModel.LINEAR),
 
-    /** Smoke: rising, fading, spreading particles with drag. */
+    /**
+     * Smoke: stylized rising particles with drag and fade.
+     * <p>
+     * Note: this is an artistic approximation, not physically based volumetric smoke.
+     */
     SMOKE("Smoke", MotionModel.LINEAR),
 
     /** Sparks: short-lived, fast particles with upward bias. */
@@ -102,7 +110,11 @@ public enum ParticleFieldType {
     /** Leaves: fluttering particles with irregular lateral paths. */
     LEAVES("Leaves", MotionModel.LINEAR),
 
-    /** Clouds: large, slow, morphing particle clusters. */
+    /**
+     * Clouds: stylized large drifting particle clusters.
+     * <p>
+     * Note: this is an artistic approximation, not physically based volumetric clouds.
+     */
     CLOUDS("Clouds", MotionModel.LINEAR),
 
     /** Lightning: fractal-path placed particles, very short lifetime, flickering. */

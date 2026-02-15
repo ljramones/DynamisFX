@@ -64,11 +64,14 @@ public class FogGenerator implements ParticleFieldGenerator {
             // Large particle sizes, biased toward maxSize
             double size = config.minSize() + (0.5 + random.nextDouble() * 0.5) * sizeRange;
 
-            // Gray/white colors, high opacity
+            // Gray/white colors with opacity centered on configured alpha.
             Color color = interpolateColor(config.primaryColor(), config.secondaryColor(),
                     random.nextDouble());
+            double baseOpacity = Math.max(config.primaryColor().getOpacity(), config.secondaryColor().getOpacity());
+            double minOpacity = Math.max(0.002, baseOpacity * 0.7);
+            double maxOpacity = Math.min(0.2, baseOpacity * 1.3 + 0.002);
             color = Color.color(color.getRed(), color.getGreen(), color.getBlue(),
-                    0.3 + random.nextDouble() * 0.3);
+                    minOpacity + random.nextDouble() * Math.max(0.001, maxOpacity - minOpacity));
 
             elements.add(new ParticleFieldElement(
                     x, y, z, vx, vy, vz, ax, ay, az,
@@ -86,7 +89,7 @@ public class FogGenerator implements ParticleFieldGenerator {
 
     @Override
     public String getDescription() {
-        return "Fog generator - slow drifting particles with high opacity near ground level";
+        return "Fog generator - slow drifting particles with configurable low opacity near ground level";
     }
 
     private Color interpolateColor(Color c1, Color c2, double t) {

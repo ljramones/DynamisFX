@@ -40,6 +40,14 @@
  *   <li><b>Swarms</b> - Erratic grouped particles</li>
  * </ul>
  *
+ * <h2>Atmospheric Effect Scope</h2>
+ * <p>
+ * Fog, smoke, and cloud presets in this package are implemented as sprite-like
+ * particle approximations suitable for stylized visuals in JavaFX.
+ * They are not physically based volumetric media (no froxel volume, volumetric
+ * shadowing, or full participating-media light integration).
+ * </p>
+ *
  * <h2>Key Classes</h2>
  * <ul>
  *   <li>{@link org.dynamisfx.particlefields.ParticleFieldRenderer} - Main renderer for particle fields</li>

@@ -27,6 +27,7 @@ module org.dynamisfx.core {
     requires static eu.mihosoft.vvecmath;		// resolved as automatic module
     requires static org.orbisgis.poly2tri.core; // resolved as automatic module
     requires org.slf4j;
+    requires static fastnoiselitenouveau;	// resolved as automatic module
 
     exports org.dynamisfx.collision;
     exports org.dynamisfx.geometry;
@@ -60,4 +61,5 @@ module org.dynamisfx.core {
     exports org.dynamisfx.particlefields.orbital;
     exports org.dynamisfx.particlefields.linear;
     exports org.dynamisfx.particlefields.vortex;
+    exports org.dynamisfx.particlefields.noise;
 }

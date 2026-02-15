@@ -53,6 +53,10 @@ public class ParticleFieldElement {
     private double lifetime;
     private double age;
 
+    // === Dynamic per-frame overrides (set by NoiseMotionController) ===
+    private double dynamicOpacity = -1;  // -1 means use color's opacity
+    private double dynamicScale = 1.0;
+
     // === VORTEX fields (cylindrical coordinates) ===
     private double vortexAngle;
     private double vortexRadius;
@@ -365,5 +369,45 @@ public class ParticleFieldElement {
         this.x = x;
         this.y = y;
         this.z = z;
+    }
+
+    /**
+     * Adds velocity displacement on top of existing motion.
+     * Used by noise controllers to layer curl-noise displacement.
+     */
+    public void addVelocity(double dvx, double dvy, double dvz) {
+        this.vx += dvx;
+        this.vy += dvy;
+        this.vz += dvz;
+    }
+
+    /**
+     * Gets the dynamic opacity override.
+     * Returns the color's opacity if no dynamic override has been set.
+     */
+    public double getDynamicOpacity() {
+        return dynamicOpacity >= 0 ? dynamicOpacity : color.getOpacity();
+    }
+
+    /**
+     * Sets a per-frame opacity override for this particle.
+     * Set to -1 to revert to the color's natural opacity.
+     */
+    public void setDynamicOpacity(double opacity) {
+        this.dynamicOpacity = opacity;
+    }
+
+    /**
+     * Gets the dynamic scale factor for this particle.
+     */
+    public double getDynamicScale() {
+        return dynamicScale;
+    }
+
+    /**
+     * Sets a per-frame scale override for this particle.
+     */
+    public void setDynamicScale(double scale) {
+        this.dynamicScale = scale;
     }
 }

@@ -66,6 +66,39 @@ public abstract class ParticleFieldDemoBase extends DynamisFXSample {
         return Color.BLACK;
     }
 
+    /**
+     * Returns the rendering mode. Override to change from the default.
+     */
+    protected ParticleFieldRenderer.RenderingMode getRenderingMode() {
+        return ParticleFieldRenderer.RenderingMode.SCATTER_MESH_AUTO;
+    }
+
+    /**
+     * Returns the ambient light color for the scene.
+     * Override to increase for atmospheric demos where high ambient reduces
+     * Phong shading variation on volumetric particles.
+     */
+    protected Color getAmbientLightColor() {
+        return Color.color(0.3, 0.3, 0.3);
+    }
+
+    /**
+     * Hook for subclasses to configure the renderer after initialization.
+     * Override to attach noise controllers, set debug modes, etc.
+     */
+    protected void configureRenderer(ParticleFieldRenderer renderer) {
+        // No-op by default; subclasses override as needed
+    }
+
+    /**
+     * Hook for subclasses to add scene content (ground planes, objects, etc.)
+     * that the particle effect renders over. Called after the renderer group
+     * is added to the scene root.
+     */
+    protected void addSceneContent(Group sceneRoot) {
+        // No-op by default; subclasses override as needed
+    }
+
     @Override
     public Node getSample() {
         PerspectiveCamera camera = new PerspectiveCamera(true);
@@ -87,7 +120,7 @@ public abstract class ParticleFieldDemoBase extends DynamisFXSample {
 
         PointLight light = new PointLight(Color.WHITE);
         cameraTransform.getChildren().add(light);
-        cameraTransform.getChildren().add(new AmbientLight(Color.color(0.3, 0.3, 0.3)));
+        cameraTransform.getChildren().add(new AmbientLight(getAmbientLightColor()));
         light.setTranslateX(camera.getTranslateX());
         light.setTranslateY(camera.getTranslateY());
         light.setTranslateZ(camera.getTranslateZ());
@@ -95,9 +128,13 @@ public abstract class ParticleFieldDemoBase extends DynamisFXSample {
 
         sceneRoot.getChildren().add(cameraTransform);
 
+        // Add scene content first so particles render on top (fog/smoke obscures objects)
+        addSceneContent(sceneRoot);
+
         renderer = new ParticleFieldRenderer();
-        renderer.setRenderingMode(ParticleFieldRenderer.RenderingMode.SCATTER_MESH_AUTO);
+        renderer.setRenderingMode(getRenderingMode());
         renderer.initialize(createConfiguration(), new Random(42));
+        configureRenderer(renderer);
 
         sceneRoot.getChildren().add(renderer.getGroup());
 

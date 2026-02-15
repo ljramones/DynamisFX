@@ -18,6 +18,7 @@ package org.dynamisfx.particlefields;
 import javafx.geometry.Bounds;
 import javafx.scene.Group;
 import javafx.scene.effect.Glow;
+import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
@@ -25,7 +26,9 @@ import javafx.scene.shape.CullFace;
 import javafx.scene.shape.DrawMode;
 import javafx.scene.shape.Sphere;
 import org.dynamisfx.geometry.Point3D;
+import org.dynamisfx.particlefields.noise.NoiseMotionController;
 import org.dynamisfx.shapes.primitives.ScatterMesh;
+import org.dynamisfx.shapes.primitives.helper.MarkerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,6 +106,18 @@ public class ParticleFieldRenderer {
     private boolean useWorldCoordinates = false;
     private double centroidX = 0, centroidY = 0, centroidZ = 0;
     private boolean useCentroidRebasing = true;
+
+    /** Marker shape for ScatterMesh particles (null = ScatterMesh default TETRAHEDRA) */
+    private MarkerFactory.Marker markerType;
+
+    /** Atmospheric/volumetric rendering using soft blob textures */
+    private boolean atmosphericRendering = false;
+    private Color atmosphericColor;
+    private WritableImage alphaBlob;
+    private WritableImage selfIlluminationBlob;
+
+    /** Noise-driven motion controller (optional) */
+    private NoiseMotionController noiseController;
 
     /** Random instance for respawning expired linear particles */
     private Random respawnRandom;
@@ -446,8 +461,14 @@ public class ParticleFieldRenderer {
             }
 
             ScatterMesh chunkMesh = new ScatterMesh(localPoints, true, baseSize, 0);
+            if (markerType != null) {
+                chunkMesh.setMarker(markerType);
+            }
 
-            if (useOpacity) {
+            if (atmosphericRendering) {
+                chunkMesh.setPerParticleScale(true);
+                applyAtmosphericMaterial(chunkMesh);
+            } else if (useOpacity) {
                 chunkMesh.enableAllPerParticleAttributes(colorPalette);
             } else {
                 chunkMesh.enablePerParticleAttributes(colorPalette);
@@ -470,8 +491,15 @@ public class ParticleFieldRenderer {
     private void buildSingleMesh() {
         usedSpatialBinning = false;
         mesh = new ScatterMesh(cachedPoints, true, baseSize, 0);
+        if (markerType != null) {
+            mesh.setMarker(markerType);
+        }
 
-        if (useOpacity) {
+        if (atmosphericRendering) {
+            // Atmospheric mode: per-particle scale only (preserves quad UVs for blob texture)
+            mesh.setPerParticleScale(true);
+            applyAtmosphericMaterial(mesh);
+        } else if (useOpacity) {
             mesh.enableAllPerParticleAttributes(colorPalette);
         } else {
             mesh.enablePerParticleAttributes(colorPalette);
@@ -479,6 +507,41 @@ public class ParticleFieldRenderer {
 
         mesh.setCullFace(CullFace.NONE);
         group.getChildren().add(mesh);
+    }
+
+    /**
+     * Applies the soft blob material for atmospheric/volumetric rendering.
+     * <p>
+     * Uses a diffuse alpha-blob for soft edge falloff plus a low-intensity
+     * self-illumination blob to reduce harsh directional-light contrast without
+     * over-brightening the volume.
+     */
+    private void applyAtmosphericMaterial(ScatterMesh targetMesh) {
+        if (alphaBlob == null || atmosphericColor == null) return;
+
+        PhongMaterial mat = new PhongMaterial();
+        // Alpha blob controls soft edge transparency.
+        mat.setDiffuseMap(alphaBlob);
+        // Keep diffuse color atmospheric; using black here causes dark blotches when many
+        // transparent layers overlap with depth test disabled.
+        mat.setDiffuseColor(atmosphericColor);
+        // A low-intensity self-illumination map softens directional lighting contrast
+        // without over-brightening the fog volume.
+        if (selfIlluminationBlob != null) {
+            mat.setSelfIlluminationMap(selfIlluminationBlob);
+        }
+        mat.setSpecularColor(Color.TRANSPARENT);
+
+        // Apply to all meshes in the ScatterMesh
+        targetMesh.getChildren().forEach(node -> {
+            if (node instanceof javafx.scene.shape.MeshView mv) {
+                mv.setMaterial(mat);
+                // Disable depth test so overlapping transparent triangles ACCUMULATE
+                // rather than only showing the frontmost one. This is critical for
+                // volumetric effects where many low-alpha particles must blend together.
+                mv.setDepthTest(javafx.scene.DepthTest.DISABLE);
+            }
+        });
     }
 
     /**
@@ -504,6 +567,89 @@ public class ParticleFieldRenderer {
                 this.useChunkedRendering = false;
                 break;
         }
+    }
+
+    /**
+     * Sets the marker shape used for each particle in ScatterMesh mode.
+     * If called after initialization, triggers a mesh rebuild.
+     */
+    public void setMarkerType(MarkerFactory.Marker marker) {
+        this.markerType = marker;
+        if (initialized && !useIndividualSpheres) {
+            group.getChildren().clear();
+            chunkedMeshes.clear();
+            mesh = null;
+            buildMesh();
+        }
+    }
+
+    public MarkerFactory.Marker getMarkerType() {
+        return markerType;
+    }
+
+    /**
+     * Enables atmospheric/volumetric rendering mode.
+     * <p>
+     * Uses CROSS_QUAD markers with an alpha-blob diffuseMap and the atmospheric
+     * color as diffuseColor. The blob texture provides gaussian alpha falloff
+     * so particle edges blend smoothly. With low per-particle alpha (0.01-0.03)
+     * and DepthTest.DISABLE, overlapping particles accumulate to create
+     * continuous volumetric haze.
+     *
+     * @param color the atmospheric color (e.g. fog gray, cloud white).
+     *              Alpha controls overall particle transparency.
+     * @param sigma gaussian sigma for blob softness (0.3=tight, 0.5=normal, 0.7=wide/soft)
+     */
+    public void setAtmosphericRendering(Color color, double sigma) {
+        this.atmosphericRendering = true;
+        this.atmosphericColor = color;
+        this.markerType = MarkerFactory.Marker.CROSS_QUAD;
+        this.useChunkedRendering = false;  // Force single mesh for atmospheric rendering
+        this.alphaBlob = SoftParticleTexture.createAlphaBlob(64, sigma);
+        // Scale emissive contribution by atmospheric alpha to avoid white blowout.
+        double emissiveScale = Math.min(0.2, Math.max(0.03, color.getOpacity() * 2.0));
+        Color emissiveColor = new Color(
+                color.getRed() * emissiveScale,
+                color.getGreen() * emissiveScale,
+                color.getBlue() * emissiveScale,
+                1.0
+        );
+        this.selfIlluminationBlob = SoftParticleTexture.createColorBlob(64, emissiveColor, sigma);
+        if (initialized) {
+            group.getChildren().clear();
+            chunkedMeshes.clear();
+            mesh = null;
+            buildMesh();
+        }
+    }
+
+    /**
+     * Enables atmospheric rendering with default sigma.
+     */
+    public void setAtmosphericRendering(Color color) {
+        setAtmosphericRendering(color, 0.5);
+    }
+
+    public boolean isAtmosphericRendering() {
+        return atmosphericRendering;
+    }
+
+    /**
+     * Sets the noise motion controller for curl-noise driven particle movement.
+     */
+    public void setNoiseMotionController(NoiseMotionController controller) {
+        this.noiseController = controller;
+        // Enable opacity support if density modulation is enabled
+        if (controller != null && controller.getConfig().densityOpacityEnabled()) {
+            this.useOpacity = true;
+        }
+    }
+
+    /**
+     * Gets the current noise motion controller, or null if none is set.
+     */
+    public NoiseMotionController getNoiseMotionController() {
+        return noiseController;
     }
 
     public void setCurrentLodLevel(String lodLevel) {
@@ -556,6 +702,11 @@ public class ParticleFieldRenderer {
                 }
             }
         }
+
+        // Apply noise-driven motion after the base advance
+        if (noiseController != null) {
+            noiseController.applyNoiseMotion(elements, timeScale);
+        }
     }
 
     /**
@@ -591,16 +742,27 @@ public class ParticleFieldRenderer {
             return false;
         }
 
+        boolean noiseActive = noiseController != null;
+
         for (int i = 0; i < elements.size(); i++) {
             ParticleFieldElement element = elements.get(i);
             Point3D point = cachedPoints.get(i);
             point.x = (float) element.getX();
             point.y = (float) element.getY();
             point.z = (float) element.getZ();
+
+            if (noiseActive && !atmosphericRendering) {
+                point.opacity = (float) element.getDynamicOpacity();
+                point.scale = (float) (element.getDynamicScale() * element.getSize() / baseSize);
+            }
         }
 
         if (mesh == null) {
             return false;
+        }
+
+        if (noiseActive && useOpacity && !atmosphericRendering) {
+            return mesh.updatePositionsAndAttributes(cachedPoints);
         }
         return mesh.updatePositions(cachedPoints);
     }

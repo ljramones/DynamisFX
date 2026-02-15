@@ -23,6 +23,7 @@ package org.dynamisfx.shapes.primitives.helper;
 import javafx.scene.DepthTest;
 import javafx.scene.shape.DrawMode;
 import org.dynamisfx.geometry.Point3D;
+import org.dynamisfx.shapes.primitives.CrossQuadMesh;
 import org.dynamisfx.shapes.primitives.CuboidMesh;
 import org.dynamisfx.shapes.primitives.FrustumMesh;
 import org.dynamisfx.shapes.primitives.OctahedronMarkerMesh;
@@ -152,6 +153,27 @@ public class MarkerFactory {
             @Override
             public TexturedMesh getMarker(String id, double size, int level, Point3D point3D) {
                 TexturedMesh dot = new QuadMesh(size, point3D);
+                dot.setId(id);
+                dot.setDrawMode(DrawMode.FILL);
+                dot.setDepthTest(DepthTest.ENABLE);
+                return dot;
+            }
+        },
+        /**
+         * Three perpendicular quads forming a cross shape for volumetric particles.
+         * <p>
+         * Visible from all viewing angles, making it ideal for atmospheric effects
+         * (fog, clouds, smoke) when combined with a soft radial gradient texture.
+         * <ul>
+         *   <li>12 vertices, 6 faces (3 quads × 2 triangles)</li>
+         *   <li>All quads share the same UV mapping for a single blob texture</li>
+         *   <li>No orientation bias: visible from any camera angle</li>
+         * </ul>
+         */
+        CROSS_QUAD {
+            @Override
+            public TexturedMesh getMarker(String id, double size, int level, Point3D point3D) {
+                TexturedMesh dot = new CrossQuadMesh(size, point3D);
                 dot.setId(id);
                 dot.setDrawMode(DrawMode.FILL);
                 dot.setDepthTest(DepthTest.ENABLE);

@@ -28,6 +28,10 @@ import java.util.Random;
 /**
  * Factory for creating particle field configurations and generators.
  * Provides preset configurations for common particle field types and manages generator creation.
+ * <p>
+ * Atmospheric presets such as fog/smoke/clouds are intentionally stylized particle approximations.
+ * In the current JavaFX renderer they do not model true participating media
+ * (for example froxel-based volumetric scattering and shadowed ray marching).
  */
 public class ParticleFieldFactory {
 
@@ -533,7 +537,11 @@ public class ParticleFieldFactory {
                 .build();
     }
 
-    /** Dense fog bank with slow horizontal drift. */
+    /**
+     * Dense fog bank with slow horizontal drift.
+     * <p>
+     * This preset is a stylized approximation, not true volumetric fog.
+     */
     public static ParticleFieldConfiguration denseFog() {
         return ParticleFieldConfiguration.builder()
                 .type(ParticleFieldType.FOG)
@@ -554,7 +562,11 @@ public class ParticleFieldFactory {
                 .build();
     }
 
-    /** Campfire smoke rising with wide spread. */
+    /**
+     * Campfire smoke rising with wide spread.
+     * <p>
+     * This preset is a stylized approximation, not true volumetric smoke.
+     */
     public static ParticleFieldConfiguration campfireSmoke() {
         return ParticleFieldConfiguration.builder()
                 .type(ParticleFieldType.SMOKE)
@@ -618,7 +630,11 @@ public class ParticleFieldFactory {
                 .build();
     }
 
-    /** Cumulus cloud layer drifting overhead. */
+    /**
+     * Cumulus cloud layer drifting overhead.
+     * <p>
+     * This preset is a stylized approximation, not true volumetric clouds.
+     */
     public static ParticleFieldConfiguration cumulusClouds() {
         return ParticleFieldConfiguration.builder()
                 .type(ParticleFieldType.CLOUDS)

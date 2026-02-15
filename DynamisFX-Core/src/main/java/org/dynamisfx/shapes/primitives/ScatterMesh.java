@@ -453,6 +453,36 @@ public class ScatterMesh extends Group implements TextureMode {
     }
 
     /**
+     * Updates particle positions and texture coordinates (opacity) efficiently.
+     * Used when per-particle dynamic opacity changes need to be reflected in the mesh.
+     *
+     * @param newPositions the new positions with updated opacity values
+     * @return true if efficient update was used, false if full rebuild occurred
+     */
+    public boolean updatePositionsAndAttributes(List<Point3D> newPositions) {
+        if (!joinSegments.get() || meshes == null || meshes.isEmpty()) {
+            setScatterData(newPositions);
+            return false;
+        }
+
+        TexturedMesh texturedMesh = meshes.get(0);
+        TriangleMesh mesh = (TriangleMesh) texturedMesh.getMesh();
+        if (mesh == null) {
+            setScatterData(newPositions);
+            return false;
+        }
+
+        boolean result = positionCache.updatePositionsAndAttributes(newPositions, mesh);
+        if (!result) {
+            setScatterData(newPositions);
+            return false;
+        }
+
+        scatterData.set(newPositions);
+        return true;
+    }
+
+    /**
      * Updates a single particle's position efficiently.
      *
      * @param particleIndex the index of the particle to update

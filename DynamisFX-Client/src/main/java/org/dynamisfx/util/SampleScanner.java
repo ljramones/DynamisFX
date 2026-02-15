@@ -93,21 +93,26 @@ public class SampleScanner {
             return projectsMap;
         }
         Class<?>[] results = loadFromPathScanning();
-        
+        System.out.println("[DEBUG-SCANNER] Found " + results.length + " classes from path scanning");
+
         for (Class<?> sampleClass : results) {
-            if (! DynamisFXSample.class.isAssignableFrom(sampleClass)) continue;
-            if (sampleClass.isInterface()) continue;
-            if (Modifier.isAbstract(sampleClass.getModifiers())) continue;
+            System.out.println("[DEBUG-SCANNER] Checking class: " + sampleClass.getName());
+            if (! DynamisFXSample.class.isAssignableFrom(sampleClass)) { System.out.println("[DEBUG-SCANNER]   SKIP: not assignable from DynamisFXSample"); continue; }
+            if (sampleClass.isInterface()) { System.out.println("[DEBUG-SCANNER]   SKIP: is interface"); continue; }
+            if (Modifier.isAbstract(sampleClass.getModifiers())) { System.out.println("[DEBUG-SCANNER]   SKIP: is abstract"); continue; }
 //            if (DynamisFXSample.class.isAssignableFrom(EmptySample.class)) continue;
-            if (sampleClass == EmptySample.class) continue;
-            
+            if (sampleClass == EmptySample.class) { System.out.println("[DEBUG-SCANNER]   SKIP: is EmptySample"); continue; }
+
             DynamisFXSample sample = null;
             try {
                 sample = (DynamisFXSample)sampleClass.getDeclaredConstructor().newInstance();
+                System.out.println("[DEBUG-SCANNER]   Instantiated OK: " + sample.getSampleName());
             } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+                System.out.println("[DEBUG-SCANNER]   FAILED to instantiate: " + e);
+                if (e.getCause() != null) System.out.println("[DEBUG-SCANNER]     Cause: " + e.getCause());
                 LOG.log(Level.FINE, "Failed to instantiate sample class " + sampleClass.getName(), e);
             }
-            if (sample == null || ! sample.isVisible()) continue;
+            if (sample == null || ! sample.isVisible()) { System.out.println("[DEBUG-SCANNER]   SKIP: null or not visible"); continue; }
 
             final String packageName = sampleClass.getPackage().getName();
             

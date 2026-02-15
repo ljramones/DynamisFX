@@ -15,14 +15,26 @@
  */
 package org.dynamisfx.samples.particlefields;
 
+import javafx.scene.paint.Color;
 import org.dynamisfx.particlefields.ParticleFieldConfiguration;
 import org.dynamisfx.particlefields.ParticleFieldFactory;
+import org.dynamisfx.particlefields.ParticleFieldRenderer;
 
 public class DustMotesDemo extends ParticleFieldDemoBase {
 
     @Override
     protected ParticleFieldConfiguration createConfiguration() {
         return ParticleFieldFactory.sunlitDustMotes();
+    }
+
+    @Override
+    protected ParticleFieldRenderer.RenderingMode getRenderingMode() {
+        return ParticleFieldRenderer.RenderingMode.INDIVIDUAL_SPHERES;
+    }
+
+    @Override
+    protected Color getBackgroundColor() {
+        return Color.rgb(30, 25, 20);
     }
 
     @Override
